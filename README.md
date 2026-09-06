@@ -1,50 +1,122 @@
 # Arrears
 
-A Creditcoin contract that treats a failed Ethereum mainnet transaction as admissible evidence
-against a bonded operator — slashing the bond and repricing a credit line.
+**A Creditcoin contract that treats a failed Ethereum mainnet transaction as admissible evidence
+against a bonded operator — slashing the bond and repricing a credit line.**
 
-Built for BUIDL CTC 2026 Fall, on the Creditcoin Attestcoin Protocol.
+Built for BUIDL CTC 2026 Fall on the Creditcoin Attestcoin Protocol.
 
-## Status: Phase 0 complete
+---
 
-Phase 0 was an investigation, not an implementation. It asked whether the premise is even
-possible and what the evidence a failed transaction carries can actually support.
+## A contract that accepted a forgery, and said so in the same breath
 
-**It is possible.** A reverted Ethereum mainnet transaction verifies `true` against the live
-block-prover precompile on CC3, and its `receiptStatus == 0` is readable on chain. Nobody had
-done this before; it is the entire premise of the product.
+This is the sharpest thing in the repository. It is a real transaction on Creditcoin CC3, and you
+can read it right now:
 
-| document | what it is |
+> ### [`0x7d81c702…c56947`](https://creditcoin-testnet.blockscout.com/tx/0x7d81c7023aa1b0a6b820670332603489d94a9dc9591bcdbee12e4797d7c56947)
+>
+> An Attestcoin Smart Contract that believed it was watching real Sepolia USDC accepted a
+> **forged `Transfer` event claiming 1,000,000 USDC from Circle's treasury** — emitted by a
+> 279-byte [throwaway contract on Sepolia](https://sepolia.etherscan.io/address/0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8)
+> that implements no token and holds no balance.
+>
+> The event it emitted while accepting:
+>
+> ```
+> TransferAccepted(
+>   emitter            = 0xfC7eAbb2…CacB8   ← the impostor
+>   from               = 0x55FE002a…44B8    ← Circle's treasury, forged
+>   amount             = 1,000,000 USDC
+>   emitterWasExpected = false              ← it KNEW
+> )
+> ```
+>
+> **`emitterWasExpected: false`, in the very event that accepted the forgery.** The contract had
+> the mismatch in hand and acted anyway, because nothing in its logic consulted it.
+
+Attestcoin did nothing wrong here. The proof is sound — that Sepolia transaction really happened
+and really emitted that log. What fails is the **inference a consuming contract drew from a
+correct proof**, and the fix is one comparison. Both are shown side by side in
+[`NaiveEventASC.sol`](contracts/src/NaiveEventASC.sol).
+
+### Check it yourself in thirty seconds
+
+No key, no funding, no `.env`, no build step. It re-reads everything live from CC3, Sepolia and
+Ethereum mainnet:
+
+```bash
+cd demo && npm install && npm run verify
+```
+
+Full walkthrough of both halves: [`demo/README.md`](demo/README.md).
+
+---
+
+## The other half: a proven *failure* accepted as a success
+
+[`0xbd4eedc2…393c52`](https://creditcoin-testnet.blockscout.com/tx/0xbd4eedc2bd216aa8dd848029d3da992510180cefc73d2794f063587d76393c52)
+— a naive ASC recorded a **reverted** 1inch v6 router transaction
+([mainnet, `status 0x0`](https://etherscan.io/tx/0x06ba12d8eaf7527634e9739dc42b778cd2b60d9976901930233f6401e9042dd7))
+as a genuine settlement. Its strict twin refuses the identical proof with
+`SourceTransactionReverted(0, 386677, 598875)` — all three values decoded from the same proven
+bytes the naive contract already had.
+
+The block-prover precompile verifies **inclusion in a block**, which is not the same claim as
+**the transaction having succeeded**. Nothing in the documented pattern mentions the difference.
+
+---
+
+## Why this project exists
+
+If a failed transaction can be proven, then a bonded operator's failures become a credit record
+that no one can edit. Phase 0 established that it can:
+
+**A reverted Ethereum mainnet transaction verifies `true` against the live precompile on CC3, and
+its `receiptStatus == 0` is readable on chain.** Nobody had done it; it is the entire premise.
+
+Two findings then reshaped the design:
+
+**A reverted transaction has no logs. Ever.** 813 of 813 measured had zero logs and an all-zero
+bloom — a top-level revert rolls back the journal — and the attested encoding has no revert-reason
+field. The documented Readability pattern is event-driven throughout, so **it cannot see failures
+at all.** Arrears builds claims from calldata, gas and identity instead.
+
+**`gasUsed >= gasLimit` is the fault line.** Reverting is normal — 1.47% of mainnet, ~26,000
+transactions a day — so "reverted" cannot mean "failed a duty". Out-of-gas is unambiguously
+self-inflicted: the sender chose the limit and nobody can race them into choosing it badly. That
+is the only slashable class. Explicit reverts are recorded and never slashable.
+
+---
+
+## Layout
+
+| path | what it is |
 |---|---|
-| [`Phase0.md`](Phase0.md) | the original brief |
-| [`Phase0-Report.md`](Phase0-Report.md) | findings, with the evidence that settled each one |
+| [`demo/`](demo/) | both exploit halves, verifiable live with one command |
+| [`contracts/src/interfaces/`](contracts/src/interfaces/) | the scoped-coverage design — registry, court, credit line |
+| [`contracts/src/`](contracts/src/) | the demo contracts, deployed on CC3 and Sepolia |
+| [`Phase0-Report.md`](Phase0-Report.md) | every finding, with the evidence that settled it |
 | [`PROTOCOL-FINDINGS.md`](PROTOCOL-FINDINGS.md) | measured protocol facts, written to be posted publicly |
 | [`phase0/evidence/`](phase0/evidence/) | raw transcripts of every live run |
 | [`phase0/probes/`](phase0/probes/) | the scripts that produced them |
-| [`contracts/`](contracts/) | the exploit-demo contracts, deployed on CC3 and Sepolia |
 
-## The two findings that shape the design
+## Deployed
 
-**A reverted transaction has no logs. Ever.** 813 of 813 reverted mainnet transactions carried
-zero logs and an all-zero bloom — a top-level revert rolls back the journal. The whole documented
-Readability pattern is event-driven, so it cannot see failures at all. Arrears must build its
-claims from calldata, gas and identity.
+| what | where |
+|---|---|
+| `NaiveSettlementASC` | [`0x5e81f5A1…5d1a2`](https://creditcoin-testnet.blockscout.com/address/0x5e81f5A15a389F9CeAd6fCCE9B2f60035415d1a2) · CC3 testnet |
+| `NaiveEventASC` | [`0x7DC1Cc8A…f4DB2`](https://creditcoin-testnet.blockscout.com/address/0x7DC1Cc8A209dB75c05717cb80827dBb66Eff4DB2) · CC3 testnet |
+| `Impostor` | [`0xfC7eAbb2…CacB8`](https://sepolia.etherscan.io/address/0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8) · Ethereum Sepolia |
 
-**`gasUsed >= gasLimit` is the fault line.** Reverting is normal — 1.47% of mainnet, ~26,000
-transactions a day — so "reverted" cannot mean "failed a duty". Out-of-gas is self-inflicted: the
-sender chose the limit and nobody raced them into it. That is the slashable class. Explicit
-reverts are recorded and never slashable.
-
-## Reproducing
+## Reproducing the investigation
 
 ```bash
 cd phase0 && npm install
 npx tsx probes/04-kill.ts          # a reverted mainnet tx, verified on the live precompile
-npx tsx probes/08-batchlimit.ts    # the batch ceiling
+npx tsx probes/08-batchlimit.ts    # the batch ceiling — exactly 10 legs
 npx tsx probes/14-selectors.ts     # which decoder functions are actually deployed
 ```
 
-No account needs funding for those three. Credentials for the on-chain probes are read from
+Those three need no funded account. Credentials for the on-chain probes are read from
 `~/.config/creditcoin/arrears-testnet.json` and never from this repository.
 
 ## License

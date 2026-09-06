@@ -23,6 +23,18 @@ receipts need a funded testnet key; the same result is visible for free through 
 
 **Status: confirmed.** This one is a compliment, not a correction.
 
+> ### ⚠️ If you benchmark this yourself, do not sample round block numbers
+>
+> Heights like 1,000,000 and 10,000,000 land **exactly on attestation checkpoints**, so their
+> continuity proofs collapse to a single root and the entire cost curve disappears. Sampling
+> them will tell you that deep history is *cheaper* to prove than recent history, which is the
+> opposite of the truth.
+>
+> I made exactly that mistake on a first pass and produced a result that flatly contradicted the
+> published guidance. The guidance was right. **Sample arbitrary heights** — 12,345,678, not
+> 12,000,000 — and the measured curve matches the documented one closely. Everything in this
+> finding is measured at non-aligned heights.
+
 The [Gas Costs](https://docs.attestcoin.org/attestcoin-protocol/attestcoin-readability/gas-costs.md)
 page gives the cost of a readability query as:
 
@@ -63,11 +75,6 @@ magnitude is right. Measured at arbitrary (non-checkpoint-aligned) heights:
 | 23,000,851 | 1000 | 150 | 162,430 |
 | 15,555,555 | 1000 | 446 | 334,759 |
 | 5,000,321 | 1000 | 680 | 456,026 |
-
-A caution for anyone benchmarking this: **do not sample round block numbers.** Heights like
-1,000,000 and 10,000,000 land exactly on checkpoints, so their continuity proofs collapse to a
-single root and the cost curve disappears. I made exactly that mistake in a first pass and got a
-result that flatly contradicted the docs. The docs were right.
 
 Worth adding to that page: even at its worst, the penalty is bounded. The most expensive
 historical proof I measured cost 456,026 gas — **0.61% of the 75,000,000 block gas cap**. Proving
