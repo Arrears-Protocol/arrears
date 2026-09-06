@@ -1,0 +1,16 @@
+import { harness } from './wallet-harness.mts';
+const h = await harness();
+const p = h.page;
+await p.goto(process.argv[2] + '/dashboard', { waitUntil: 'networkidle' });
+await p.waitForTimeout(3000);
+console.log('window.ethereum present in page:', await p.evaluate(() => !!(window as any).ethereum));
+console.log('eth_accounts via provider:', await p.evaluate(() => (window as any).ethereum.request({ method: 'eth_accounts' })).catch((e) => 'ERR ' + e.message));
+const btns = await p.$$eval('header button, header a', (es) => es.map((e) => `${e.tagName}:"${e.textContent?.trim()}"`));
+console.log('header controls:', JSON.stringify(btns));
+const errs: string[] = [];
+p.on('pageerror', (e) => errs.push(e.message));
+await p.reload({ waitUntil: 'networkidle' }); await p.waitForTimeout(2500);
+console.log('page errors:', errs.length ? errs : 'none');
+const btns2 = await p.$$eval('header button, header a', (es) => es.map((e) => `${e.tagName}:"${e.textContent?.trim()}"`));
+console.log('header after reload:', JSON.stringify(btns2));
+await h.close();

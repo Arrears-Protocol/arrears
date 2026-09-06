@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { fontVars } from '../lib/fonts';
 import { ThemeProvider } from '../components/ThemeProvider';
+import { WalletProvider } from '../components/dash/Wallet';
 
 export const metadata: Metadata = {
   title: 'Arrears — a failed transaction is evidence',
@@ -18,7 +19,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
       </head>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          {/* Wallet state is shared by both surfaces so connect and disconnect are
+              available anywhere, any time. It gates nothing: every read path
+              renders server-side and works with no wallet and no JavaScript. */}
+          <WalletProvider>{children}</WalletProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

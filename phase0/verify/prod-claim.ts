@@ -22,16 +22,29 @@ const post = (body: any) =>
   ck(v.gitLinked === true, 'gitLinked is true (Vercel project IS linked to GitHub)');
   ck(v.relayerConfigured === true, 'relayerConfigured is true (env var reaches the runtime)');
 
+  // Pick evidence that has NOT been ruled on. An earlier run consumes items, and a test that
+  // always picks the first one reports the replay guard as a failure.
+  const { JsonRpcProvider, Contract, AbiCoder, keccak256 } = await import('ethers');
+  const rpc = new JsonRpcProvider(M.chains.cc3.rpc, undefined, { staticNetwork: true });
+  const court = new Contract(M.contracts.arrearsCourt.address,
+    ['function claimsAgainst(bytes32) view returns (bytes32[])'], rpc);
+  const ruled = new Set(((await court.claimsAgainst(M.operator.operatorId)) as string[]).map((x) => x.toLowerCase()));
+  const idFor = (h: number, i: number) => keccak256(
+    AbiCoder.defaultAbiCoder().encode(['uint64','uint64','uint64'], [M.operator.chainKey, h, i])).toLowerCase();
+  const unruled = (k: string) => M.evidencePool.items
+    .filter((i: any) => i.kind === k && !ruled.has(idFor(i.block, i.txIndex)));
+  console.log(`\nunruled evidence: ${unruled('OutOfGas').length} out-of-gas, ${unruled('ExplicitRevert').length} explicit revert`);
+
   // A PREVIEW, in production: refused before spending anything.
   console.log('\n=== 1. preview-equivalent: the relayer refuses without spending ===');
-  const rev = M.evidencePool.items.find((i: any) => i.kind === 'ExplicitRevert');
+  const rev = unruled('ExplicitRevert')[0];
   const r1 = await post({ sourceTx: rev.txHash, shape: 'slash', beneficiary: BEN });
   ck(r1.json?.refusedBeforeSubmit === true, 'strict on an explicit revert is refused pre-submit',
      r1.json?.namedError ?? r1.json?.error);
 
   // A REAL sponsored claim, in production.
   console.log('\n=== 2. a real sponsored claim, from the deployed origin ===');
-  const oog = M.evidencePool.items.find((i: any) => i.kind === 'OutOfGas');
+  const oog = unruled('OutOfGas')[0];
   const r2 = await post({ sourceTx: oog.txHash, shape: 'record', beneficiary: BEN });
   const j = r2.json;
   ck(j?.ok === true, 'claim submitted and mined', j?.error);

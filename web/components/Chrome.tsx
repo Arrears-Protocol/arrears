@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { Container, DivideX } from './ui/primitives';
 import { M } from '../lib/manifest';
+import { ConnectButton } from './dash/Wallet';
 
 /* Navbar + Footer + ModeToggle — harvested from nodus-agent-template (structure,
    hairline rails, link rhythm), normalised onto Arrears tokens and our copy. */
@@ -51,6 +52,8 @@ export function Navbar() {
             className="mono hidden rounded-inner border border-line px-3 py-1.5 text-[11.5px] text-fg-2 transition-colors hover:border-fg-3 hover:text-fg lg:block">
             source ↗
           </a>
+          {/* Connect is an entry point, never a gate — nothing on this page needs it. */}
+          <ConnectButton className="hidden sm:block" />
           {/* The door. Everything left of here reads; this is where you act. */}
           <Link href="/dashboard"
             className="mono rounded-inner border border-line bg-fg px-3 py-1.5 text-[11.5px] text-bg transition-opacity hover:opacity-90">

@@ -1,0 +1,11 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch({ channel: 'chrome' });
+const c = await b.newContext({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 2 });
+const p = await c.newPage();
+await p.goto(process.argv[2] + '/dashboard', { waitUntil: 'networkidle' }); await p.waitForTimeout(4000);
+await p.screenshot({ path: 'verify/dash/wide-overview.png', fullPage: true });
+await p.goto(process.argv[2] + '/dashboard/o/' + process.argv[3], { waitUntil: 'networkidle' }); await p.waitForTimeout(7000);
+await p.screenshot({ path: 'verify/dash/wide-record.png', fullPage: true });
+await p.goto(process.argv[2] + '/#act', { waitUntil: 'networkidle' }); await p.waitForTimeout(3500);
+const el = await p.$('#act'); if (el) await el.screenshot({ path: 'verify/dash/landing-door.png' });
+await b.close(); console.log('shot');

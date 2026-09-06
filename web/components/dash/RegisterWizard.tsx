@@ -195,7 +195,11 @@ export function RegisterWizard() {
           Now switch your wallet to <strong className="text-fg-2">{ctrlOk ? short(controller, 10, 6) : 'the controller'}</strong>{' '}
           on Creditcoin CC3. This one is a transaction and costs gas.
         </p>
-        <button onClick={doSubmit} disabled={step < 3 || busy || !!txHash || !w.address || !w.onCC3}
+        {/* When the wallet is on the wrong chain this button SWITCHES rather than
+            sitting disabled under a label that reads like an instruction. A
+            control that names an action must perform it. */}
+        <button onClick={w.address && !w.onCC3 ? w.switchToCC3 : doSubmit}
+          disabled={step < 3 || busy || !!txHash || !w.address}
           className="mono mt-4 rounded-inner border border-line bg-fg px-4 py-2 text-[12.5px] text-bg transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
           {txHash ? 'registered' : !w.address ? 'connect a wallet to submit' : !w.onCC3 ? 'switch to Creditcoin CC3' : busy ? 'waiting…' : 'register operator'}
         </button>
