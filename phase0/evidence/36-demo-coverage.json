@@ -1,0 +1,16 @@
+{
+  "coverageC": "0xe168d1c010f5bb7ae31b102c558bbff33b0ef298fdb345ceda963bcbdc78639f",
+  "target": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+  "selector": "0x095ea7b3",
+  "selectorName": "approve(address,uint256)",
+  "committedWei": "20000000000000000000",
+  "perClaimCapWei": "50000000000000000",
+  "maxInteractiveSlashes": 400,
+  "fromHeight": 11646000,
+  "toHeight": 12000000,
+  "topUpTx": null,
+  "declareTx": "0xefe97e6c02d724117977f8ba1a3bbefd1fb32385702693b2f3c33af461b5cc40",
+  "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xefe97e6c02d724117977f8ba1a3bbefd1fb32385702693b2f3c33af461b5cc40",
+  "bondedWei": "48000000000000000000",
+  "committedTotalWei": "28000000000000000000"
+}

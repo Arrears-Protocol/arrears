@@ -1,0 +1,11 @@
+waiting for Sepolia 11647164 to attest...
+  tip 11647140, 24 behind
+  tip 11647150, 14 behind
+  tip 11647150, 14 behind
+  tip 11647160, 4 behind
+  attested (tip 11647170)
+........................................
+
+verified 40/40: {"OutOfGas":30,"ExplicitRevert":10}
+
+manifest.evidencePool written: 40 items, 400 slashes affordable

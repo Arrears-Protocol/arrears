@@ -1,0 +1,10 @@
+operator 0x9733EcE9ba9351f70942E1241D875b878f6B178E  0.029892185351008359 ETH
+starting nonce 4, maxFeePerGas 4025870604
+
+broadcasting 40 transactions...
+........................................
+
+produced 40/40: {"OutOfGas":30,"ExplicitRevert":10}
+highest block 11647164 — must be attested before the pool is usable
+spent ~0.00459702086658948 ETH
+remaining balance 0.0287559882836821 ETH
