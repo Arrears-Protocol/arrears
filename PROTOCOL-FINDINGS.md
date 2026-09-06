@@ -210,13 +210,22 @@ bad proof, so a contract can validate a proof before committing gas to anything.
 itself as a "lean vendored copy" — so a builder working from that interface never sees the batch
 forms at all.
 
-**The batch overloads work on chain, and cap at exactly 10 legs.** Passing 11 or more reverts:
+**The batch overloads work on chain, and cap at exactly 10 legs.** Every row below is a mined
+transaction sent from an EOA straight to the precompile; each successful one emitted exactly N
+`TransactionVerified` events, confirming all N legs verified.
 
-```
- N=9   calldata= 22,756 B   gas= 350,607   (0.467% of cap)   OK
- N=10  calldata= 25,220 B   gas= 386,181   (0.515% of cap)   OK
- N=11  calldata= 27,716 B   execution reverted: "heights: Value is too large for length"
-```
+| N | calldata | mined gasUsed | % of MAX_GAS_CAP | events |
+|---|---|---|---|---|
+| 1 | 4,324 B | 77,256 | 0.103% | 1 |
+| 5 | 14,180 B | 206,528 | 0.275% | 5 |
+| 9 | 24,196 B | 346,780 | 0.462% | 9 |
+| **10** | 25,220 B | **383,516** | **0.511%** | **10** |
+| **11** | 29,444 B | **reverted** — `"heights: Value is too large for length"` | — | — |
+
+N=11 was refused twice over: `estimateGas` rejected it, and a transaction sent anyway reverted on
+chain. The cap is real, not an estimator artifact. Marginal mined cost is ~34,029 gas per
+additional leg, so ten legs cost roughly five times one leg rather than ten times — the shared
+continuity proof is carried once, which is the main reason to use the batch form.
 
 Three observations:
 
@@ -290,8 +299,10 @@ are plain TypeScript over `ethers` v6 and the published SDK:
 | 5 — batch cap | `probes/08-batchlimit.ts` | `evidence/08-batchlimit.txt` |
 | 6 — failed transactions | `probes/04-kill.ts`, `probes/10-survey.ts` | `evidence/04-kill-reverted-1inch.txt` |
 
-Gas figures are `estimateGas` rather than mined receipts, for the reason given in finding 2:
-validated as a conservative upper bound accurate to within 7% against nine replayed mined
-transactions. Where a figure is a fit rather than a single reading, the sample is stated.
+Where a figure could be backed by a mined receipt it is: the batch cap in finding 5, and the
+15 single-leg proofs underlying finding 1's model, were all submitted as real transactions on CC3
+testnet. Fitted constants are stated as fits, with their sample size. The remaining
+`estimateGas` figures are validated as conservative upper bounds accurate to within 7.6%, per
+finding 2 — across every case measured, estimation over-shot the receipt and never under-shot it.
 
 Corrections to any of this are welcome — the scripts are the argument, not the prose.
