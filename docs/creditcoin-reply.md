@@ -16,7 +16,7 @@ Thanks — the selector suggestion was the right thread to pull, and it turns ou
 | `(LogEntry[], bytes32)` | `0xe6c11b43` ✗ | `0x07648c7a` ✓ |
 | `(ReceiptFields, bytes32)` | `0x2414a709` ✗ | `0x54014825` ✓ |
 
-We built calldata from the shipped ABI through ethers, got `0xe6c11b43`/`0x2414a709`, and both revert with empty return data — which surfaces as `require(false)`, indistinguishable from a function that isn't there. We read it as "not deployed". That was our mistake, not yours.
+We built calldata from the shipped ABI through ethers, got `0xe6c11b43`/`0x2414a709`, and both revert with empty return data — which surfaces as `require(false)`, indistinguishable from a function that isn't there. We read it as "not deployed". That was our mistake, not yours. (For what it's worth it isn't an ethers quirk — viem and web3.js derive the same two wrong selectors from the same ABI, because they all compute from `type` and ignore `internalType`. solc gets it right in `methodIdentifiers`.)
 
 With the right selector it works. Filtering one USDC `Transfer` log, live on CC3 testnet:
 
@@ -29,6 +29,6 @@ Returns the log. Change the leading `0x07648c7a` to `0xe6c11b43` and the same ca
 
 On the real transaction above, `0x54014825` returns 5 `Transfer` logs from 3 emitters as expected.
 
-One suggestion, if it's useful: nothing next to the shipped ABI indicates it can't be used to derive calldata for those two functions, and the empty revert leaves nothing to search for. A note in the SDK docs, or a helper that emits the calldata, would have saved us the wrong conclusion.
+One suggestion, if it's useful: nothing next to the shipped ABI indicates it can't be used to derive calldata for those two functions, and the empty revert leaves nothing to search for. Publishing `methodIdentifiers` next to `evmV1DecoderAbi.json`, or an SDK helper that emits the calldata, would have saved us the wrong conclusion.
 
 Sorry for the noise, and thanks for the pointer.

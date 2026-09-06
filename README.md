@@ -217,6 +217,7 @@ obvious upgrade if this ever matters.
 
 | path | what it is |
 |---|---|
+| [`docs/video-shotlist.md`](docs/video-shotlist.md) | the submission video, shot by shot |
 | [`selftest/`](selftest/) | walks every write path in a real browser with a real wallet, as a first-time user |
 | [`demo/`](demo/) | the demo surface — both exploit halves, the evidence gallery and the slash, verifiable with one command |
 | [`demo/manifest.json`](demo/manifest.json) | single source of truth for the demo and the frontend: hashes and addresses, no fixtures |

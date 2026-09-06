@@ -23,3 +23,4 @@ Regenerate any of them with `npx tsx probes/<name>.ts`.
 | `40-emitter.txt` | the **deployed** filter returns a forged `Transfer` from `0x…DeaDBeef` alongside the real USDC one |
 | `41-getlogs-endtoend.txt` | real mainnet tx `0x77e7a60b…` proven on CC3, receipt decoded, 5 Transfers from 3 emitters returned |
 | `42-selectors-library.txt` | **16 of 16** decoder ABI functions are dispatchable |
+| `44-toolchain.txt` | solc emits the right selectors; ethers, viem and web3.js all emit the wrong ones from the same ABI |

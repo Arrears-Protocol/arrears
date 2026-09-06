@@ -230,8 +230,11 @@ limits as a safety net, not a default.
 > [`41-getlogs-endtoend.txt`](phase0/evidence/41-getlogs-endtoend.txt). See finding 3 in
 > [`PROTOCOL-FINDINGS.md`](PROTOCOL-FINDINGS.md).
 >
-> The one claim here that survives is the documentation count: index41 says "9 public selectors";
-> the deployed library dispatches **16**.
+> The generalisation is the part worth keeping: solc emits the correct selectors in
+> `methodIdentifiers`, and the ABI JSON keeps the canonical name in `internalType` — but ethers,
+> viem and web3.js all compute from `type` and get it wrong
+> ([`44-toolchain.txt`](phase0/evidence/44-toolchain.txt)). Any public library function taking a
+> struct is affected, on any chain.
 
 **Arrears embeds the filtering logic rather than calling the deployed library** — a choice that
 predates this correction and is unaffected by it, since we need an emitter check the library does

@@ -1,0 +1,24 @@
+correct selectors (from the deployed bytecode):
+  LogEntry[]      0x07648c7a
+  ReceiptFields   0x54014825
+
+solc emits them correctly in methodIdentifiers:
+  0x07648c7a  getLogsByEventSignature(EvmV1Decoder.LogEntry[],bytes32)
+  0x54014825  getLogsByEventSignature(EvmV1Decoder.ReceiptFields,bytes32)
+  (solc 0.8.30, compiling @gluwa/usc-contracts@0.1.2 EvmV1Decoder.sol unmodified)
+
+the ABI JSON keeps the canonical name in `internalType`, so nothing is lost.
+what each off-chain toolchain actually derives from it:
+  LogEntry[]      internalType "struct EvmV1Decoder.LogEntry[]"
+    ethers v6   0xe6c11b43  WRONG
+    viem        0xe6c11b43  WRONG
+    web3.js     0xe6c11b43  WRONG
+  ReceiptFields   internalType "struct EvmV1Decoder.ReceiptFields"
+    ethers v6   0x2414a709  WRONG
+    viem        0x2414a709  WRONG
+    web3.js     0x2414a709  WRONG
+
+versions: ethers 6.17.0, viem 2.56.3, web3 4.16.0, solc 0.8.30
+
+All three read `type` and discard `internalType`. The compiler is right; every
+major client library is wrong, and the resulting revert carries no data.

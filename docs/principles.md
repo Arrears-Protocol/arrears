@@ -68,12 +68,24 @@ Three times now the instrument lied in a way that looked exactly like a finding.
 
 **An ABI-derived selector is wrong for a Solidity library.** A public library function refers to a
 struct parameter by canonical name — `EvmV1Decoder.LogEntry[]` — instead of expanding it to a
-tuple, so the selector ethers computes from the shipped ABI JSON is not the one the deployed
-library dispatches. The wrong selector reverts with **no return data**, which is
+tuple, so the selector ethers, viem and web3.js all compute from the shipped ABI JSON is not the
+one the deployed library dispatches. The wrong selector reverts with **no return data**, which is
 indistinguishable from a function that was never deployed. We wrote it up as *"shipped in the ABI
-but not deployed"* and it reached a document we were about to publish. Both functions were there
-the whole time. Retracted in
+but not deployed"*. Both functions were there the whole time. Rewritten as
 [`../PROTOCOL-FINDINGS.md`](../PROTOCOL-FINDINGS.md) finding 3.
+
+Two things about this one are worth recording separately from the technical lesson.
+
+**It is the first that reached print.** The other two were caught in the working session that
+produced them. This one survived review, went into a document written to be published, and was
+still there when someone outside the project read it.
+
+**It was not caught by our own testing.** It was caught because Creditcoin asked us for the
+transaction hash and the calldata. We had run the check, saved the transcript and cited it — and
+the transcript was of a wrong measurement, so every later look at it confirmed the error. What
+broke the loop was an outsider asking for the artifact rather than the conclusion. **Publish the
+reproduction, not the result** — it is the only part of a claim that someone else can falsify,
+and on this occasion it is the only reason the claim got fixed before it did damage.
 
 **`tsx` breaks Playwright's `addInitScript`.** It rewrites the function body and
 injects a `__name` helper that does not exist in the browser. The script throws,

@@ -7,10 +7,12 @@ Everything below was produced by running against the live network — the public
 hosted prover, and Ethereum mainnet.
 
 Six findings. Two are things the documentation gets right and that deserve saying out loud, one
-is a security note on the reference library, two are gaps between what is documented or shipped
-and what is actually deployed, and one — finding 3 — is a **retraction of an earlier claim in
-this document**, kept in place rather than deleted because the mistake is a trap other builders
-will hit.
+is a security note on the reference library, and three are gaps between what is documented or
+shipped and what is actually deployed.
+
+Finding 3 opens with a **correction to an earlier version of this document**. The claim it
+replaces was wrong; the reason it was wrong turned out to be worth more than the claim, and it
+generalises well past Attestcoin.
 
 Versions under test: `@gluwa/usc-sdk@0.18.0`, `@gluwa/usc-contracts@0.1.2`, CC3 testnet at block
 ~5,439,000, Ethereum mainnet attested tip ~25,916,390.
@@ -110,54 +112,80 @@ behaviour warrants.
 
 ---
 
-## 3. Deriving a selector from a library's ABI JSON gives you the wrong selector
+## 3. Every major client library computes the wrong selector for a public library function
 
-**Status: retracted and replaced. An earlier draft of this document reported that both
-`getLogsByEventSignature` overloads were missing from the deployed bytecode. That was wrong.
-Both are deployed and both work. The error was mine, and it is worth writing up because the
-thing that caused it will catch other builders.**
+> **Correction first.** An earlier draft of this document reported that both
+> `getLogsByEventSignature` overloads were **missing from the deployed bytecode**. That was wrong.
+> Both are deployed, both work, and all 16 functions in the shipped ABI are dispatchable — not 14.
+> The claim was published in error and is retracted here rather than deleted, because the reason
+> we got it wrong is the finding.
 
-`EvmV1Decoder` is a **`library`**, not a contract ([`EvmV1Decoder.sol:35`](https://www.npmjs.com/package/@gluwa/usc-contracts)).
-Solidity computes the external signature of a *public library* function differently from a
-contract's: **struct parameters are referred to by their canonical name, not expanded to a
-tuple.** So the selector is `keccak("getLogsByEventSignature(EvmV1Decoder.LogEntry[],bytes32)")`,
-not `keccak("getLogsByEventSignature((address,bytes32[],bytes)[],bytes32)")`.
+**Status: confirmed, and more general than the claim it replaces.**
 
-The ABI JSON cannot express this. `@gluwa/usc-sdk/dist/utils/evmV1DecoderAbi.json` declares the
-tuple-expanded parameter types, which is what ABI JSON always does — and every tool that computes
-a selector from an ABI (ethers, viem, web3.js) therefore produces a selector the deployed library
-does not dispatch:
+`EvmV1Decoder` is a **`library`**, not a contract. Solidity computes the external signature of a
+*public library* function differently: **a struct parameter is referred to by its canonical name,
+not expanded to a tuple.**
 
-| overload | selector from the ABI JSON | selector the library dispatches | deployed |
-|---|---|---|---|
-| `(LogEntry[], bytes32)` | `0xe6c11b43` ✗ | **`0x07648c7a`** | yes |
-| `(ReceiptFields, bytes32)` | `0x2414a709` ✗ | **`0x54014825`** | yes |
+```
+getLogsByEventSignature(EvmV1Decoder.LogEntry[],bytes32)      → 0x07648c7a   ← what it dispatches
+getLogsByEventSignature((address,bytes32[],bytes)[],bytes32)  → 0xe6c11b43   ← what every tool derives
+```
 
-Called with the right selector, both work on the live decoder. Called with the ABI-derived one,
-both revert with **no return data**, which ethers surfaces as `require(false)` — indistinguishable
-from a function that is not there. That is what I misread.
+**solc knows this.** Compiling `@gluwa/usc-contracts@0.1.2` unmodified with solc 0.8.30 emits
+exactly the right values in `methodIdentifiers`:
 
-This affects only these two functions, because they are the only public entry points in the
-library that take a struct. The other 14 take `bytes`/`uint8` and their ABI selectors are correct.
-**All 16 are dispatchable** — reproduce with [`probes/42-selectors-library.ts`](phase0/probes/42-selectors-library.ts).
+```
+0x07648c7a  getLogsByEventSignature(EvmV1Decoder.LogEntry[],bytes32)
+0x54014825  getLogsByEventSignature(EvmV1Decoder.ReceiptFields,bytes32)
+```
 
-> ### ⚠️ If you call a Solidity library from off chain, do not trust an ABI-derived selector
+**The ABI JSON keeps enough to recover it.** `evmV1DecoderAbi.json` carries
+`"internalType": "struct EvmV1Decoder.LogEntry[]"` alongside `"type": "tuple[]"`. Nothing is lost
+in the ABI.
+
+**Every major client library throws that away.** They compute the selector from `type` and ignore
+`internalType`:
+
+| | `(LogEntry[], bytes32)` | `(ReceiptFields, bytes32)` |
+|---|---|---|
+| **deployed / solc** | **`0x07648c7a`** | **`0x54014825`** |
+| ethers 6.17.0 | `0xe6c11b43` ✗ | `0x2414a709` ✗ |
+| viem 2.56.3 | `0xe6c11b43` ✗ | `0x2414a709` ✗ |
+| web3.js 4.16.0 | `0xe6c11b43` ✗ | `0x2414a709` ✗ |
+
+Reproduce: [`probes/44-toolchain.ts`](phase0/probes/44-toolchain.ts) ·
+[transcript](phase0/evidence/44-toolchain.txt).
+
+> ### ⚠️ The failure mode is what makes this dangerous
 >
-> This is a Solidity rule, not a Creditcoin bug, and it is silent: the revert carries no data, so
-> it reads as "not deployed" rather than "wrong selector". Any public library function taking a
-> struct is affected. Build the calldata with the library-qualified signature, or link the library
-> and let the compiler do it.
+> A wrong selector on a library reverts with **no return data at all** — no `Error(string)`, no
+> custom error, no `fallback`. ethers surfaces it as `require(false)`. That is byte-for-byte
+> **indistinguishable from calling a function that was never deployed**, so the natural conclusion
+> is the wrong one, and it is a conclusion you can reach with an eth_call, a block explorer and a
+> bytecode scan all agreeing with you.
+>
+> We reached it. So, independently, did at least one other team building on this decoder, who
+> vendored their own copy rather than call the deployed one. Two projects, the same wrong
+> conclusion, the same cause.
 
-**What is worth fixing on the Attestcoin side** is only the failure mode's legibility: nothing in
-the SDK or the docs warns that the shipped ABI cannot be used to call these two functions
-directly. A note next to the ABI, or a helper in the SDK that emits the correct calldata, would
-have saved this.
+**Any public library function taking a struct is affected** — this is not specific to Attestcoin
+or to this decoder. If you call a Solidity library from off chain, build the calldata from
+`methodIdentifiers`, or from a signature you assembled by hand using `internalType`. Do not trust
+a selector your client library derived from the ABI.
 
-Reproduce, calling by explicit selector against the live decoder:
-[`probes/39-getlogs-call.ts`](phase0/probes/39-getlogs-call.ts) ·
-[transcript](phase0/evidence/39-getlogs-call.txt). End to end from a real mainnet transaction:
+**What would fix it on the Attestcoin side** is small: nothing next to the shipped ABI indicates
+it cannot be used to build calldata for those two functions. Publishing `methodIdentifiers`
+alongside `evmV1DecoderAbi.json`, or shipping an SDK helper that emits the calldata, closes it.
+
+Verified end to end against a real Ethereum mainnet transaction —
+`0x77e7a60b…` at block 25,916,354, chain key 3 — proven on CC3, receipt decoded, then filtered
+with `0x54014825`: 5 `Transfer` logs from 3 emitters.
 [`probes/41-getlogs-endtoend.ts`](phase0/probes/41-getlogs-endtoend.ts) ·
-[transcript](phase0/evidence/41-getlogs-endtoend.txt).
+[transcript](phase0/evidence/41-getlogs-endtoend.txt). Both overloads called by explicit selector:
+[`probes/39-getlogs-call.ts`](phase0/probes/39-getlogs-call.ts) ·
+[transcript](phase0/evidence/39-getlogs-call.txt). Full selector scan, 16 of 16:
+[`probes/42-selectors-library.ts`](phase0/probes/42-selectors-library.ts) ·
+[transcript](phase0/evidence/42-selectors-library.txt).
 
 ---
 
@@ -337,7 +365,7 @@ are plain TypeScript over `ethers` v6 and the published SDK:
 |---|---|---|
 | 1 — gas model | `probes/20-deep-history-honest.ts`, `probes/16-marginal.ts` | `evidence/20-deep-history-honest.txt` |
 | 2 — estimator accuracy | `probes/17-estimator-trust.ts` | `evidence/17-estimator-trust.txt` |
-| 3 — library selectors | `probes/42-selectors-library.ts`, `probes/39-getlogs-call.ts`, `probes/41-getlogs-endtoend.ts` | `evidence/42-selectors-library.txt`, `evidence/39-getlogs-call.txt`, `evidence/41-getlogs-endtoend.txt` |
+| 3 — library selectors | `probes/44-toolchain.ts`, `probes/42-selectors-library.ts`, `probes/39-getlogs-call.ts`, `probes/41-getlogs-endtoend.ts` | `evidence/44-toolchain.txt`, `evidence/42-selectors-library.txt`, `evidence/39-getlogs-call.txt`, `evidence/41-getlogs-endtoend.txt` |
 | 4 — emitter check | source reading; `probes/13b-impostor-real.ts` | `evidence/13b-impostor-real.txt` |
 | 5 — batch cap | `probes/08-batchlimit.ts` | `evidence/08-batchlimit.txt` |
 | 6 — failed transactions | `probes/04-kill.ts`, `probes/10-survey.ts` | `evidence/04-kill-reverted-1inch.txt` |
