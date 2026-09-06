@@ -1,0 +1,18 @@
+mainnet block 25916354: 361 txs
+fetched 64 proofs
+all share one continuity proof: true  (roots=7)
+txBytes: min=1120 max=58624 mean=6910
+
+ N   calldataBytes      estimateGas    %ofCap   gas/leg    result
+  1      60004        888375    1.185%    888375   OK
+  2      66916        988167    1.318%    494084   OK
+  4      85924       1262595    1.683%    315649   OK
+  8     104292       1527783    2.037%    190973   OK
+ 12     120356                                     FAIL: execution reverted: "heights: Value is too large for length"
+ 16     131236                                     FAIL: execution reverted: "heights: Value is too large for length"
+ 24     172644                                     FAIL: execution reverted: "heights: Value is too large for length"
+ 32     254244                                     FAIL: execution reverted: "heights: Value is too large for length"
+ 48     391364                                     FAIL: execution reverted: "heights: Value is too large for length"
+ 64     493988                                     FAIL: execution reverted: "heights: Value is too large for length"
+
+largest batch that estimated OK: 8

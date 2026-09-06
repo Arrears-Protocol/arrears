@@ -1,0 +1,21 @@
+CC3 chainId=102031 head=5439024
+BLOCK_PROVER_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000000FD2
+CHAIN_INFO_PRECOMPILE_ADDRESS   = 0x0000000000000000000000000000000000000fd3
+MAX_GAS_CAP (SDK constant)      = 75000000
+CC3 block 5439024 gasLimit=75000000 gasUsed=201194
+
+--- getSupportedChains() ---
+{"chainKey":3,"chainId":1,"chainName":"0x457468657265756d","chainEncoding":1}
+{"chainKey":1,"chainId":11155111,"chainName":"0x5365706f6c696120657468657265756d","chainEncoding":1}
+
+--- per-chain genesis / tip ---
+chainKey=3 genesisHeight=0 attestedTip=25916400 hash=0x17593c22c34b08b76811bc26c16cc0b0c3cffe1dd6f14b74e3574bc325a6f5e2
+chainKey=1 genesisHeight=0 attestedTip=11645410 hash=0x38681cc3c9c50fe36033e80cadc23482820dee4a65215cf1fbae289197acc176
+
+--- getSupportedChainByKey(3) ---
+{
+  "chainKey": 3,
+  "chainId": 1,
+  "chainName": "0x457468657265756d",
+  "chainEncoding": 1
+}

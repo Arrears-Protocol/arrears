@@ -1,0 +1,31 @@
+=== the MINED ruling transaction on CC3 ===
+  hash        0xd136dea0524b7e0e9eba54bf9724eec78597c2598047a96849af727f4d243810
+  to          0xb37bc52b9d6f7431ba8be4ded4f53281efb10ec2   (index41's own court contract, NOT the precompile)
+  status      0x1   block 5317821
+  gasUsed     10,92,100
+  gasLimit    15,39,012
+  calldata    17860 bytes (6341 nonzero, 11519 zero)
+  logs        5
+  logs emitted BY the precompile: 3
+    log from 0x0000000000000000000000000000000000000fd2  topic0=0x8a8df984523447f7...
+    log from 0x0000000000000000000000000000000000000fd2  topic0=0x8a8df984523447f7...
+    log from 0x0000000000000000000000000000000000000fd2  topic0=0x8a8df984523447f7...
+    log from 0xb37bc52b9d6f7431ba8be4ded4f53281efb10ec2  topic0=0xbb41c14a4b2500ad...
+    log from 0xb37bc52b9d6f7431ba8be4ded4f53281efb10ec2  topic0=0xdcdf799a3df7388e...
+
+=== decomposition of the 1,092,100 ===
+  21,000                     intrinsic transaction
+      147532                 calldata (6341x16 + 11519x4)
+      168532                 = unavoidable floor before ANY execution
+      923568                 = all execution: 3x verifyAndEmit + 3x calculateTxIndex
+                                 + storage writes + 5 events + the bond payment
+     1092100                 total
+
+  naive "per verifyAndEmit" = 1092100/3 = 3,64,033  <-- the 364k figure
+  but that attributes 100% of a contract's storage, events and payout to the precompile.
+
+=== what 101,002 measured ===
+  a DIRECT EOA -> precompile call, ONE leg, index41's own front-leg proof.
+  6,340 bytes calldata. It includes the 21,000 intrinsic that a contract-internal
+  call does NOT pay, and excludes contract storage/events entirely.
+  So it is not comparable to 1,092,100 either -- both are composites.

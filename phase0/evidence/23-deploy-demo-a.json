@@ -1,0 +1,605 @@
+{
+  "network": "cc3-testnet",
+  "chainId": 102031,
+  "deployer": "0xD675A0C01511bC5a41169Dc2b93d8C9C13C27030",
+  "deploys": [
+    {
+      "name": "Trivial",
+      "addr": "0x60e9F9bc1b49A796ceD2FC92fA008A238A9EF050",
+      "gasUsed": 104189,
+      "costWei": "52094500000000",
+      "cost": "0.0000520945",
+      "hash": "0x46677e64492c0ebab2c30a60e967602a9ee422f23e6ea51693e8e4ca8fb59b7f",
+      "initcode": 265,
+      "abi": [
+        {
+          "type": "function",
+          "name": "set",
+          "inputs": [
+            {
+              "name": "v",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "value",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "event",
+          "name": "Set",
+          "inputs": [
+            {
+              "name": "value",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        }
+      ]
+    },
+    {
+      "name": "NaiveSettlementASC",
+      "addr": "0x243d6BE96A486d4Aa60b0cD49ec2C293EEBE431d",
+      "gasUsed": 825709,
+      "costWei": "412854500000000",
+      "cost": "0.0004128545",
+      "hash": "0x7cb67f475feee6ed1bd3840e941c0393159b2bbe3c15a96f97a26de789a9586f",
+      "initcode": 3608,
+      "abi": [
+        {
+          "type": "function",
+          "name": "recordSettlement",
+          "inputs": [
+            {
+              "name": "chainKey",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "height",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "txBytes",
+              "type": "bytes",
+              "internalType": "bytes"
+            },
+            {
+              "name": "merkleProof",
+              "type": "tuple",
+              "internalType": "struct IBlockProver.MerkleProof",
+              "components": [
+                {
+                  "name": "root",
+                  "type": "bytes32",
+                  "internalType": "bytes32"
+                },
+                {
+                  "name": "siblings",
+                  "type": "tuple[]",
+                  "internalType": "struct IBlockProver.MerkleProofEntry[]",
+                  "components": [
+                    {
+                      "name": "hash",
+                      "type": "bytes32",
+                      "internalType": "bytes32"
+                    },
+                    {
+                      "name": "isLeft",
+                      "type": "bool",
+                      "internalType": "bool"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "continuityProof",
+              "type": "tuple",
+              "internalType": "struct IBlockProver.ContinuityProof",
+              "components": [
+                {
+                  "name": "lowerEndpointDigest",
+                  "type": "bytes32",
+                  "internalType": "bytes32"
+                },
+                {
+                  "name": "roots",
+                  "type": "bytes32[]",
+                  "internalType": "bytes32[]"
+                }
+              ]
+            }
+          ],
+          "outputs": [
+            {
+              "name": "key",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "settled",
+          "inputs": [
+            {
+              "name": "",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "strictRecordSettlement",
+          "inputs": [
+            {
+              "name": "chainKey",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "height",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "txBytes",
+              "type": "bytes",
+              "internalType": "bytes"
+            },
+            {
+              "name": "merkleProof",
+              "type": "tuple",
+              "internalType": "struct IBlockProver.MerkleProof",
+              "components": [
+                {
+                  "name": "root",
+                  "type": "bytes32",
+                  "internalType": "bytes32"
+                },
+                {
+                  "name": "siblings",
+                  "type": "tuple[]",
+                  "internalType": "struct IBlockProver.MerkleProofEntry[]",
+                  "components": [
+                    {
+                      "name": "hash",
+                      "type": "bytes32",
+                      "internalType": "bytes32"
+                    },
+                    {
+                      "name": "isLeft",
+                      "type": "bool",
+                      "internalType": "bool"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "continuityProof",
+              "type": "tuple",
+              "internalType": "struct IBlockProver.ContinuityProof",
+              "components": [
+                {
+                  "name": "lowerEndpointDigest",
+                  "type": "bytes32",
+                  "internalType": "bytes32"
+                },
+                {
+                  "name": "roots",
+                  "type": "bytes32[]",
+                  "internalType": "bytes32[]"
+                }
+              ]
+            }
+          ],
+          "outputs": [
+            {
+              "name": "key",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "event",
+          "name": "SettlementAccepted",
+          "inputs": [
+            {
+              "name": "key",
+              "type": "bytes32",
+              "indexed": true,
+              "internalType": "bytes32"
+            },
+            {
+              "name": "chainKey",
+              "type": "uint64",
+              "indexed": true,
+              "internalType": "uint64"
+            },
+            {
+              "name": "height",
+              "type": "uint64",
+              "indexed": false,
+              "internalType": "uint64"
+            },
+            {
+              "name": "payer",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            },
+            {
+              "name": "target",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "indexed": false,
+              "internalType": "bytes4"
+            },
+            {
+              "name": "gasUsed",
+              "type": "uint64",
+              "indexed": false,
+              "internalType": "uint64"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "error",
+          "name": "AlreadySettled",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "NotProven",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "SourceTransactionReverted",
+          "inputs": [
+            {
+              "name": "receiptStatus",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "gasUsed",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "gasLimit",
+              "type": "uint64",
+              "internalType": "uint64"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "NaiveEventASC",
+      "addr": "0xd335C4F3Eb60c4Bd99F221Ec470D1b9885208229",
+      "gasUsed": 807791,
+      "costWei": "403895500000000",
+      "cost": "0.0004038955",
+      "hash": "0xa0b871446a134cb497d568a126aeed1cf74ff029ec1b3a626f92e9a66b52ea61",
+      "initcode": 3648,
+      "abi": [
+        {
+          "type": "constructor",
+          "inputs": [
+            {
+              "name": "expectedToken_",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "TRANSFER_SIG",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "expectedToken",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "recordTransfer",
+          "inputs": [
+            {
+              "name": "chainKey",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "height",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "txBytes",
+              "type": "bytes",
+              "internalType": "bytes"
+            },
+            {
+              "name": "merkleProof",
+              "type": "tuple",
+              "internalType": "struct IBlockProver.MerkleProof",
+              "components": [
+                {
+                  "name": "root",
+                  "type": "bytes32",
+                  "internalType": "bytes32"
+                },
+                {
+                  "name": "siblings",
+                  "type": "tuple[]",
+                  "internalType": "struct IBlockProver.MerkleProofEntry[]",
+                  "components": [
+                    {
+                      "name": "hash",
+                      "type": "bytes32",
+                      "internalType": "bytes32"
+                    },
+                    {
+                      "name": "isLeft",
+                      "type": "bool",
+                      "internalType": "bool"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "continuityProof",
+              "type": "tuple",
+              "internalType": "struct IBlockProver.ContinuityProof",
+              "components": [
+                {
+                  "name": "lowerEndpointDigest",
+                  "type": "bytes32",
+                  "internalType": "bytes32"
+                },
+                {
+                  "name": "roots",
+                  "type": "bytes32[]",
+                  "internalType": "bytes32[]"
+                }
+              ]
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "strictRecordTransfer",
+          "inputs": [
+            {
+              "name": "chainKey",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "height",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "txBytes",
+              "type": "bytes",
+              "internalType": "bytes"
+            },
+            {
+              "name": "merkleProof",
+              "type": "tuple",
+              "internalType": "struct IBlockProver.MerkleProof",
+              "components": [
+                {
+                  "name": "root",
+                  "type": "bytes32",
+                  "internalType": "bytes32"
+                },
+                {
+                  "name": "siblings",
+                  "type": "tuple[]",
+                  "internalType": "struct IBlockProver.MerkleProofEntry[]",
+                  "components": [
+                    {
+                      "name": "hash",
+                      "type": "bytes32",
+                      "internalType": "bytes32"
+                    },
+                    {
+                      "name": "isLeft",
+                      "type": "bool",
+                      "internalType": "bool"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "continuityProof",
+              "type": "tuple",
+              "internalType": "struct IBlockProver.ContinuityProof",
+              "components": [
+                {
+                  "name": "lowerEndpointDigest",
+                  "type": "bytes32",
+                  "internalType": "bytes32"
+                },
+                {
+                  "name": "roots",
+                  "type": "bytes32[]",
+                  "internalType": "bytes32[]"
+                }
+              ]
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "event",
+          "name": "TransferAccepted",
+          "inputs": [
+            {
+              "name": "chainKey",
+              "type": "uint64",
+              "indexed": true,
+              "internalType": "uint64"
+            },
+            {
+              "name": "height",
+              "type": "uint64",
+              "indexed": true,
+              "internalType": "uint64"
+            },
+            {
+              "name": "emitter",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "from",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            },
+            {
+              "name": "to",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "emitterWasExpected",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "error",
+          "name": "NoMatchingEvent",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "NotProven",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "WrongEmitter",
+          "inputs": [
+            {
+              "name": "got",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "expected",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "demoA": {
+    "naive": {
+      "hash": "0x5ef8edf24b4cdae2d9482a148d87bbba4c873babfcec89f3935d63c72f28e48b",
+      "status": 1,
+      "gasUsed": 273896,
+      "accepted": {
+        "payer": "0x8B65363a01510490fbA03cEA97B14C73b7eE8f75",
+        "target": "0x111111125421cA6dc452d289314280a0f8842A65",
+        "selector": "0x07ed2379",
+        "gasUsed": "386677"
+      }
+    },
+    "strict": {
+      "reverted": true,
+      "error": "transaction execution reverted"
+    }
+  },
+  "explorer": {
+    "settlement": "https://creditcoin-testnet.blockscout.com/address/0x243d6BE96A486d4Aa60b0cD49ec2C293EEBE431d",
+    "event": "https://creditcoin-testnet.blockscout.com/address/0xd335C4F3Eb60c4Bd99F221Ec470D1b9885208229"
+  }
+}

@@ -1,0 +1,67 @@
+scanning 30 blocks at each of 5 offsets per window
+
+=== FTX collapse            2022-11-09  base block 15932331 ===
+  +   0   5456 txs   243 reverted (4.45%)    3 liquidations  {"Maker Bark":3}
+  + 300   5105 txs   227 reverted (4.45%)    0 liquidations  {}
+  + 900   4860 txs   152 reverted (3.13%)    0 liquidations  {}
+  +1800   3489 txs   912 reverted (26.14%)    0 liquidations  {}
+  +3600   4983 txs   202 reverted (4.05%)    0 liquidations  {}
+  -> peak at +1800: 912 reverts (26.14%), 0 liquidations
+     out-of-gas failures in that slice: 5
+       OOG 0x80ed5433e4ae0f919ad189b3134a38f2079faf8a0ddf6cdf5502be66e0dffb72 blk 15934133 to 0x55a44e7ed23409241e1c4b9c5cbe80a066993bdd sel 0x045a6a0f gas 50000/50000
+       OOG 0x023fedae4b82be792ab9cab897e9e69052305bdf75217601da30972535ef7376 blk 15934135 to 0x55a44e7ed23409241e1c4b9c5cbe80a066993bdd sel 0x045a6a0f gas 40210/40210
+       OOG 0x35e00adbbe650675858022ec153fe2d8252d5f64d7ff5a103ac63d3b8d40fc0e blk 15934139 to 0x55a44e7ed23409241e1c4b9c5cbe80a066993bdd sel 0x045a6a0f gas 70000/70000
+       OOG 0x4913c783753bde8cd436735e8e184ed9a7d2df1e05d89c854d95f2ce7b7fdf41 blk 15934143 to 0x55a44e7ed23409241e1c4b9c5cbe80a066993bdd sel 0x045a6a0f gas 36000/36000
+
+=== USDC depeg (SVB)        2023-03-11  base block 16804702 ===
+  +   0   4703 txs   112 reverted (2.38%)    2 liquidations  {"Aave LiquidationCall":2}
+  + 300   4578 txs   106 reverted (2.32%)    0 liquidations  {}
+  + 900   4210 txs    86 reverted (2.04%)    0 liquidations  {}
+  +1800   4194 txs   133 reverted (3.17%)    0 liquidations  {}
+  +3600   3611 txs    94 reverted (2.60%)    0 liquidations  {}
+  -> peak at +1800: 133 reverts (3.17%), 0 liquidations
+     out-of-gas failures in that slice: 4
+       OOG 0x225b3401691edf2c1ef142e04bd12de1c6ad689cbec86d7c240684f3c2245a48 blk 16806504 to 0x078ad8ff1b69751dfcd699cea7ab46a8df1e9a4c sel 0x gas 21000/21000
+       OOG 0x1dd76820f55cc790a57ed33eee30ed25d120f6f0820a89c1f55a6c2dc7e71c22 blk 16806523 to 0x1b0e765f6224c21223aea2af16c1c46e38885a40 sel 0xb7034f7e gas 77600/77600
+       OOG 0xc22eb305d884a45228068337df490470661882e5e0efb1ff901b93fd192a8096 blk 16806527 to 0x7a250d5630b4cf539739df2c5dacb4c659f2488d sel 0x791ac947 gas 324239/324239
+       OOG 0xc1d98fac3a8683faf537d7268d91735452ccd7b747743c845adb12023d3a389d blk 16806531 to 0xbe9895146f7af43049ca1c1ae358b0541ea49704 sel 0xa9059cbb gas 28000/28000
+
+=== Yen carry unwind        2024-08-05  base block 20460434 ===
+  +   0   4612 txs   104 reverted (2.25%)    6 liquidations  {"Aave LiquidationCall":4,"Compound v3 AbsorbDebt":2}
+  + 300   5114 txs    76 reverted (1.49%)    1 liquidations  {"Aave LiquidationCall":1}
+  + 900   5034 txs    89 reverted (1.77%)    3 liquidations  {"Aave LiquidationCall":3}
+  +1800   5290 txs   173 reverted (3.27%)    0 liquidations  {}
+  +3600   5063 txs    82 reverted (1.62%)    1 liquidations  {"Aave LiquidationCall":1}
+  -> peak at +1800: 173 reverts (3.27%), 0 liquidations
+     out-of-gas failures in that slice: 8
+       OOG 0xbf4a64126832f98707b723de0bc68b5883144313d5e8f2cb627847193aa206d0 blk 20462236 to 0xdac17f958d2ee523a2206206994597c13d831ec7 sel 0xa9059cbb gas 76808/76808
+       OOG 0x252a53c5d5fa0706ba15624c62db62300708eb9dbe14454af7a73f8fed6625e4 blk 20462242 to 0xe43ca1dee3f0fc1e2df73a0745674545f11a59f5 sel 0x2646478b gas 134138/134138
+       OOG 0xf77280848a69a867da4e99bbb28a162d43526bff5a912f765dec95e286e267f3 blk 20462244 to 0xec6fc9be2d5e505b40a2df8b0622cd25333823db sel 0x6440a7b4 gas 54769/54769
+       OOG 0x6808da5f905bec11868ff9895c25b2dbbab009534d2b777006c21aca2f9be45b blk 20462244 to 0xec6fc9be2d5e505b40a2df8b0622cd25333823db sel 0x6440a7b4 gas 54846/54846
+
+=== Feb 2025 selloff        2025-02-03  base block 21765839 ===
+  +   0   4747 txs    34 reverted (0.72%)    0 liquidations  {}
+  + 300   5316 txs    64 reverted (1.20%)    0 liquidations  {}
+  + 900   5402 txs    70 reverted (1.30%)    0 liquidations  {}
+  +1800   5336 txs    60 reverted (1.12%)    0 liquidations  {}
+  +3600   4796 txs    86 reverted (1.79%)    0 liquidations  {}
+  -> peak at +3600: 86 reverts (1.79%), 0 liquidations
+     out-of-gas failures in that slice: 12
+       OOG 0x3198a097f62d37dc2463b87adf87419621a8bf45e014491c0f9911aa09224fcc blk 21769440 to 0x92d6c1e31e14520e676a687f0a93788b716beff5 sel 0xa9059cbb gas 134482/134482
+       OOG 0x1ae95c8451344ee5f8e385fb1b6cc830b6519c1933bd0390adecaf9ef6f69e94 blk 21769441 to 0x92d6c1e31e14520e676a687f0a93788b716beff5 sel 0xa9059cbb gas 134482/134482
+       OOG 0x5d485bfa7ce1920d559c8e89672126c9793a9aec2da921b12c1c31498f2831cd blk 21769442 to 0x5a98fcbea516cf06857215779fd812ca3bef1b32 sel 0xa9059cbb gas 134482/134482
+       OOG 0x60b1c22c18ab63ee8c3725e7076b6bd801228d9416560e3558feaab1283c9013 blk 21769443 to 0x92d6c1e31e14520e676a687f0a93788b716beff5 sel 0xa9059cbb gas 134482/134482
+
+=== Oct 2025 cascade        2025-10-10  base block 23548975 ===
+  +   0   6942 txs    77 reverted (1.11%)    7 liquidations  {"Aave LiquidationCall":7}
+  + 300   6060 txs   127 reverted (2.10%)    4 liquidations  {"Aave LiquidationCall":4}
+  + 900   8701 txs   209 reverted (2.40%)    6 liquidations  {"Morpho Liquidate":4,"Aave LiquidationCall":2}
+  +1800   8293 txs   123 reverted (1.48%)    2 liquidations  {"Aave LiquidationCall":1,"Morpho Liquidate":1}
+  +3600   6359 txs    90 reverted (1.42%)    0 liquidations  {}
+  -> peak at +900: 209 reverts (2.40%), 6 liquidations
+     out-of-gas failures in that slice: 12
+       OOG 0x27cb58551d34f7b1a48fabdbfc8ca078a2e7aaf0bed52b425a980cd11d4a967c blk 23549876 to 0xdac17f958d2ee523a2206206994597c13d831ec7 sel 0xa9059cbb gas 120000/120000
+       OOG 0x3ccc9a8d035bd90b1726b883bd66c98e6cdc205f350280c8c0c4111236336205 blk 23549876 to 0xdac17f958d2ee523a2206206994597c13d831ec7 sel 0xa9059cbb gas 120000/120000
+       OOG 0xaadffd39ed444786e8b703ddfdf5da0e27a9d9336668cacbfcee879fc992f92d blk 23549876 to 0xdac17f958d2ee523a2206206994597c13d831ec7 sel 0xa9059cbb gas 120000/120000
+       OOG 0xee76fbbb8fe207a1af967a751dd5dd2c0b3fb6ae3f061ec108fc13d12df3c756 blk 23549876 to 0xdac17f958d2ee523a2206206994597c13d831ec7 sel 0xa9059cbb gas 80000/80000
+

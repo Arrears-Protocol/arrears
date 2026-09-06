@@ -1,0 +1,1 @@
+@gluwa/usc-contracts/=../phase0/node_modules/@gluwa/usc-contracts/

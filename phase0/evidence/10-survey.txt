@@ -1,0 +1,58 @@
+surveying mainnet blocks [25916180..25916379] (200 blocks, all attested)
+
+blocks scanned      200
+transactions        49140
+reverted            721  (1.47%)  = 3.6/block
+  ...with >=1 log   0   <-- logs survive a revert?
+  gasUsed>=gasLimit 74  (out-of-gas signature)
+  gasUsed< gasLimit 647  (explicit revert)
+
+extrapolated: ~25,956 reverted txs/day on mainnet
+
+--- top reverted targets ---
+   240x  0x278d858f05b94576c1e6f73285886876ff6ef8d2  
+    61x  0x5c7bcd6e7de5423a257d81b442095a1a6ced35c5  
+    37x  0x8cc5c24a1666d3214340050315b82b2b6b0d9027  
+    35x  0x66a9893cc07d91d95644aedd05d03f95e1dba8af  Uniswap v4 PoolManager
+    35x  0x967da4048cd07ab37855c090aaf366e4ce1b9f48  
+    26x  0xdac17f958d2ee523a2206206994597c13d831ec7  
+    21x  0x8feab81d36e7576107d5de0758c1b839be31b4f6  
+    20x  0xec2c96e75b09e29b66bf2ee5c37fa749ef9aa7c7  
+    14x  0x7a250d5630b4cf539739df2c5dacb4c659f2488d  
+    14x  0x81cba6291a4a1876c0ba5713076c790c309b2b9d  
+    13x  0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48  
+    11x  0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae  LI.FI Diamond
+    10x  0xec000064576f9c95a8623bc0eff3db6d296ea6df  
+     8x  0x5597278e3baa59d53e256db5cbabc9b491499ce5  
+     7x  0x7d63644230412e4dc3a2cb9b39056fde05bf383e  
+
+--- top reverted selectors ---
+   158x  0x42e3dcf3  
+   102x  0xa9059cbb  ERC20 transfer
+    61x  0xdeff4b24  
+    53x  0x70521ae9  
+    40x  0x3593564c  UniversalRouter execute
+    37x  0x8250ff23  
+    29x  0x95435ac9  
+    20x  0x  
+    20x  0xdb5c7e88  
+    12x  0x095ea7b3  
+    11x  0xf2c42696  
+    10x  0x7af10029  
+     8x  0x2213bc0b  
+     6x  0xde5e0b9a  
+     6x  0x5ae401dc  
+
+--- named examples ---
+  ERC20 transfer: {"hash":"0x44dc68b0e437aa338995e68c906ae140fb44455895300b0ef9bb443a7fd389a4","block":25916180,"to":"0x7d63644230412e4dc3a2cb9b39056fde05bf383e","sel":"0xa9059cbb","gasUsed":24502,"gasLimit":65000,"logs":0}
+  Uniswap v4 PoolManager: {"hash":"0x6a33c25a51641f2c7fb89eda37dc3d7095dc4a332fa0e6504ff546917b3f0975","block":25916183,"to":"0x66a9893cc07d91d95644aedd05d03f95e1dba8af","sel":"0x3593564c","gasUsed":341815,"gasLimit":700000,"logs":0}
+  swapExactTokensForETHSupportingFee: {"hash":"0x2881c3713d7c84d30e48142e7a5124246e9bce809303ccb4b1e22b13077631f9","block":25916187,"to":"0x7a250d5630b4cf539739df2c5dacb4c659f2488d","sel":"0x791ac947","gasUsed":25910,"gasLimit":214608,"logs":0}
+  Uniswap UniversalRouter(old): {"hash":"0x4cec634b3b7e40745e5dd2de02589714246d687e89e4ab38ec668cc083759039","block":25916187,"to":"0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45","sel":"0xac9650d8","gasUsed":120558,"gasLimit":295857,"logs":0}
+  LI.FI Diamond: {"hash":"0x3bdaecf0d5374de25273a1b404abca9bffc5de5818f2ee240e4c8c06e0539d2f","block":25916190,"to":"0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae","sel":"0x2c57e884","gasUsed":140322,"gasLimit":1333506,"logs":0}
+  Uniswap v4 (aux): {"hash":"0xb0a995beb45869516c65a6875084dd6b35c63bb9e9528e1441116999cd8d3214","block":25916217,"to":"0xc005dc82818d67af737725bd4bf75435d065d239","sel":"0x7c39d130","gasUsed":39052,"gasLimit":239119,"logs":0}
+  ERC20 transferFrom: {"hash":"0xc3a2a02c033bfd07d8f4b074a82f1e54067e0ebfeeeb29a54f9cbdc7bf5a6410","block":25916219,"to":"0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","sel":"0x23b872dd","gasUsed":39152,"gasLimit":100000,"logs":0}
+  1inch AggregationRouterV6: {"hash":"0x320d9b35be51f8b9b8a23d33e36af805ba018271cc4a7f0bb1aba56689757775","block":25916224,"to":"0x111111125421ca6dc452d289314280a0f8842a65","sel":"0x07ed2379","gasUsed":289394,"gasLimit":422327,"logs":0}
+  Uniswap UniversalRouter: {"hash":"0xcc6ec00aa3b5823fd19348ef531f2b6c4aca467483203ceec51b964768fec642","block":25916231,"to":"0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad","sel":"0x3593564c","gasUsed":41321,"gasLimit":41321,"logs":0}
+  MEV/keeper bot: {"hash":"0x649bd17abb4506f3ee6f4f5e199f50d7ee886bb7b09c8d8fda0b47421eec7374","block":25916247,"to":"0x00000000009e50a7ddb7a7b0e2ee6604fd120e49","sel":"0x56415000","gasUsed":21350,"gasLimit":100000,"logs":0}
+  Aave v3 Pool: {"hash":"0xeeb319e853b4a18b389e8a1605cc2e5fa38dcfba90c15683151d53edd4b8e2f5","block":25916275,"to":"0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2","sel":"0x02c205f0","gasUsed":198712,"gasLimit":203801,"logs":0}
+  UniversalRouter execute: {"hash":"0xac58f6c7c634ec4101c0b9a1e2f2a6950a0f96cec42d8f57058711079fe63ae8","block":25916289,"to":"0x4c82d1fbfe28c977cbb58d8c7ff8fcf9f70a2cca","sel":"0x3593564c","gasUsed":220111,"gasLimit":221372,"logs":0}

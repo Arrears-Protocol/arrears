@@ -1,0 +1,50 @@
+==============================================================================
+KILL QUESTION: prove a REVERTED mainnet transaction on CC3
+==============================================================================
+
+[ground truth · Ethereum mainnet]
+  tx           0x06ba12d8eaf7527634e9739dc42b778cd2b60d9976901930233f6401e9042dd7
+  block        25916354  index 85
+  status       0x0   <-- 0x0 == REVERTED
+  to           0x111111125421ca6dc452d289314280a0f8842a65
+  gasUsed      386677  of gasLimit 598875
+  logs         0
+
+[attestation] tip=25916400  target=25916354  attested=true
+
+[proof generation] POST https://prover.cc3-testnet.creditcoin.network/api/v1/proof-by-tx/3/...
+  success=true  in 779ms
+  headerNumber   25916354
+  txIndex        85
+  txBytes        4866 hex chars (2432 bytes)
+  merkle root    0x38bde428b134fc5c0267c89416de361366e04a4228268f030de9bf3409d8eea5
+  merkle siblings 9
+  continuity roots 7  lowerEndpointDigest 0x04e7e64b7abd49970e59560669dc9beffc08626292bacf76216eeeba3cee50fd
+
+[live precompile verify] 0x0000000000000000000000000000000000000FD2
+  verifySingle -> true    <<<< KILL QUESTION ANSWER
+  calculateTxIndex -> 85  (mainnet says 85)
+
+[EvmV1Decoder.decodeReceiptFields on CC3] 0x731c345d79Fb8BbDC541f9DF3b6317585F849F9f
+  receiptStatus    0     <<<< must read 0
+  receiptGasUsed   386677
+  receiptLogs      0
+  receiptLogsBloom 0x000000000000000000... len=256
+  bloom all-zero   true
+
+[proven bytes: common fields]  txType=2
+  from      0x8B65363a01510490fbA03cEA97B14C73b7eE8f75
+  to        0x111111125421cA6dc452d289314280a0f8842A65  (toIsNull=false)
+  value     0
+  nonce     8697
+  gasLimit  598875
+  data      1160 bytes, selector 0x07ed2379
+
+  gasUsed==gasLimit (out-of-gas signature)? false
+
+[cross-check vs mainnet]
+  from match     true
+  to match       true
+  gasUsed match  true
+  index match    true
+  calldata match true

@@ -1,0 +1,10 @@
+deployed EvmV1Decoder code size: 9598 bytes
+
+real mainnet tx 0x77e7a60b4c1b02970ed9f09cceb7211b52a2a2d33061aa3319be90997af45a7f @ block 25916354
+  5 Transfer logs from 3 DISTINCT token contracts:
+    0xdac17f958d2ee523a2206206994597c13d831ec7
+    0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48
+    0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
+
+proven+decoded on CC3: status=1 logs=8
+FATAL execution reverted (no data present; likely require(false) occurred (action="call", data="0x", reason="require(false)", transaction={ "data": "0x2414a7090000000000000000000000000000000000000000000000000000000000000040ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef0000000000000000000

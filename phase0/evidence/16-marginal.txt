@@ -1,0 +1,23 @@
+pool=30, using the 10 smallest, identical continuity proof
+
+  N  calldataB  intrinsic+calldata   estimateGas   EXECUTION   exec/leg
+   1      4324               64168         80278      16110     16110
+   2      6788               81548        106535      24987     12494
+   3      9252               98820        140317      41497     13832
+   4     11716              116056        173783      57727     14432
+   5     14180              133256        206887      73631     14726
+   6     16644              150528        262365     111837     18640
+   7     19108              167716        297939     130223     18603
+   8     21604              185416        333975     148559     18570
+   9     24196              204352        371397     167045     18561
+  10     26820              222624        409281     186657     18666
+
+  marginal EXECUTION cost per additional leg: 18950 gas
+  fixed execution overhead of the call:       -2840 gas
+
+=== index41's front-leg proof, single verifyAndEmit, direct from an EOA ===
+  calldata            6340 bytes (3067 nonzero, 3273 zero)
+  intrinsic           21,000
+  calldata gas        62,164
+  estimateGas total   1,01,002
+  => EXECUTION        17,838 gas  <-- the precompile's actual work

@@ -1,0 +1,26 @@
+pool=40  smallest txBytes=1664
+
+--- verifyAndEmit (state-changing), smallest txs, N=1..14 ---
+  N= 1 calldata=  3044 gas=    51673 (0.069% of cap)  OK
+  N= 2 calldata=  5508 gas=    86913 (0.116% of cap)  OK
+  N= 3 calldata=  7972 gas=   121298 (0.162% of cap)  OK
+  N= 4 calldata= 10436 gas=   155469 (0.207% of cap)  OK
+  N= 5 calldata= 12900 gas=   189128 (0.252% of cap)  OK
+  N= 6 calldata= 15364 gas=   223280 (0.298% of cap)  OK
+  N= 7 calldata= 17828 gas=   279459 (0.373% of cap)  OK
+  N= 8 calldata= 20292 gas=   315033 (0.420% of cap)  OK
+  N= 9 calldata= 22756 gas=   350607 (0.467% of cap)  OK
+  N=10 calldata= 25220 gas=   386181 (0.515% of cap)  OK
+  N=11 calldata= 27716 FAIL: execution reverted: "heights: Value is too large for length"
+  N=12 calldata= 30308 FAIL: execution reverted: "heights: Value is too large for length"
+  N=13 calldata= 32932 FAIL: execution reverted: "heights: Value is too large for length"
+  N=14 calldata= 35556 FAIL: execution reverted: "heights: Value is too large for length"
+
+--- verify (view, free) same sweep — is the cap on both forms? ---
+  N= 6 -> 0x00000000... OK
+  N= 7 -> 0x00000000... OK
+  N= 8 -> 0x00000000... OK
+  N= 9 -> 0x00000000... OK
+  N=10 -> 0x00000000... OK
+  N=11 FAIL: execution reverted: "heights: Value is too large for length"
+  N=12 FAIL: execution reverted: "heights: Value is too large for length"

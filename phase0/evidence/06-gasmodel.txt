@@ -1,0 +1,20 @@
+MAX_GAS_CAP=75000000  (CC3 live block gasLimit confirmed 75,000,000)
+
+--- calibration: index41 sandwich legs (their measured total 1,092,100 for 3x verifyAndEmit + 3x calculateTxIndex + asserts) ---
+index41 front (idx14)        h= 25764741 contRoots= 60 sibs= 8 txBytes= 3520 calldata=  6340 gas=   101002
+
+--- our reverted tx ---
+reverted 1inch               h= 25916354 contRoots=  7 sibs= 9 txBytes= 2432 calldata=  3620 gas=    59160
+
+--- history depth sweep: does age change continuity length / gas? ---
+mainnet block 25916354       h= 25916354 contRoots=  7 sibs= 9 txBytes= 6112 calldata=  7300 gas=   112919
+mainnet block 25900000       h= 25900000 contRoots=  1 sibs= 8 txBytes= 8480 calldata=  9412 gas=   142365
+mainnet block 25800000       h= 25800000 contRoots=  1 sibs= 9 txBytes= 1472 calldata=  2468 gas=    50539
+mainnet block 25500000       h= 25500000 contRoots=  1 sibs= 8 txBytes= 1664 calldata=  2596 gas=    51363
+mainnet block 25000000       h= 25000000 contRoots=  1 sibs= 9 txBytes= 5152 calldata=  6148 gas=    94473
+mainnet block 23000000       h= 23000000 contRoots=  1 sibs= 8 txBytes= 1248 calldata=  2180 gas=    47066
+mainnet block 20000000       h= 20000000 contRoots=  1 sibs= 8 txBytes= 4512 calldata=  5444 gas=    86157
+mainnet block 15000000       h= 15000000 contRoots=  1 sibs= 9 txBytes= 1248 calldata=  2244 gas=    47541
+mainnet block 10000000       h= 10000000 contRoots=  1 sibs= 7 txBytes= 1120 calldata=  1988 gas=    46255
+mainnet block 5000000        h=  5000000 contRoots=  1 sibs= 7 txBytes= 1536 calldata=  2404 gas=    50452
+mainnet block 1000000        h=  1000000 contRoots=  1 sibs= 1 txBytes= 1120 calldata=  1604 gas=    43538

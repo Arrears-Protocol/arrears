@@ -1,0 +1,12 @@
+binary search calldata bytes accepted by public RPC: lo=400000 hi=800000
+  600000 -> 413
+  500000 -> OK
+  550000 -> 413
+  525000 -> 413
+  512500 -> OK
+  518750 -> OK
+  521875 -> OK
+  523437 -> OK
+
+max calldata accepted ~= 5,23,437 bytes (JSON-RPC body ~= 1.00 MiB hex)
+at ~2,522 calldata bytes per proven leg -> ~207 legs of calldata could ride in one tx

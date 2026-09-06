@@ -1,0 +1,17 @@
+{
+  "name": "arrears-phase0",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase 0 investigation harness. Probe scripts only - no application logic.",
+  "dependencies": {
+    "@gluwa/usc-sdk": "0.18.0",
+    "@gluwa/usc-contracts": "^0.1.2",
+    "ethers": "^6.13.4"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "@types/node": "^22.10.0"
+  }
+}

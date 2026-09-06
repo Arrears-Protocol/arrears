@@ -1,0 +1,62 @@
+Proving named historical failures. All are out-of-gas => slashable class.
+
+USDC depeg (SVB) 2023-03-11
+  tx      0xc22eb305d884a45228068337df490470661882e5e0efb1ff901b93fd192a8096
+  block   16806527  (2023-03-11)   Uniswap V2 Router swapExactTokensForETHSupportingFee - OUT OF GAS 324,239/324,239
+  status  0x0  logs 0
+  VERIFY  true   contRoots=474  txBytes=1536
+  COST    3,35,919 gas  (0.448% of block cap)  calldata 17540 B
+
+USDC depeg (SVB) 2023-03-11
+  tx      0x1dd76820f55cc790a57ed33eee30ed25d120f6f0820a89c1f55a6c2dc7e71c22
+  block   16806523  (2023-03-11)   OUT OF GAS 77,600/77,600
+  status  0x0  logs 0
+  VERIFY  true   contRoots=478  txBytes=1376
+  COST    3,37,173 gas  (0.450% of block cap)  calldata 17508 B
+
+Yen carry unwind 2024-08-05
+  tx      0x252a53c5d5fa0706ba15624c62db62300708eb9dbe14454af7a73f8fed6625e4
+  block   20462242  (2024-08-05)   OUT OF GAS 134,138/134,138
+  status  0x0  logs 0
+  VERIFY  true   contRoots=759  txBytes=1632
+  COST    5,02,341 gas  (0.670% of block cap)  calldata 26820 B
+
+Yen carry unwind 2024-08-05
+  tx      0xbf4a64126832f98707b723de0bc68b5883144313d5e8f2cb627847193aa206d0
+  block   20462236  (2024-08-05)   USDT transfer OUT OF GAS 76,808/76,808
+  status  0x0  logs 0
+  VERIFY  true   contRoots=765  txBytes=1216
+  COST    5,02,659 gas  (0.670% of block cap)  calldata 26660 B
+
+Feb 2025 selloff 2025-02-03
+  tx      0x3198a097f62d37dc2463b87adf87419621a8bf45e014491c0f9911aa09224fcc
+  block   21769440  (2025-02-04)   OUT OF GAS 134,482/134,482
+  status  0x0  logs 0
+  VERIFY  true   contRoots=561  txBytes=1344
+  COST    3,84,792 gas  (0.513% of block cap)  calldata 20196 B
+
+Oct 2025 cascade 2025-10-10
+  tx      0x27cb58551d34f7b1a48fabdbfc8ca078a2e7aaf0bed52b425a980cd11d4a967c
+  block   23549876  (2025-10-10)   USDT transfer OUT OF GAS 120,000/120,000
+  status  0x0  logs 0
+  VERIFY  true   contRoots=125  txBytes=1216
+  COST    1,18,740 gas  (0.158% of block cap)  calldata 6180 B
+
+Oct 2025 cascade 2025-10-10
+  tx      0xee76fbbb8fe207a1af967a751dd5dd2c0b3fb6ae3f061ec108fc13d12df3c756
+  block   23549876  (2025-10-10)   USDT transfer OUT OF GAS 80,000/80,000
+  status  0x0  logs 0
+  VERIFY  true   contRoots=125  txBytes=1344
+  COST    1,19,239 gas  (0.159% of block cap)  calldata 6308 B
+
+=== summary ===
+    335919 gas  roots= 474  block 16806527  verified=true
+    337173 gas  roots= 478  block 16806523  verified=true
+    502341 gas  roots= 759  block 20462242  verified=true
+    502659 gas  roots= 765  block 20462236  verified=true
+    384792 gas  roots= 561  block 21769440  verified=true
+    118740 gas  roots= 125  block 23549876  verified=true
+    119239 gas  roots= 125  block 23549876  verified=true
+
+  range 1,18,740 - 5,02,659 gas
+  worst case is 0.670% of the CC3 block gas cap

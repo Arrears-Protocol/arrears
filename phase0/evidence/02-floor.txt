@@ -1,0 +1,17 @@
+attested tip chainKey=3: 25916400
+nominal getAttestationGenesisHeight(3): 0
+
+height            bounds                                                    checkpoint
+         0  attested=false parent=0 child=0                          exists=true hash=0xdaa77426c30c02a4
+         1  attested=true parent=0 child=1000                        exists=false hash=0x0000000000000000
+   1000000  attested=true parent=999000 child=1000000                exists=true hash=0xa134d586c3a95bee
+  10000000  attested=true parent=9999000 child=10000000              exists=true hash=0xc54603b21612e203
+  20000000  attested=true parent=19999000 child=20000000             exists=true hash=0x0f516de448fb123f
+  23000000  attested=true parent=22999000 child=23000000             exists=true hash=0x06c4d59bd79e5447
+  25000000  attested=true parent=24999000 child=25000000             exists=true hash=0x865cf69e0f3d096a
+  25500000  attested=true parent=25499900 child=25500000             exists=true hash=0xeca23c62fecd55f6
+  25700000  attested=true parent=25699900 child=25700000             exists=true hash=0x9f0a24337b260de7
+  25764741  attested=true parent=25764700 child=25764800             exists=false hash=0x0000000000000000
+  25900000  attested=true parent=25899900 child=25900000             exists=true hash=0x342cc2c86ac8c622
+  25916300  attested=true parent=25916290 child=25916300             exists=false hash=0x0000000000000000
+  25916400  attested=true parent=25916390 child=25916400             exists=false hash=0x0000000000000000

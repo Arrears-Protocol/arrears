@@ -1,0 +1,16 @@
+CC3 head=5439073 gasLimit=75000000
+
+calldata size sweep (to a plain address — isolates size/gas from precompile logic):
+       1000 bytes -> gas       37146  (0.05% of cap)  OK
+      10000 bytes -> gas      181641  (0.24% of cap)  OK
+      50000 bytes -> gas      858012  (1.14% of cap)  OK
+     100000 bytes -> gas     1680598  (2.24% of cap)  OK
+     200000 bytes -> gas     3325760  (4.43% of cap)  OK
+     400000 bytes -> gas     6616095  (8.82% of cap)  OK
+     800000 bytes -> FAIL: server response 413 Request Entity Too Large
+    1600000 bytes -> FAIL: server response 413 Request Entity Too Large
+    3200000 bytes -> FAIL: server response 413 Request Entity Too Large
+
+largest calldata that estimated OK: 400000 bytes
+gas model: gas ~= 15090 + 16.66 * calldataBytes
+=> calldata bytes affordable within 75,000,000 gas: 45,02,225

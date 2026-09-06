@@ -1,0 +1,29 @@
+signer 0xD675A0C01511bC5a41169Dc2b93d8C9C13C27030  balance 10000.0 tCTC
+
+proof pool 30, using the 11 smallest; shared continuity proof (47 roots)
+
+  N  calldataB   estimateGas    MINED gasUsed   %ofCap  events   tx
+   1      4324         80278           77256   0.103%       1   0xef3dafc813ded95077c279e997365487e0549c41f5dc6e9b16302ab962b27e92
+   2      6788        106535          103040   0.137%       2   0x804b815b33140220ca7379e338e37285954a1f85130a2e83aaf1fa98d12b30e6
+   3      9252        140317          137536   0.183%       3   0x8f3ecfafa16f7188ae847d34c0b1003db0e439757c25584a568cd6e345232f5b
+   5     14180        206887          206528   0.275%       5   0x72f41acd838842b28d86e9c27e4e25f959b25937bdf8c6c45f09e7cc15c2dae9
+   8     21604        333975          310492   0.414%       8   0x1ea52be06a398a939c9fae5d7babcd2447c43630a75357bde7e1fb1dd89bcea8
+   9     24196        371397          346780   0.462%       9   0xf536e061bf3bc93ae7d0d62974faed0684979a7bffa0ca4c91998af732c05bb2
+  10     26820        409281          383516   0.511%      10   0xf72036eb825e737415539788f99eb392a64e619e1cd1eb7bf2bd47c189de9670
+  11     29444             -        REVERTED          -       -   transaction execution reverted
+         estimateGas also refused: execution reverted: "heights: Value is too large for length"
+
+--- estimate vs mined ---
+  N= 1  est=   80278  mined=   77256  over-estimate 3.91%  TransactionVerified events=1
+  N= 2  est=  106535  mined=  103040  over-estimate 3.39%  TransactionVerified events=2
+  N= 3  est=  140317  mined=  137536  over-estimate 2.02%  TransactionVerified events=3
+  N= 5  est=  206887  mined=  206528  over-estimate 0.17%  TransactionVerified events=5
+  N= 8  est=  333975  mined=  310492  over-estimate 7.56%  TransactionVerified events=8
+  N= 9  est=  371397  mined=  346780  over-estimate 7.10%  TransactionVerified events=9
+  N=10  est=  409281  mined=  383516  over-estimate 6.72%  TransactionVerified events=10
+
+  marginal MINED gas per leg: 34029
+  N=10 mined 3,83,516 = 0.511% of MAX_GAS_CAP
+FATAL require is not defined
+
+[exited with code 0]
