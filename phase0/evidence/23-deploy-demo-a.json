@@ -5,11 +5,11 @@
   "deploys": [
     {
       "name": "Trivial",
-      "addr": "0x60e9F9bc1b49A796ceD2FC92fA008A238A9EF050",
+      "addr": "0x9a5988020032Fa0F82ff847d42bbb178CCfb5C26",
       "gasUsed": 104189,
       "costWei": "52094500000000",
       "cost": "0.0000520945",
-      "hash": "0x46677e64492c0ebab2c30a60e967602a9ee422f23e6ea51693e8e4ca8fb59b7f",
+      "hash": "0x7ae23a4d64d472c5a85f7843ad961e42015b177c4b179dbe093b0688c21a8af7",
       "initcode": 265,
       "abi": [
         {
@@ -55,11 +55,11 @@
     },
     {
       "name": "NaiveSettlementASC",
-      "addr": "0x243d6BE96A486d4Aa60b0cD49ec2C293EEBE431d",
+      "addr": "0x5e81f5A15a389F9CeAd6fCCE9B2f60035415d1a2",
       "gasUsed": 825709,
       "costWei": "412854500000000",
       "cost": "0.0004128545",
-      "hash": "0x7cb67f475feee6ed1bd3840e941c0393159b2bbe3c15a96f97a26de789a9586f",
+      "hash": "0x55ebee24418dde108d82045e597df8f68e10d10f537c4d0f5ae23ef56b516901",
       "initcode": 3608,
       "abi": [
         {
@@ -321,11 +321,11 @@
     },
     {
       "name": "NaiveEventASC",
-      "addr": "0xd335C4F3Eb60c4Bd99F221Ec470D1b9885208229",
+      "addr": "0x06E85983Bc38745302a96b7b71b27a6F8990EAdc",
       "gasUsed": 807791,
       "costWei": "403895500000000",
       "cost": "0.0004038955",
-      "hash": "0xa0b871446a134cb497d568a126aeed1cf74ff029ec1b3a626f92e9a66b52ea61",
+      "hash": "0x90197d0a3468f51bc5ce6b0df0c551052c301ec398afbc59789ac818e2e8801b",
       "initcode": 3648,
       "abi": [
         {
@@ -583,7 +583,7 @@
   ],
   "demoA": {
     "naive": {
-      "hash": "0x5ef8edf24b4cdae2d9482a148d87bbba4c873babfcec89f3935d63c72f28e48b",
+      "hash": "0xbd4eedc2bd216aa8dd848029d3da992510180cefc73d2794f063587d76393c52",
       "status": 1,
       "gasUsed": 273896,
       "accepted": {
@@ -599,7 +599,7 @@
     }
   },
   "explorer": {
-    "settlement": "https://creditcoin-testnet.blockscout.com/address/0x243d6BE96A486d4Aa60b0cD49ec2C293EEBE431d",
-    "event": "https://creditcoin-testnet.blockscout.com/address/0xd335C4F3Eb60c4Bd99F221Ec470D1b9885208229"
+    "settlement": "https://creditcoin-testnet.blockscout.com/address/0x5e81f5A15a389F9CeAd6fCCE9B2f60035415d1a2",
+    "event": "https://creditcoin-testnet.blockscout.com/address/0x06E85983Bc38745302a96b7b71b27a6F8990EAdc"
   }
 }

@@ -1,0 +1,49 @@
+Sepolia signer 0xD2973C898c3B028ad71763FD7444E537148e77d0  0.09 ETH
+
+=== 1. deploy Impostor on Ethereum Sepolia ===
+  Impostor 0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8
+  deploy gasUsed 113717 · tx 0xe28f4d23e3da3e6426aa2f1b9a321017777f5123eb8779fe4a7a2852bbd04bce
+  https://sepolia.etherscan.io/address/0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8
+
+=== 2. emit a forged ERC-20 Transfer ===
+  forge(from=0x55FE002aefF02F77364de339a1292923A15844B8, to=0xD2973C898c3B028ad71763FD7444E537148e77d0, value=1000000000000)
+  Sepolia tx 0xb7dbe7c2121b048991e136074b3120f20e4ed955e7074f3a3f06df436bdca191  block 11645759  logs 1
+  emitted by 0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8  topic0 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+  Transfer sig 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+  https://sepolia.etherscan.io/tx/0xb7dbe7c2121b048991e136074b3120f20e4ed955e7074f3a3f06df436bdca191
+
+=== 3. wait for CC3 to attest Sepolia block 11645759 ===
+  tip 11645720, need 11645759 — 39 behind
+  tip 11645720, need 11645759 — 39 behind
+  tip 11645730, need 11645759 — 29 behind
+  tip 11645730, need 11645759 — 29 behind
+  tip 11645740, need 11645759 — 19 behind
+  tip 11645740, need 11645759 — 19 behind
+  tip 11645750, need 11645759 — 9 behind
+  tip 11645750, need 11645759 — 9 behind
+  attested (tip 11645760)
+
+=== 4. prove the impostor transaction (chainKey 1) ===
+  proven: height 11645759 index 82 contRoots 2 txBytes 1696
+
+=== 5. deploy NaiveEventASC watching Sepolia USDC ===
+  NaiveEventASC 0x7DC1Cc8A209dB75c05717cb80827dBb66Eff4DB2  expectedToken 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238 (real Sepolia USDC)
+  deploy gasUsed 807791 · tx 0xcb5ca263e39a430581fab6e7d28db81fdeb9387b16ab7dea80a34677141f029f
+
+=== 6. submit the impostor proof to the naive ASC ===
+  NAIVE recordTransfer -> status 1 gasUsed 238378 tx 0x7d81c7023aa1b0a6b820670332603489d94a9dc9591bcdbee12e4797d7c56947
+  TransferAccepted EMITTED:
+    emitter            0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8   <- the impostor
+    expectedToken      0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238   <- what it thought it was watching
+    emitterWasExpected false
+    from               0x55FE002aefF02F77364de339a1292923A15844B8
+    to                 0xD2973C898c3B028ad71763FD7444E537148e77d0
+    amount             1000000000000
+
+=== 7. the same proof against the strict variant ===
+  REVERTED WrongEmitter(0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8, 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238)
+
+CC3 ASC:  https://creditcoin-testnet.blockscout.com/address/0x7DC1Cc8A209dB75c05717cb80827dBb66Eff4DB2
+Sepolia:  https://sepolia.etherscan.io/address/0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8
+
+[exited with code 0]

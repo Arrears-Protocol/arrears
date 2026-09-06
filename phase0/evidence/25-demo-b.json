@@ -1,0 +1,37 @@
+{
+  "impostor": {
+    "address": "0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8",
+    "deployTx": "0xe28f4d23e3da3e6426aa2f1b9a321017777f5123eb8779fe4a7a2852bbd04bce",
+    "deployGas": 113717
+  },
+  "forgeTx": {
+    "hash": "0xb7dbe7c2121b048991e136074b3120f20e4ed955e7074f3a3f06df436bdca191",
+    "block": 11645759,
+    "emitter": "0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8",
+    "amount": "1000000000000"
+  },
+  "proof": {
+    "height": 11645759,
+    "txIndex": 82,
+    "contRoots": 2
+  },
+  "asc": {
+    "address": "0x7DC1Cc8A209dB75c05717cb80827dBb66Eff4DB2",
+    "expectedToken": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+    "deployTx": "0xcb5ca263e39a430581fab6e7d28db81fdeb9387b16ab7dea80a34677141f029f",
+    "deployGas": 807791
+  },
+  "naive": {
+    "hash": "0x7d81c7023aa1b0a6b820670332603489d94a9dc9591bcdbee12e4797d7c56947",
+    "status": 1,
+    "gasUsed": 238378,
+    "emitter": "0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8",
+    "emitterWasExpected": false,
+    "from": "0x55FE002aefF02F77364de339a1292923A15844B8",
+    "to": "0xD2973C898c3B028ad71763FD7444E537148e77d0",
+    "amount": "1000000000000"
+  },
+  "strict": {
+    "error": "WrongEmitter(0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8, 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238)"
+  }
+}

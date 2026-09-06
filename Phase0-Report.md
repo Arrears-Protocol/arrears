@@ -23,7 +23,15 @@ that reshapes the product. A reverted transaction has **no logs at all** — not
 Whatever Arrears slashes on must be built from calldata, gas and identity, never from events.
 That is the one finding that should change the design before a line of it is written.
 
-Five of the six "established" claims taken from index41 are wrong or misleading. Details below.
+Five of the six "established" claims taken as leads are wrong or misleading. Details below.
+
+Both halves of the exploit demo are captured on chain (§7), every gas and ceiling figure is
+backed by a mined receipt, and seven real historical failures spanning 2023–2025 have been
+verified against the live precompile (§9).
+
+**One correction to this document's own earlier draft:** it claimed deep history was *cheaper* to
+prove. That was wrong — I had sampled checkpoint-aligned block numbers. Corrected in §5, and the
+corrected finding agrees with Creditcoin's published guidance.
 
 ---
 
@@ -264,18 +272,33 @@ Evidence: [`08-batchlimit.txt`](phase0/evidence/08-batchlimit.txt),
 
 The measured answer is not the arithmetic one, and it is not a gas answer at all.
 
-```
- N=1  calldata=  3,044 B  gas=  51,673  (0.069% of cap)  OK
- N=5  calldata= 12,900 B  gas= 189,128  (0.252% of cap)  OK
- N=9  calldata= 22,756 B  gas= 350,607  (0.467% of cap)  OK
- N=10 calldata= 25,220 B  gas= 386,181  (0.515% of cap)  OK
- N=11 calldata= 27,716 B  execution reverted: "heights: Value is too large for length"
-```
+**Receipt-backed.** Every row below is a real transaction sent from an EOA straight to the
+precompile and mined on CC3. Each successful one emitted exactly N `TransactionVerified` events,
+confirming all N legs really were verified. Evidence:
+[`22-ceiling-mined.txt`](phase0/evidence/22-ceiling-mined.txt).
+
+| N | calldata | estimateGas | **mined gasUsed** | % of cap | events | CC3 receipt |
+|---|---|---|---|---|---|---|
+| 1 | 4,324 B | 80,278 | **77,256** | 0.103% | 1 | [`0xef3dafc8…`](https://creditcoin-testnet.blockscout.com/tx/0xef3dafc813ded95077c279e997365487e0549c41f5dc6e9b16302ab962b27e92) |
+| 2 | 6,788 B | 106,535 | **103,040** | 0.137% | 2 | [`0x804b815b…`](https://creditcoin-testnet.blockscout.com/tx/0x804b815b33140220ca7379e338e37285954a1f85130a2e83aaf1fa98d12b30e6) |
+| 3 | 9,252 B | 140,317 | **137,536** | 0.183% | 3 | [`0x8f3ecfaf…`](https://creditcoin-testnet.blockscout.com/tx/0x8f3ecfafa16f7188ae847d34c0b1003db0e439757c25584a568cd6e345232f5b) |
+| 5 | 14,180 B | 206,887 | **206,528** | 0.275% | 5 | [`0x72f41acd…`](https://creditcoin-testnet.blockscout.com/tx/0x72f41acd838842b28d86e9c27e4e25f959b25937bdf8c6c45f09e7cc15c2dae9) |
+| 8 | 21,604 B | 333,975 | **310,492** | 0.414% | 8 | [`0x1ea52be0…`](https://creditcoin-testnet.blockscout.com/tx/0x1ea52be06a398a939c9fae5d7babcd2447c43630a75357bde7e1fb1dd89bcea8) |
+| 9 | 24,196 B | 371,397 | **346,780** | 0.462% | 9 | [`0xf536e061…`](https://creditcoin-testnet.blockscout.com/tx/0xf536e061bf3bc93ae7d0d62974faed0684979a7bffa0ca4c91998af732c05bb2) |
+| **10** | 25,220 B | 409,281 | **383,516** | **0.511%** | **10** | [`0xf72036eb…`](https://creditcoin-testnet.blockscout.com/tx/0xf72036eb825e737415539788f99eb392a64e619e1cd1eb7bf2bd47c189de9670) |
+| **11** | 29,444 B | *refused* | **REVERTED** | — | — | `execution reverted: "heights: Value is too large for length"` |
+
+N=11 was refused twice over: `estimateGas` rejected it, and the transaction sent anyway reverted
+on chain. The cap is real, not an estimator artifact.
 
 **A single batch `verifyAndEmit` accepts at most 10 legs.** The cap is a hard protocol bound —
 almost certainly a `BoundedVec<_, ConstU32<10>>` on the `heights` argument — and it bites at
-**0.515% of MAX_GAS_CAP**. Gas is three orders of magnitude away from mattering. The same cap of
-10 applies to the batch `verify` view.
+**0.511% of MAX_GAS_CAP, measured from a mined receipt**. Gas is three orders of magnitude away
+from mattering. The same cap of 10 applies to the batch `verify` view.
+
+Marginal mined cost is **~34,029 gas per additional leg** for these proofs (47 continuity roots
+each), so ten legs cost about five times one leg rather than ten times — the shared continuity
+proof is carried once.
 
 The binding constraints, in the order they actually bite:
 
@@ -296,32 +319,68 @@ submission until it has been run on chain.
 
 ---
 
-## 7. The exploit demo — mechanism proven, on-chain capture blocked
+## 7. The exploit demo — both halves, captured on chain
 
-**Half two, the impostor, is confirmed as a real vulnerability**, and it is worse than the brief
-assumed — the flaw is in Creditcoin's own shipped library source. `EvmV1Decoder.sol:128-141`:
+Two Attestcoin Smart Contracts, each written to follow the documented Readability pattern, each
+accepting evidence it should refuse. Both were deployed to CC3 testnet and both accepted a real
+proof in a mined transaction. Each contract also carries a `strict…` variant — the same function
+with the one missing guard — deployed alongside so the difference is demonstrable on the same
+proof.
 
-```solidity
-function getLogsByEventSignature(LogEntry[] memory logs, bytes32 eventSignature)
-    public pure returns (LogEntry[] memory)
-{
-    for (uint256 i; i < logs.length; i++) {
-        if (logs[i].topics.length > 0 && logs[i].topics[0] == eventSignature) n++;
-    }
-    ...
-}
-```
+Sources: [`contracts/src/`](contracts/src/). Evidence:
+[`23-deploy-demo-a.json`](phase0/evidence/23-deploy-demo-a.json),
+[`24-strict-revert.txt`](phase0/evidence/24-strict-revert.txt),
+[`25-demo-b-impostor.txt`](phase0/evidence/25-demo-b-impostor.txt).
 
-It matches `topics[0]` and **never reads `logs[i].address_`**. A contract that asks "did a
-`Transfer` happen?" and trusts this helper has learned nothing about *who* emitted it. Any
-contract on the source chain that emits the right signature satisfies it.
+### Half one — a naive ASC accepts a reverted mainnet transaction as a genuine settlement
 
-The twist found in §4: this helper **is not deployed** on CC3, so a naive developer cannot call
-it — they will embed the library in their own contract or hand-roll the same loop. Either way the
-flawed logic ships, and the fact that Creditcoin's own reference source contains it makes the
-demonstration considerably more pointed.
+[`NaiveSettlementASC`](contracts/src/NaiveSettlementASC.sol) proves the source transaction with
+`verifyAndEmit`, decodes it with `EvmV1Decoder`, and records a settlement. That is the documented
+flow, followed exactly. It never reads `receiptStatus`.
 
-**Both halves still need on-chain capture**, which needs funded accounts. Blocked — see §9.
+Fed the reverted 1inch v6 router transaction from §1:
+
+| | |
+|---|---|
+| Contract | [`0x5e81f5A1…5d1a2`](https://creditcoin-testnet.blockscout.com/address/0x5e81f5A15a389F9CeAd6fCCE9B2f60035415d1a2) |
+| Source transaction | [`0x06ba12d8…`](https://etherscan.io/tx/0x06ba12d8eaf7527634e9739dc42b778cd2b60d9976901930233f6401e9042dd7) — mainnet block 25,916,354, **`status 0x0`** |
+| **Naive path accepted** | [`0xbd4eedc2…`](https://creditcoin-testnet.blockscout.com/tx/0xbd4eedc2bd216aa8dd848029d3da992510180cefc73d2794f063587d76393c52) — **status 1**, 273,896 gas |
+| Event emitted | `SettlementAccepted(payer 0x8B65363a…, target 0x11111112… (1inch v6), selector 0x07ed2379, gasUsed 386,677)` |
+| On-chain state | `settled[key] == true` — a failed transaction is recorded as settled |
+| **Strict path refused** | reverts `SourceTransactionReverted(0, 386677, 598875)` |
+
+The strict variant's decoded error is the whole argument in one line: `receiptStatus 0`,
+`gasUsed 386,677`, `gasLimit 598,875`. All three came out of the same proven bytes the naive
+contract already had and did not look at.
+
+### Half two — a naive ASC credits an impostor's event to a token it never touched
+
+[`Impostor`](contracts/src/Impostor.sol) was deployed on Ethereum Sepolia. It holds no balance,
+implements no token, and does one thing: emit `Transfer(address,address,uint256)` with whatever
+arguments the caller names.
+
+[`NaiveEventASC`](contracts/src/NaiveEventASC.sol) believes it is watching real Sepolia USDC. It
+proves a transaction, walks the receipt's logs, and accepts the first whose `topics[0]` matches
+the `Transfer` signature — the exact predicate of the SDK's own `getLogsByEventSignature`. It
+never compares `log.address_` to the token it trusts.
+
+| | |
+|---|---|
+| Impostor on Sepolia | [`0xfC7eAbb2…CacB8`](https://sepolia.etherscan.io/address/0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8) — deploy [`0xe28f4d23…`](https://sepolia.etherscan.io/tx/0xe28f4d23e3da3e6426aa2f1b9a321017777f5123eb8779fe4a7a2852bbd04bce), 113,717 gas |
+| Forged event | [`0xb7dbe7c2…`](https://sepolia.etherscan.io/tx/0xb7dbe7c2121b048991e136074b3120f20e4ed955e7074f3a3f06df436bdca191) — Sepolia block 11,645,759, claiming **1,000,000 USDC** from Circle's treasury address |
+| Proven as | chain key 1, height 11,645,759, index 82, 2 continuity roots |
+| ASC on CC3 | [`0x7DC1Cc8A…f4DB2`](https://creditcoin-testnet.blockscout.com/address/0x7DC1Cc8A209dB75c05717cb80827dBb66Eff4DB2) — `expectedToken` = real Sepolia USDC `0x1c7D4B19…C7238` |
+| **Naive path accepted** | [`0x7d81c702…`](https://creditcoin-testnet.blockscout.com/tx/0x7d81c7023aa1b0a6b820670332603489d94a9dc9591bcdbee12e4797d7c56947) — **status 1**, 238,378 gas |
+| Event emitted | `TransferAccepted(emitter 0xfC7eAbb2… (the impostor), from 0x55FE002a… (Circle treasury), to 0xD2973C89…, amount 1,000,000,000,000, emitterWasExpected **false**)` |
+| **Strict path refused** | reverts `WrongEmitter(0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8, 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238)` |
+
+The contract emitted `emitterWasExpected: false` **in the same event it accepted**. It had the
+information and acted anyway, because nothing in its logic consulted it.
+
+Nothing here is an exploit of Attestcoin. Every proof is sound — those transactions really did
+happen, and those logs really were emitted. What fails is the inference a consuming contract
+draws from a correct proof. That distinction is the point of the demo, and it is why the fix in
+both cases is three lines inside the consumer.
 
 ---
 
@@ -397,23 +456,30 @@ stETH depeg out of reach on this endpoint. Five windows are reachable, and I sca
 Baseline is 1.47%, so the stress windows run roughly **1.5–2.2x the normal revert rate**, and two
 of them carry live liquidation cascades alongside the failures.
 
-### Seven named failures, each proven against the live precompile
+### Seven named failures, each verified on chain with a mined receipt
+
+Evidence: [`26-historical-mined.json`](phase0/evidence/26-historical-mined.json)
 
 Every one is **out-of-gas** — `gasUsed == gasLimit` exactly — so every one falls in the slashable
-class under design decision 1. Every one returned `verifySingle == true`.
+class under design decision 1. Each was submitted as a real `verifyAndEmit` transaction to the
+precompile on CC3 and each mined successfully, emitting exactly one `TransactionVerified` event.
+These are receipts, not estimates.
 
-| # | window | transaction | block | contRoots | cost to prove | % of block |
-|---|---|---|---|---|---|---|
-| 1 | USDC depeg | [`0xc22eb305…`](https://etherscan.io/tx/0xc22eb305d884a45228068337df490470661882e5e0efb1ff901b93fd192a8096) — Uniswap V2 Router `swapExactTokensForETHSupportingFee`, OOG at 324,239 | 16,806,527 | 474 | 335,919 | 0.448% |
-| 2 | USDC depeg | [`0x1dd76820…`](https://etherscan.io/tx/0x1dd76820f55cc790a57ed33eee30ed25d120f6f0820a89c1f55a6c2dc7e71c22) — OOG at 77,600 | 16,806,523 | 478 | 337,173 | 0.450% |
-| 3 | Yen carry | [`0x252a53c5…`](https://etherscan.io/tx/0x252a53c5d5fa0706ba15624c62db62300708eb9dbe14454af7a73f8fed6625e4) — OOG at 134,138 | 20,462,242 | 759 | 502,341 | 0.670% |
-| 4 | Yen carry | [`0xbf4a6412…`](https://etherscan.io/tx/0xbf4a64126832f98707b723de0bc68b5883144313d5e8f2cb627847193aa206d0) — USDT transfer OOG at 76,808 | 20,462,236 | 765 | 502,659 | 0.670% |
-| 5 | Feb 2025 | [`0x3198a097…`](https://etherscan.io/tx/0x3198a097f62d37dc2463b87adf87419621a8bf45e014491c0f9911aa09224fcc) — OOG at 134,482 | 21,769,440 | 561 | 384,792 | 0.513% |
-| 6 | Oct 2025 | [`0x27cb5855…`](https://etherscan.io/tx/0x27cb58551d34f7b1a48fabdbfc8ca078a2e7aaf0bed52b425a980cd11d4a967c) — USDT transfer OOG at 120,000 | 23,549,876 | 125 | 118,740 | 0.158% |
-| 7 | Oct 2025 | [`0xee76fbbb…`](https://etherscan.io/tx/0xee76fbbb8fe207a1af967a751dd5dd2c0b3fb6ae3f061ec108fc13d12df3c756) — USDT transfer OOG at 80,000 | 23,549,876 | 125 | 119,239 | 0.159% |
+| # | window | source transaction | mainnet block | contRoots | **mined gas** | % of cap | CC3 receipt |
+|---|---|---|---|---|---|---|---|
+| 1 | USDC depeg | [`0xc22eb305…`](https://etherscan.io/tx/0xc22eb305d884a45228068337df490470661882e5e0efb1ff901b93fd192a8096) — Uniswap V2 Router `swapExactTokensForETHSupportingFee`, OOG at 324,239 | 16,806,527 | 474 | **312,376** | 0.417% | [`0x8733dcaf…`](https://creditcoin-testnet.blockscout.com/tx/0x8733dcafbceaa05b9cc9ff0299f3f915dcfa88b697930cdbbac98a3bafe9e268) |
+| 2 | USDC depeg | [`0x1dd76820…`](https://etherscan.io/tx/0x1dd76820f55cc790a57ed33eee30ed25d120f6f0820a89c1f55a6c2dc7e71c22) — OOG at 77,600 | 16,806,523 | 478 | **313,592** | 0.418% | [`0xe89fd606…`](https://creditcoin-testnet.blockscout.com/tx/0xe89fd606c4298aa50593508837975968896cdb2d14695978979841bb76f9680b) |
+| 3 | Yen carry | [`0x252a53c5…`](https://etherscan.io/tx/0x252a53c5d5fa0706ba15624c62db62300708eb9dbe14454af7a73f8fed6625e4) — OOG at 134,138 | 20,462,242 | 759 | **473,756** | 0.632% | [`0x09678d94…`](https://creditcoin-testnet.blockscout.com/tx/0x09678d94e51bc83543050a3d72c8a7634119f4ba84f596b6f956c6bfee8c4acf) |
+| 4 | Yen carry | [`0xbf4a6412…`](https://etherscan.io/tx/0xbf4a64126832f98707b723de0bc68b5883144313d5e8f2cb627847193aa206d0) — USDT transfer OOG at 76,808 | 20,462,236 | 765 | **474,064** | 0.632% | [`0xf8dbd5da…`](https://creditcoin-testnet.blockscout.com/tx/0xf8dbd5da13418206df74df06786934caadd619cf42e9e2d9513685fcc905fecb) |
+| 5 | Feb 2025 | [`0x3198a097…`](https://etherscan.io/tx/0x3198a097f62d37dc2463b87adf87419621a8bf45e014491c0f9911aa09224fcc) — OOG at 134,482 | 21,769,440 | 561 | **359,768** | 0.480% | [`0x0d45e64f…`](https://creditcoin-testnet.blockscout.com/tx/0x0d45e64f8e71ab44578f666b72a277d8215f2f16715656e27eebe8addb5e0dca) |
+| 6 | Oct 2025 | [`0x27cb5855…`](https://etherscan.io/tx/0x27cb58551d34f7b1a48fabdbfc8ca078a2e7aaf0bed52b425a980cd11d4a967c) — USDT transfer OOG at 120,000 | 23,549,876 | 125 | **116,744** | 0.156% | [`0x017c8fad…`](https://creditcoin-testnet.blockscout.com/tx/0x017c8fadaaa472a1bd87409930e30bb58139b84c465969a4e48e41eed14deb3b) |
+| 7 | Oct 2025 | [`0xee76fbbb…`](https://etherscan.io/tx/0xee76fbbb8fe207a1af967a751dd5dd2c0b3fb6ae3f061ec108fc13d12df3c756) — USDT transfer OOG at 80,000 | 23,549,876 | 125 | **117,304** | 0.156% | [`0x0c4956d5…`](https://creditcoin-testnet.blockscout.com/tx/0x0c4956d5bcf0134c9d13351b490967d3808b7b4827986ad0cae1e04626810aa9) |
 
-**Range: 118,740 – 502,659 gas. Worst case 0.670% of a CC3 block, for evidence three and a half
-years old.** That is the number the demo rests on.
+**Mined range: 116,744 – 474,064 gas. Worst case 0.632% of a CC3 block, for evidence three and a
+half years old. Total cost to prove all seven: 0.00108 tCTC.**
+
+`estimateGas` over-estimated these by 1.65%–7.54% and never under-estimated, consistent with the
+nine-transaction replay in §5.
 
 ### Recommended demo window
 
@@ -435,57 +501,67 @@ public RPCs will support, and I would want an archive endpoint before promising 
 
 ---
 
-## 10. Blocked: everything that needs a funded account
+## 10. Deploy cost on CC3
 
-Three Phase 0 items are not done, all blocked on the same thing.
+Measured from mined receipts at the CC3 gas price of **0.5 gwei**:
 
-**The CC3 faucet is Discord-only.** Per
-[the docs](https://docs.creditcoin.org/wallets/using-testnet-faucet.md), the only way to get
-testnet CTC is `/faucet address:<addr>` in the `token-faucet` channel of
-[discord.gg/creditcoin](https://discord.gg/creditcoin). There is no HTTP faucet — I probed
-`faucet.cc3-testnet.creditcoin.network` and `faucet.creditcoin.org` and neither resolves. This
-needs a human with a Discord account.
+| contract | initcode | deploy gasUsed | cost |
+|---|---|---|---|
+| `Trivial` (a counter) | 265 B | 104,189 | **0.0000520945 tCTC** |
+| `NaiveSettlementASC` (linked to the deployed decoder) | 3,608 B | 825,709 | 0.0004128545 tCTC |
+| `NaiveEventASC` | 3,648 B | 807,791 | 0.0004038955 tCTC |
 
-I have generated three keypairs, stored at `~/.config/creditcoin/arrears-testnet.json`, mode
-`0600`, outside the repo. All currently zero balance:
+Faucet: Discord-only, `/faucet address:<addr>` in `token-faucet` on
+[discord.gg/creditcoin](https://discord.gg/creditcoin). One request delivered **10,000 tCTC**.
 
-| role | address |
-|---|---|
-| deployer | `0xD675A0C01511bC5a41169Dc2b93d8C9C13C27030` |
-| operator | `0x9733EcE9ba9351f70942E1241D875b878f6B178E` |
-| impostor | `0xD2973C898c3B028ad71763FD7444E537148e77d0` |
-
-Still outstanding, in priority order:
-
-1. **The exploit demo, both halves, captured on chain** — the centrepiece. Needs CC3 CTC for the
-   two naive ASCs, and Sepolia ETH for the impostor contract.
-2. **Faucet / trivial deploy / cost** — needs CC3 CTC.
-3. **On-chain confirmation of the gas and ceiling numbers** — everything in §5 and §6 is
-   `estimateGas` and live `eth_call`, which is strong but is not a mined receipt. One funded run
-   converts the whole gas section from estimated to measured.
-
-**What I need from you:** run `/faucet address:0xD675A0C01511bC5a41169Dc2b93d8C9C13C27030` in the
-Creditcoin Discord (and the other two if the faucet allows repeats), plus any Sepolia ETH you can
-spare to `0xD2973C898c3B028ad71763FD7444E537148e77d0`. I will finish all three items unattended
-once the balances land.
+Total spent across all of Phase 0's on-chain work — 3 deploys, 8 ceiling transactions, 7
+historical proofs, both exploit demos, plus a second full demo-A run — was under **0.005 tCTC**,
+or 0.00005% of a single faucet grant. Cost is not a constraint on this project at testnet scale.
 
 ---
 
-## 11. Repo and org status
+## 11. Everything that was blocked is done
 
-Nothing created, nothing pushed, as instructed.
+All three funding-gated items completed. The accounts live at
+`~/.config/creditcoin/arrears-testnet.json`, mode `0600`, outside the repository.
 
-One thing to flag before Phase 1: the active `gh` account is **`Jagadeeshftw`**, and its token
-carries scopes `admin:public_key, gist, read:org, repo` — **no `admin:org` or `write:org`**. I
-cannot create the `Arrears-Protocol` org from the CLI with the current token. Org creation is a
-web-UI action anyway (`github.com/organizations/plan`); once it exists and the token has
-`write:org`, `gh repo create Arrears-Protocol/arrears` will work.
+| role | address | funded |
+|---|---|---|
+| deployer (CC3) | `0xD675A0C01511bC5a41169Dc2b93d8C9C13C27030` | 10,000 tCTC via Discord faucet |
+| impostor (Sepolia) | `0xD2973C898c3B028ad71763FD7444E537148e77d0` | 0.09 ETH |
+| operator (reserved) | `0x9733EcE9ba9351f70942E1241D875b878f6B178E` | unfunded, unused so far |
 
-Commits will be under your name with no AI attribution trailers, as instructed.
+1. **Exploit demo, both halves** — done, §7, four mined transactions across two chains.
+2. **Deploy cost** — done, §10.
+3. **Every gas and ceiling number converted to mined receipts** — done. §6 now carries eight
+   receipts including the N=11 revert; §9 carries seven. `estimateGas` over-estimated by
+   0.17%–7.56% across all of them and never under-estimated, which retires the concern raised in
+   §5's method note.
 
 ---
 
-## 12. What this changes about the design
+## 12. Repo and org status
+
+The repository is committed locally and ready to push. **One thing genuinely cannot be automated:
+creating the GitHub organisation.**
+
+GitHub exposes no REST endpoint for creating an organisation on a personal account —
+`POST /organizations` returns 404 regardless of token scopes, and `write:org` governs managing an
+*existing* org's members and teams, not creating one. It is a web-UI action:
+[github.com/organizations/plan](https://github.com/organizations/plan), free tier, about thirty
+seconds.
+
+Once `Arrears-Protocol` exists:
+
+```bash
+gh repo create Arrears-Protocol/arrears --public --source . --remote origin --push
+```
+
+Commits are under `Jagadeesh B <jagadeesh26062002@gmail.com>` with no AI attribution trailers.
+
+---
+
+## 13. What this changes about the design
 
 The bonded-operator, slash-on-failure design survives, with three amendments:
 
