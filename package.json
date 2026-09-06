@@ -1,14 +1,11 @@
 {
   "name": "arrears",
   "private": true,
-  "workspaces": ["web"],
+  "description": "Convenience scripts only. Deliberately declares no workspaces: Vercel builds with Root Directory web/, and a workspace parent would make npm refuse to install from inside it.",
   "scripts": {
-    "build": "npm run build --workspace web",
-    "dev": "npm run dev --workspace web",
+    "dev": "npm --prefix web run dev",
+    "build": "npm --prefix web run build",
     "verify:demo": "npm --prefix demo run verify",
     "test:contracts": "cd contracts && forge test --summary"
-  },
-  "dependencies": {
-    "next": "^15.1.3"
   }
 }
