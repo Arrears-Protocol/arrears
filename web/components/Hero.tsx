@@ -7,6 +7,7 @@ import { Live } from './Live';
 import { Tx, Addr } from './Hash';
 import { short } from '../lib/explorer';
 import { Container, Ambient, Reveal, Eyebrow } from './ui/primitives';
+import { FaultStream } from './FaultStream';
 
 /**
  * The site opens on a REFUSAL, not the slash.
@@ -48,6 +49,8 @@ export function Hero() {
     <section id="hero" className="relative overflow-hidden pt-20 pb-24 md:pt-28">
       <Ambient />
       <Container className="relative">
+        <div className="lg:grid lg:grid-cols-[1fr_340px] lg:items-start lg:gap-14">
+        <div>
         <Reveal>
           <Eyebrow>A failed transaction is evidence</Eyebrow>
           <h1 className="display mt-5 max-w-[17ch] text-[46px] leading-[1.04] tracking-[-0.02em] md:text-[68px]">
@@ -67,9 +70,17 @@ export function Hero() {
             A rule that only ever says yes is not a rule. Start here, not at the payout.
           </p>
         </Reveal>
+        </div>
+
+        {/* Empty space, now carrying the thesis. Dropped below lg rather than
+            shrunk: at mobile width it would be noise, not explanation. */}
+        <Reveal delay={0.12} className="hidden lg:block">
+          <FaultStream />
+        </Reveal>
+        </div>
 
         {/* The slot proactiv fills with a PNG. Ours holds the live scope card. */}
-        <Reveal delay={0.16} y={22}>
+        <Reveal delay={0.16}>
           <div className="mt-12 rounded-[16px] border border-line bg-bg-raised p-1.5 shadow-[0_1px_0_0_rgb(0_0_0/0.04)]">
             <div className="rounded-[11px] border border-line-soft bg-bg">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line-soft px-5 py-3.5">
