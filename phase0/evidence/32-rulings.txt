@@ -1,0 +1,17 @@
+court    0xdcB573069D8A58b97732b6b1DdaF859A85be702f
+relayer  0xD675A0C01511bC5a41169Dc2b93d8C9C13C27030  (pays the gas)
+judge    0xD2973C898c3B028ad71763FD7444E537148e77d0  (credited, holds no CTC)
+
+=== 1. THE SLASH: out-of-gas, in scope ===
+  source 0xe11a3557f5e32c939f05c6d752036131cde5ed498520887b36b9f68676bbbf12 @ Sepolia 11646331
+  previewClaim (free): valid=true verdict=OutOfGas miss=None wouldSlash=2.0 tCTC
+  submitClaim -> status 1  gas 620046  0xa7b1e50e66cff9d5c3e43fc9a6f3986e918b845756dc240c0fe1735b6c976be2
+  ClaimRuled   verdict=OutOfGas slashed=2.0 tCTC beneficiary=0xD2973C898c3B028ad71763FD7444E537148e77d0
+  BondSlashed  2.0 tCTC, 18.0 tCTC remaining
+  LineRepriced limit 1000.0 -> 750.0, premium 500 -> 650 bps, strikes 1
+  treasury 0.0 -> 2.0 tCTC
+
+=== 2. THE REFUSAL: explicit revert, in scope, recorded but not slashed ===
+  source 0x9477726d63d97f22bb4a836e30eba335f0381e8626b59b31a2c102eead6c79e7 @ Sepolia 11646964  (gasUsed 24187 of 100000)
+     waiting for attestation: tip 11646950, need 11646964
+     waiting for attestation: tip 11646950, need 11646964

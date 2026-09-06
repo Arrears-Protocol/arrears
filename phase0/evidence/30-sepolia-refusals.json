@@ -1,0 +1,28 @@
+{
+  "operator": "0x9733EcE9ba9351f70942E1241D875b878f6B178E",
+  "target": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+  "explicitRevert": {
+    "label": "EXPLICIT REVERT, in scope: WETH.transfer() on a zero balance",
+    "txHash": "0x9477726d63d97f22bb4a836e30eba335f0381e8626b59b31a2c102eead6c79e7",
+    "block": 11646964,
+    "gasUsed": 24187,
+    "gasLimit": 100000,
+    "status": "0x0",
+    "logs": 0,
+    "explorer": "https://sepolia.etherscan.io/tx/0x9477726d63d97f22bb4a836e30eba335f0381e8626b59b31a2c102eead6c79e7",
+    "selector": "0xa9059cbb",
+    "selectorName": "transfer(address,uint256)"
+  },
+  "outOfScope": {
+    "label": "OUT OF SCOPE: WETH.withdraw(), a selector no coverage names",
+    "txHash": "0x5c02af742744810c9caa683acdcd2e9fd8ab983f3c81edcc6edaa85b91c3f251",
+    "block": 11646965,
+    "gasUsed": 23671,
+    "gasLimit": 100000,
+    "status": "0x0",
+    "logs": 0,
+    "explorer": "https://sepolia.etherscan.io/tx/0x5c02af742744810c9caa683acdcd2e9fd8ab983f3c81edcc6edaa85b91c3f251",
+    "selector": "0x2e1a7d4d",
+    "selectorName": "withdraw(uint256)"
+  }
+}

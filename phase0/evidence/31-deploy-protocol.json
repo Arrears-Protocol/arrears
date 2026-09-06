@@ -1,0 +1,100 @@
+{
+  "chain": "cc3-testnet",
+  "chainId": 102031,
+  "registry": "0x66bBEAe928E6E86263E0161948F9309d53f56454",
+  "creditLine": "0x53853218595a0219499E2422e641F03B2b5f38DD",
+  "court": "0xdcB573069D8A58b97732b6b1DdaF859A85be702f",
+  "treasury": "0x2C48F9bCf1eb912d26186ffb899bA457285Bdc5a",
+  "controller": "0xD675A0C01511bC5a41169Dc2b93d8C9C13C27030",
+  "operatorSourceAddress": "0x9733EcE9ba9351f70942E1241D875b878f6B178E",
+  "operatorId": "0xa44376b5c17e6f02e94be4defe83a08796188649a012d588fff22ffeabf21b40",
+  "coverageA": "0xea06a4c944141e97574579e2ad642cff420dba190cedfc6008c2d0e976c9efa2",
+  "coverageB": "0xcd05a125a8b7a63a244567a6072c5fca30f6bc9ffecfcbe959f488319392d0f5",
+  "window": {
+    "fromHeight": 11646000,
+    "toHeight": 11700000
+  },
+  "claimDeadline": 1820230233,
+  "params": {
+    "unbondingPeriod": 604800,
+    "minChallengePeriod": 86400,
+    "decayHalfLifeSeconds": 0
+  },
+  "bondedWei": "20000000000000000000",
+  "perClaimCapWei": "2000000000000000000",
+  "transactions": [
+    {
+      "step": "deploy ArrearsRegistry",
+      "hash": "0xdae628e6b028bcd2bbef163b784623b34fe4a34c36a0951d1ab9dc154de7beca",
+      "status": 1,
+      "gasUsed": 1643675,
+      "cost": "0.0008218375",
+      "address": "0x66bBEAe928E6E86263E0161948F9309d53f56454"
+    },
+    {
+      "step": "deploy ArrearsCreditLine",
+      "hash": "0xf6058a7d14e269044879030f4983c348062c727512b6e959ba03d40bb60c0347",
+      "status": 1,
+      "gasUsed": 602593,
+      "cost": "0.0003012965",
+      "address": "0x53853218595a0219499E2422e641F03B2b5f38DD"
+    },
+    {
+      "step": "deploy ArrearsCourt",
+      "hash": "0x46877515556ad0dcb69c70ba9eb76565346cacf6d00ff847b65343020f67c4c1",
+      "status": 1,
+      "gasUsed": 2716288,
+      "cost": "0.001358144",
+      "address": "0xdcB573069D8A58b97732b6b1DdaF859A85be702f"
+    },
+    {
+      "step": "registry.setCourt",
+      "hash": "0x6fae231fbd7d00d0244546ea2017000a1c2452e80ff6641796e39931cc50e812",
+      "status": 1,
+      "gasUsed": 114198,
+      "cost": "0.000057099"
+    },
+    {
+      "step": "creditLine.setCourt",
+      "hash": "0x8c5a8ed5181fe036017ca5a2cf18b1da58195169ed30ea373f969604459f8628",
+      "status": 1,
+      "gasUsed": 46746,
+      "cost": "0.000023373"
+    },
+    {
+      "step": "registry.registerOperator",
+      "hash": "0xc2b08dac8893950a2713e650422b3d91bf84b1d07a15155abc80eaecffd63678",
+      "status": 1,
+      "gasUsed": 123816,
+      "cost": "0.000061908"
+    },
+    {
+      "step": "registry.postBond (20 tCTC)",
+      "hash": "0xd2bf83b028a0d8bdcd96db8f24b93a7ea6bd6f70fd722a1fad2c5ea1add249a1",
+      "status": 1,
+      "gasUsed": 115822,
+      "cost": "0.000057911"
+    },
+    {
+      "step": "creditLine.openLine",
+      "hash": "0x9bdde8f3a59a4a11b7f0b0a551a2e5feccd67604f57b3440579978429d787092",
+      "status": 1,
+      "gasUsed": 135767,
+      "cost": "0.0000678835"
+    },
+    {
+      "step": "coverage A: WETH.deposit()",
+      "hash": "0x139adb8395ab636cd3fcffab3ff3b32710264754e8294c79341b28c3eb09fbdf",
+      "status": 1,
+      "gasUsed": 329650,
+      "cost": "0.000164825"
+    },
+    {
+      "step": "coverage B: WETH.transfer()",
+      "hash": "0x62d674284259d19cd2ffe5b2c1bba69ed83d462c75bf5b0aa3858ec79a67b631",
+      "status": 1,
+      "gasUsed": 278350,
+      "cost": "0.000139175"
+    }
+  ]
+}

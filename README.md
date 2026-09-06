@@ -105,6 +105,54 @@ is the only slashable class. Explicit reverts are recorded and never slashable.
 
 ---
 
+## The structural property: the gallery and the court cannot disagree
+
+Most projects claim their demo path and their production path are the same. Here it is enforced
+by the build, and the reason is worth stating precisely because a reader will not infer it from
+the file layout.
+
+**The classification rule exists exactly once, in
+[`ArrearsVerdict.classify`](contracts/src/ArrearsVerdict.sol).** It is an `internal` function in a
+library with no storage and no external interface:
+
+```solidity
+function classify(uint8 receiptStatus, uint64 gasUsed, uint64 gasLimit)
+    internal pure returns (ArrearsTypes.Verdict)
+{
+    if (receiptStatus == 1) return ArrearsTypes.Verdict.Succeeded;
+    return gasUsed >= gasLimit ? ArrearsTypes.Verdict.OutOfGas : ArrearsTypes.Verdict.ExplicitRevert;
+}
+```
+
+Two contracts call it:
+
+- [`ArrearsCourt`](contracts/src/ArrearsCourt.sol) — reaches the ruling that moves the bond
+- [`VerdictProbe`](contracts/src/VerdictProbe.sol) — the public, view-only classifier the evidence
+  gallery reads
+
+Because `classify` is `internal`, the Solidity compiler **inlines it into each contract's
+bytecode at compile time.** There is no delegatecall, no shared deployed library, no address
+either contract could be pointed at something else. Both contracts literally contain the same
+compiled instructions.
+
+**The property that follows:** a change to the rule that made the gallery say one thing and the
+court another is not merely discouraged, it is *not expressible*. There is one definition; editing
+it recompiles both. A demo that showed a friendlier classification than production would require
+deleting the library and writing the rule twice, which would be visible in a diff.
+
+This matters because the two surfaces carry different halves of the argument — the mainnet gallery
+proves the classification is right against seven real failures across three years, and the Sepolia
+slash proves the ruling those classifications lead to actually lands. Splitting a claim across two
+surfaces is only honest if the surfaces cannot drift. This is why they cannot.
+
+The seven were also **re-classified through the deployed probe** rather than carried forward from
+the Phase 0 transcript, since they were first classified before `Verdict` existed and before the
+slashable class was narrowed. All seven survived unchanged, and
+[`probes/29-reclassify.ts`](phase0/probes/29-reclassify.ts) exits non-zero if that ever stops being
+true.
+
+---
+
 ## Limitations, and the one thing we take on trust
 
 Arrears' pitch is that it takes nobody's word for anything. That is nearly true, and the exception
