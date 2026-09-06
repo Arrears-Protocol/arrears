@@ -11,8 +11,23 @@ export { Reveal } from './Reveal';
                                        Never loops, never animates a number.
    ───────────────────────────────────────────────────────────────────────────── */
 
-export const Container = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <div className={cn('mx-auto w-full max-w-6xl px-6 md:px-10', className)}>{children}</div>
+/**
+ * Two measures, deliberately different.
+ *
+ *   'doc'   a reading measure. The landing page is a document and prose past
+ *           ~75 characters gets harder to read, not easier.
+ *   'wide'  a console measure. The dashboard is a working surface: role cards,
+ *           coverage panels and record tables should use the screen.
+ *
+ * A document that reads narrow beside a console that fills the screen is right.
+ */
+export const Container = ({
+  children, className, size = 'doc',
+}: { children: React.ReactNode; className?: string; size?: 'doc' | 'wide' }) => (
+  <div className={cn('mx-auto w-full px-6 md:px-10',
+    size === 'wide' ? 'max-w-[1560px] xl:px-14' : 'max-w-6xl', className)}>
+    {children}
+  </div>
 );
 
 /** nodus's section divider: one hairline, full width. The device that makes

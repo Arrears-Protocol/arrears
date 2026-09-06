@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { Container, DivideX } from './ui/primitives';
@@ -46,13 +47,15 @@ export function Navbar() {
           ))}
         </nav>
         <div className="flex items-center gap-2.5">
-          <a
-            href="https://github.com/Arrears-Protocol/arrears"
-            target="_blank" rel="noreferrer"
-            className="mono hidden rounded-[9px] border border-line px-3 py-1.5 text-[11.5px] text-fg-2 transition-colors hover:border-fg-3 hover:text-fg sm:block"
-          >
+          <a href="https://github.com/Arrears-Protocol/arrears" target="_blank" rel="noreferrer"
+            className="mono hidden rounded-inner border border-line px-3 py-1.5 text-[11.5px] text-fg-2 transition-colors hover:border-fg-3 hover:text-fg lg:block">
             source ↗
           </a>
+          {/* The door. Everything left of here reads; this is where you act. */}
+          <Link href="/dashboard"
+            className="mono rounded-inner border border-line bg-fg px-3 py-1.5 text-[11.5px] text-bg transition-opacity hover:opacity-90">
+            dashboard →
+          </Link>
           <ModeToggle />
         </div>
       </Container>
@@ -76,6 +79,7 @@ export function Footer() {
           <div className="mono text-[12.5px] leading-[2] text-fg-3">
             <a className="block hover:text-fg" href="https://github.com/Arrears-Protocol/arrears" target="_blank" rel="noreferrer">github ↗</a>
             <a className="block hover:text-fg" href={`${M.chains.cc3.explorer}/address/${M.contracts.arrearsCourt.address}`} target="_blank" rel="noreferrer">court on blockscout ↗</a>
+            <Link className="block hover:text-fg" href="/dashboard">dashboard →</Link>
             <a className="block hover:text-fg" href="/api/version">build version</a>
           </div>
           <div className="mono max-w-[40ch] text-[12px] leading-[1.8] text-fg-3">

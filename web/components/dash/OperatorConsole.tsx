@@ -74,7 +74,7 @@ export function OperatorConsole() {
           <>
             <Record operatorId={opId} compact />
 
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-2 xl:gap-5">
               <Panel className="p-6">
                 <Eyebrow>Deposit bond</Eyebrow>
                 <p className="mt-2 text-[13px] leading-relaxed text-fg-3">
@@ -239,7 +239,7 @@ function DeclareCoverage({ operatorId, v, busy, run }: {
         floor for Ethereum is block 0.
       </p>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Num label="from height" v={from} set={setFrom} />
         <Num label="to height" v={to} set={setTo} />
         <Num label="committed · tCTC" v={committed} set={setCommitted} hint={`free ${ctc(v.free)}`} />

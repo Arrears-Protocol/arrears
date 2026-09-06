@@ -3,6 +3,7 @@ import { Hero } from '../components/Hero';
 import { FaultLine } from '../components/FaultLine';
 import { Outcomes } from '../components/Outcomes';
 import { TryIt } from '../components/TryIt';
+import { Act } from '../components/Act';
 import { Gallery } from '../components/Gallery';
 import { Trust } from '../components/Trust';
 import { DivideX } from '../components/ui/primitives';
@@ -31,6 +32,8 @@ export default function Page() {
         <Outcomes />
         <DivideX />
         <TryIt />
+        <DivideX />
+        <Act />
         <DivideX />
         <Gallery />
         <DivideX />

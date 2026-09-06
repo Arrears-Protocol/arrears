@@ -36,7 +36,7 @@ export function DashShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-divide bg-bg/85 backdrop-blur-md">
-        <Container className="flex h-14 items-center justify-between">
+        <Container size="wide" className="flex h-14 items-center justify-between">
           <div className="flex items-baseline gap-3">
             <Link href="/" className="display text-[21px] leading-none">Arrears</Link>
             <span className="mono text-[10px] uppercase tracking-[0.16em] text-fg-3">dashboard</span>
@@ -49,8 +49,8 @@ export function DashShell({ children }: { children: React.ReactNode }) {
         </Container>
       </header>
 
-      <Container className="py-10">
-        <div className="lg:grid lg:grid-cols-[200px_1fr] lg:gap-12">
+      <Container size="wide" className="py-10">
+        <div className="lg:grid lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-14 xl:grid-cols-[230px_minmax(0,1fr)]">
           <nav className="mb-8 lg:mb-0">
             <div className="mono mb-3 text-[10px] uppercase tracking-[0.12em] text-fg-3">roles</div>
             <ul className="flex flex-wrap gap-x-4 gap-y-1 lg:block">
@@ -91,7 +91,7 @@ export function StatRow({ cells, accent }: { cells: Array<[string, string]>; acc
         <div aria-hidden className="absolute inset-x-0 top-0 h-0.5"
           style={{ background: 'linear-gradient(90deg, var(--moved), var(--kept), var(--away))' }} />
       )}
-      <div className="grid grid-cols-2 gap-px bg-line md:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-px bg-line sm:grid-cols-3 lg:grid-cols-6">
         {cells.map(([k, v]) => (
           <div key={k} className="bg-bg-raised px-3.5 py-3.5">
             <div className="mono text-[10px] uppercase tracking-[0.09em] text-fg-3">{k}</div>

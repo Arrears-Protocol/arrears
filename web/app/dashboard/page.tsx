@@ -20,7 +20,7 @@ export default function DashboardHome() {
         act — and one of the three roles here still needs no wallet at all.
       </SectionHead>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3 xl:gap-5">
         {ROLES.map(([name, href, desc, needsWallet]) => (
           <Link key={href} href={href} className="group">
             <Panel className="flex h-full flex-col p-6 transition-colors group-hover:border-fg-3">

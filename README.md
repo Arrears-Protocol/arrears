@@ -153,6 +153,23 @@ true.
 
 ---
 
+## One rule this site is built on
+
+**Gate the button, never the explanation.** Every explanatory surface renders for
+everyone — no wallet, no account, no JavaScript. Only actions that send a
+transaction require anything, and they say so on a visible, disabled control
+rather than by hiding the screen.
+
+That rule exists because it was broken three times: sections rendered invisible
+without JavaScript while every assertion passed, the registration wizard — the
+screen written to explain the one thing the precompile does not verify — was put
+behind a wallet gate, and the test suite checked whether text was in the DOM
+rather than whether a reader could see it. All three are written up in
+[`docs/principles.md`](docs/principles.md), and the no-JS suite now asserts
+effective rendered opacity so the class cannot go green again.
+
+---
+
 ## Limitations, and the one thing we take on trust
 
 Arrears' pitch is that it takes nobody's word for anything. That is nearly true, and the exception
@@ -206,6 +223,7 @@ obvious upgrade if this ever matters.
 | [`contracts/src/`](contracts/src/) | the protocol — registry, court, credit line — and the demo contracts |
 | [`contracts/test/`](contracts/test/) | 31 tests, including the revocation and coverage-selection boundaries |
 | [`docs/claim-submission.md`](docs/claim-submission.md) | how a judge triggers a real ruling with sponsored gas |
+| [`docs/principles.md`](docs/principles.md) | engineering rules that earned their place — read before changing the site |
 | [`Phase0-Report.md`](Phase0-Report.md) | every finding, with the evidence that settled it |
 | [`PROTOCOL-FINDINGS.md`](PROTOCOL-FINDINGS.md) | measured protocol facts, written to be posted publicly |
 | [`phase0/evidence/`](phase0/evidence/) | raw transcripts of every live run |
