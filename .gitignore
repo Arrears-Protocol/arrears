@@ -9,3 +9,5 @@ contracts/out/
 contracts/cache/
 phase0/verify/shots/
 phase0/verify/*.png
+.vercel
+.env*
