@@ -76,12 +76,12 @@ const MUST_CONTAIN: Array<[string, string]> = [
   console.log(`\n  deep links present with JS off: ${bs} Blockscout, ${es} Etherscan`);
   if (bs === 0 || es === 0) bad++;
 
-  await page.screenshot({ path: 'verify/nojs-full.png', fullPage: true });
+  await page.screenshot({ path: 'out/nojs-full.png', fullPage: true });
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.screenshot({ path: 'verify/nojs-hero.png' });
-  console.log('  screenshots: verify/nojs-full.png, verify/nojs-hero.png');
+  await page.screenshot({ path: 'out/nojs-hero.png' });
+  console.log('  screenshots: out/nojs-full.png, out/nojs-hero.png');
 
-  writeFileSync('verify/nojs-report.json', JSON.stringify({
+  writeFileSync('out/nojs-report.json', JSON.stringify({
     url: URL, status: resp?.status(), javaScriptEnabled: false,
     checks: MUST_CONTAIN.map(([n, s]) => ({ name: n, present: text.includes(s) || html.includes(s) })),
     blockscoutLinks: bs, etherscanLinks: es, failures: bad, at: new Date().toISOString(),

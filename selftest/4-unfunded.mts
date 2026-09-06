@@ -1,4 +1,4 @@
-import { harness, ADDR } from './wallet-harness.mts';
+import { harness, ADDR } from './harness.mts';
 const U = process.argv[2];
 // 'source' holds 0 tCTC — exactly what an external participant arrives with
 const h = await harness({ startChain: '0x18e8f' });
@@ -17,5 +17,5 @@ const checks: Array<[string, boolean]> = [
   ['no transaction was attempted', h.state.sendCalls === 0],
 ];
 for (const [n, v] of checks) console.log(`  ${v ? 'PASS' : 'FAIL'}  ${n}`);
-await p.screenshot({ path: 'verify/selftest-gas.png', fullPage: true });
+await p.screenshot({ path: 'out/selftest-gas.png', fullPage: true });
 await h.close();

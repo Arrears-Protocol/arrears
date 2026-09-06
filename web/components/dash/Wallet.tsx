@@ -176,6 +176,14 @@ export function NeedsGas({ what }: { what: string }) {
   );
 }
 
+/** Shown ABOVE actions rather than instead of a screen. An unfunded operator can
+ *  still read their own record; they simply cannot send anything yet. */
+export function GasBanner({ what }: { what: string }) {
+  const w = useWallet();
+  if (!w.address || !w.onCC3 || w.funded || w.balance === null) return null;
+  return <NeedsGas what={what} />;
+}
+
 export function NeedsWallet({ children, what }: { children: React.ReactNode; what: string }) {
   const w = useWallet();
   if (!w.address) {
@@ -191,9 +199,6 @@ export function NeedsWallet({ children, what }: { children: React.ReactNode; wha
         {w.error && <p className="mono mt-3 text-[11.5px]" style={{ color: 'var(--miss)' }}>{w.error}</p>}
       </div>
     );
-  }
-  if (w.onCC3 && !w.funded && w.balance !== null) {
-    return <NeedsGas what={what} />;
   }
   if (!w.onCC3) {
     return (

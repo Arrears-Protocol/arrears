@@ -1,0 +1,20 @@
+{
+  "name": "arrears-selftest",
+  "private": true,
+  "type": "module",
+  "description": "Walks every write path in a real browser with a real wallet, as a first-time user.",
+  "scripts": {
+    "all": "npm run connect && npm run register && npm run claim:preview && npm run unfunded && npm run operators && npm run nojs",
+    "all:spend": "npm run connect && npm run register && npm run claim && npm run unfunded && npm run operators && npm run nojs",
+    "connect": "tsx 1-connect.mts $npm_config_url",
+    "register": "tsx 2-register.mts $npm_config_url",
+    "claim": "tsx 3-claim.mts $npm_config_url",
+    "claim:preview": "tsx 3-claim.mts $npm_config_url --preview-only",
+    "unfunded": "tsx 4-unfunded.mts $npm_config_url",
+    "operators": "tsx 5-operators.mts $npm_config_url",
+    "nojs": "tsx 6-nojs.ts $npm_config_url",
+    "version": "node version.mjs $npm_config_url"
+  },
+  "dependencies": { "ethers": "^6.13.4" },
+  "devDependencies": { "playwright": "1.63.0", "tsx": "^4.19.2", "typescript": "^5.7.2", "@types/node": "^22.10.0" }
+}

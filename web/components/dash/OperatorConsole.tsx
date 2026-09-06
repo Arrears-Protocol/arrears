@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 import { formatEther, getAddress, isAddress, parseEther } from 'ethers';
 import { M } from '../../lib/manifest';
 import { loadOperator, ctc, registryRead, type OperatorView, type Cov } from '../../lib/dashRead';
+import { knownIds, idForSource, remember } from '../../lib/knownOperators';
 import { Panel, Eyebrow, SectionHead } from '../ui/primitives';
-import { useWallet, NeedsWallet } from './Wallet';
+import { useWallet, NeedsWallet, GasBanner } from './Wallet';
 import { registryWrite, CC3 } from '../../lib/wallet';
 import { Record, CoverageRow } from './Record';
 import { Tx } from '../Hash';
@@ -23,21 +24,51 @@ export function OperatorConsole() {
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // Resolve the connected controller to an operator id by scanning the demo
-  // operator first — there is no enumerable operator list on chain, which is a
-  // real gap and is stated rather than papered over.
+  const [mine, setMine] = useState<Array<{ id: string; v: OperatorView }>>([]);
+  const [resolving, setResolving] = useState(true);
+  const [lookup, setLookup] = useState('');
+  const [lookupErr, setLookupErr] = useState<string | null>(null);
+
+  /* Resolve EVERY known id against the connected controller, not just the one in
+     the manifest. There is no enumerable operator list on chain, so "known" means
+     the manifest operator plus anything this browser has registered or looked up. */
   useEffect(() => {
-    if (!w.address) { setOpId(null); setV(null); return; }
+    if (!w.address) { setMine([]); setOpId(null); setV(null); setResolving(false); return; }
     let dead = false;
+    setResolving(true);
     (async () => {
-      const candidate = M.operator.operatorId;
-      const o = await loadOperator(candidate).catch(() => null);
+      const found: Array<{ id: string; v: OperatorView }> = [];
+      for (const id of knownIds()) {
+        const o = await loadOperator(id).catch(() => null);
+        if (o?.registered && getAddress(o.controller) === getAddress(w.address!)) found.push({ id, v: o });
+      }
       if (dead) return;
-      if (o?.registered && getAddress(o.controller) === getAddress(w.address!)) { setOpId(candidate); setV(o); }
-      else { setOpId(null); setV(null); }
+      setMine(found);
+      setResolving(false);
+      // keep the current selection if it is still ours, else take the first
+      setOpId((prev) => (prev && found.some((f) => f.id === prev) ? prev : found[0]?.id ?? null));
     })();
     return () => { dead = true; };
   }, [w.address, tx]);
+
+  useEffect(() => { setV(mine.find((m) => m.id === opId)?.v ?? null); }, [opId, mine]);
+
+  /** A fresh browser knows nothing. operatorIdOf is pure, so a source address is
+   *  all anyone needs to find their own record. */
+  async function findBySource() {
+    setLookupErr(null);
+    try {
+      const id = await idForSource(lookup.trim());
+      const o = await loadOperator(id);
+      if (!o.registered) { setLookupErr('No operator registered for that source address.'); return; }
+      remember(id);
+      if (getAddress(o.controller) !== getAddress(w.address ?? '0x0')) {
+        setLookupErr(`That operator is controlled by ${short(o.controller, 8, 6)}, not the connected account. You can still read its record.`);
+      }
+      setMine((m) => (m.some((x) => x.id === id) ? m : [...m, { id, v: o }]));
+      setOpId(id);
+    } catch { setLookupErr('Enter a valid source-chain address.'); }
+  }
 
   async function run(label: string, fn: () => Promise<any>) {
     setErr(null); setBusy(true); setTx(null);
@@ -54,25 +85,53 @@ export function OperatorConsole() {
       </SectionHead>
 
       <NeedsWallet what="Acting as an operator">
-        {!opId || !v ? (
+        {resolving ? (
+          <Panel className="p-6"><p className="mono text-[12.5px] text-fg-3">resolving operators for this account…</p></Panel>
+        ) : !opId || !v ? (
           <Panel className="p-6">
-            <Eyebrow>No operator for this account</Eyebrow>
+            <Eyebrow>No operator found for this account</Eyebrow>
             <p className="mt-2 max-w-[68ch] text-[14.5px] leading-relaxed text-fg-2">
               The connected account <span className="mono text-fg">{short(w.address ?? '', 8, 6)}</span>{' '}
-              does not control a registered operator. Register one first — that is the two-step
-              identity binding, and it is the most important screen here.
+              does not control any operator this browser knows about.
             </p>
             <a href="/dashboard/operator/register" className={cn(btnGo, 'mt-4 inline-block')}>register an operator →</a>
-            <p className="mt-4 max-w-[68ch] text-[12.5px] leading-relaxed text-fg-3">
-              There is no enumerable operator list on chain — <code>claimsAgainst</code> and{' '}
-              <code>operator</code> both need an id you already hold. This console therefore
-              resolves the connected account against known operators rather than scanning. A real
-              deployment would want an indexer.
-            </p>
+
+            <div className="mt-6 border-t border-line-soft pt-5">
+              <Eyebrow>Already registered, on another browser?</Eyebrow>
+              <p className="mt-2 max-w-[68ch] text-[13px] leading-relaxed text-fg-3">
+                There is no enumerable operator list on chain — <code>operator</code> and{' '}
+                <code>claimsAgainst</code> both need an id you already hold — so type the
+                source-chain address you bound and this will find it.{' '}
+                <code>operatorIdOf</code> is pure, so the lookup costs nothing.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <input className={cn(input, 'max-w-[420px] flex-1')} placeholder="0x… source-chain address"
+                  value={lookup} onChange={(e) => setLookup(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && findBySource()} />
+                <button className={btn} onClick={findBySource}>find my operator</button>
+              </div>
+              {lookupErr && <p className="mono mt-2 text-[11.5px]" style={{ color: 'var(--miss)' }}>{lookupErr}</p>}
+            </div>
           </Panel>
         ) : (
           <>
+            {mine.length > 1 && (
+              <Panel className="p-4">
+                <Eyebrow>This account controls {mine.length} operators</Eyebrow>
+                <div className="mt-2.5 flex flex-wrap gap-2">
+                  {mine.map((m) => (
+                    <button key={m.id} onClick={() => setOpId(m.id)}
+                      className={cn('mono rounded-inner border px-3 py-1.5 text-[11.5px] transition-colors',
+                        m.id === opId ? 'border-fg-3 text-fg' : 'border-line text-fg-3 hover:border-fg-3')}>
+                      {short(m.v.sourceAddress, 8, 4)} · {ctc(m.v.bonded)}
+                    </button>
+                  ))}
+                </div>
+              </Panel>
+            )}
             <Record operatorId={opId} compact />
+
+            <GasBanner what="Depositing, declaring coverage, revoking or withdrawing" />
 
             <div className="grid gap-4 lg:grid-cols-2 xl:gap-5">
               <Panel className="p-6">

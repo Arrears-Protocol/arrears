@@ -6,6 +6,7 @@ import { Panel, Eyebrow } from '../ui/primitives';
 import { useWallet, ConnectButton } from './Wallet';
 import { CC3, REGISTRY_ABI, innerDigest, prefixed, signInner, registryWrite } from '../../lib/wallet';
 import { short } from '../../lib/explorer';
+import { remember } from '../../lib/knownOperators';
 import { Tx, Addr } from '../Hash';
 import { cn } from '../../lib/cn';
 
@@ -92,6 +93,10 @@ export function RegisterWizard() {
       const tx = await c.registerOperator(getAddress(sourceAddress), M.operator.chainKey, sig!);
       const rc = await tx.wait();
       setTxHash(rc.hash);
+      // Record it locally so the console finds this operator immediately. There is
+      // no enumerable list on chain; without this a fresh registrant lands on an
+      // empty screen the moment after succeeding.
+      if (operatorId) remember(operatorId);
     } catch (e: any) { setErr(e.shortMessage ?? e.message ?? String(e)); }
     setBusy(false);
   }
@@ -213,6 +218,10 @@ export function RegisterWizard() {
             <p className="mt-2 text-[12.5px] text-fg-3">
               The bond posted by this controller now answers for that address, and for no other.
             </p>
+            <a href="/dashboard/operator"
+              className="mono mt-3 inline-block rounded-inner border border-line px-3 py-1.5 text-[11.5px] hover:border-fg-3">
+              go to the operator console →
+            </a>
           </div>
         )}
       </Panel>

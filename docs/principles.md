@@ -35,7 +35,7 @@ gates only `sign` and `submit`.
 
 ## 2. Assert what a reader sees, not what the DOM contains
 
-Presence in the HTML is not the claim being made. `phase0/verify/nojs.ts`
+Presence in the HTML is not the claim being made. [`selftest/6-nojs.ts`](../selftest/6-nojs.ts)
 therefore checks **effective rendered opacity through the whole ancestor chain**
 for every section, with JavaScript disabled, alongside the content assertions.
 
@@ -62,7 +62,26 @@ continuity proof to a single root and erasing the cost curve. Sampling them once
 produced a result that flatly contradicted Creditcoin's published gas guidance —
 the guidance was right. Use 12,345,678, never 12,000,000.
 
-## 6. Say which number is measured and which is derived
+## 6. When a test fails, suspect the harness before the app
+
+Twice now the instrument lied in a way that looked exactly like a finding.
+
+**`tsx` breaks Playwright's `addInitScript`.** It rewrites the function body and
+injects a `__name` helper that does not exist in the browser. The script throws,
+`window.ethereum` is never defined, and the app correctly reports "no wallet" —
+indistinguishable from the app failing to detect a wallet. Pass init scripts as a
+string, never as a function.
+
+**Round block numbers break Attestcoin benchmarks** — see rule 5. Same shape: the
+measurement is wrong in a plausible direction, so the result reads as a discovery
+rather than as a broken instrument.
+
+The tell in both cases was a result that contradicted something already known to
+be true. When that happens, reproduce the claim by a second route before writing
+it down. A harness bug filed as an app bug wastes a fix; a harness bug filed as a
+protocol finding gets published.
+
+## 7. Say which number is measured and which is derived
 
 Every gas figure on this project is either a mined receipt or an `estimateGas`
 validated against mined receipts (0.03–7.56% over, never under). Where a figure

@@ -1,4 +1,4 @@
-import { harness, ADDR, MANIFEST as M } from './wallet-harness.mts';
+import { harness, ADDR, MANIFEST as M } from './harness.mts';
 
 const U = process.argv[2];
 const findings: Array<{ sev: 'BREAK' | 'CONFUSING' | 'ASSUMES'; where: string; what: string }> = [];

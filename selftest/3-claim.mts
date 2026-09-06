@@ -1,7 +1,11 @@
-import { harness, ADDR, MANIFEST as M } from './wallet-harness.mts';
+import { harness, ADDR, MANIFEST as M } from './harness.mts';
 import { JsonRpcProvider, Contract } from 'ethers';
 
 const U = process.argv[2];
+/** Walk the whole claim path but stop before the send. The preview is free and
+ *  changes nothing; the submit spends a real bond and consumes real evidence, so
+ *  a stranger checking this suite should not have to. */
+const PREVIEW_ONLY = process.argv.includes('--preview-only');
 const ok = (s: string) => console.log(`  PASS  ${s}`);
 const note = (sev: string, w: string, x: string) => console.log(`  ${sev}  ${w} — ${x}`);
 const rpc = new JsonRpcProvider(M.chains.cc3.rpc, undefined, { staticNetwork: true });
@@ -45,6 +49,13 @@ await p.waitForTimeout(9000);
 const predicted = await p.locator(':text("predicted, before any gas")').count();
 predicted ? ok('free preview returned before any transaction') : note('BREAK', 'claim', 'preview did not render');
 
+if (PREVIEW_ONLY) {
+  ok('stopped before the send (--preview-only): nothing spent, no evidence consumed');
+  await p.screenshot({ path: 'out/selftest-claim.png', fullPage: true });
+  await h.close();
+  process.exit(0);
+}
+
 const before = await new Contract(M.contracts.arrearsCourt.address,
   ['function claimsAgainst(bytes32) view returns (bytes32[])'], rpc).claimsAgainst(M.operator.operatorId);
 
@@ -66,5 +77,5 @@ if (after.length > before.length) {
            : note('BREAK', 'claim', `ruling credited ${c.beneficiary} but we asked for ${ben}`);
 } else note('BREAK', 'claim', 'no new claim appeared on chain');
 
-await p.screenshot({ path: 'verify/selftest-claim.png', fullPage: true });
+await p.screenshot({ path: 'out/selftest-claim.png', fullPage: true });
 await h.close();

@@ -4,7 +4,7 @@ import { formatEther, getAddress, isAddress } from 'ethers';
 import { M } from '../../lib/manifest';
 import { preview, claimIdFor, ruledClaimIds, fetchProof, type Preview } from '../../lib/chain';
 import { Panel, Eyebrow, SectionHead } from '../ui/primitives';
-import { useWallet, NeedsWallet } from './Wallet';
+import { useWallet, NeedsWallet, GasBanner } from './Wallet';
 import { courtWrite } from '../../lib/wallet';
 import { Tx } from '../Hash';
 import { cn } from '../../lib/cn';
@@ -161,6 +161,8 @@ export function ClaimConsole() {
           would return <code>AlreadyClaimed</code> instead of a real answer.
         </p>
       </Panel>
+
+      <GasBanner what="Submitting a claim yourself" />
 
       <NeedsWallet what="Submitting a claim">
         <Panel className="p-6">

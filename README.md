@@ -217,6 +217,7 @@ obvious upgrade if this ever matters.
 
 | path | what it is |
 |---|---|
+| [`selftest/`](selftest/) | walks every write path in a real browser with a real wallet, as a first-time user |
 | [`demo/`](demo/) | the demo surface — both exploit halves, the evidence gallery and the slash, verifiable with one command |
 | [`demo/manifest.json`](demo/manifest.json) | single source of truth for the demo and the frontend: hashes and addresses, no fixtures |
 | [`demo/GALLERY.md`](demo/GALLERY.md) | seven real mainnet failures, 2023–2025, plus the live Sepolia slash |

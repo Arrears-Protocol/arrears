@@ -16,3 +16,4 @@ phase0/verify/*.jpg
 phase0/verify/nojs-report.json
 .vercel
 .env*
+*.tsbuildinfo
