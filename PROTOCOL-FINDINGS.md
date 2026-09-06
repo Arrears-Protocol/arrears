@@ -13,8 +13,9 @@ shipped and what is actually deployed.
 Versions under test: `@gluwa/usc-sdk@0.18.0`, `@gluwa/usc-contracts@0.1.2`, CC3 testnet at block
 ~5,439,000, Ethereum mainnet attested tip ~25,916,390.
 
-Reproduction scripts and raw transcripts are linked per finding. No account needs funding to
-reproduce any of this: every measurement uses `eth_call`, `estimateGas` or a read.
+Reproduction scripts and raw transcripts are linked per finding. Findings 1–4 and 6 reproduce
+with no funded account at all — they use `eth_call`, `estimateGas` and reads. Finding 5's mined
+receipts need a funded testnet key; the same result is visible for free through `estimateGas`.
 
 ---
 
@@ -172,6 +173,18 @@ event — not that the contract it cares about did.
 Anyone on the source chain can deploy a contract emitting `Transfer(address,address,uint256)`, or
 any other signature, with arbitrary arguments. Attestcoin will faithfully prove that transaction,
 because it really did happen. The proof is sound; the inference is not.
+
+This is not theoretical. On CC3 testnet, a contract following exactly this pattern — proving a
+transaction and matching a log by signature — accepted a forged `Transfer` event emitted by a
+throwaway contract on Sepolia
+([`0xfC7eAbb2…`](https://sepolia.etherscan.io/address/0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8))
+claiming a transfer of 1,000,000 USDC from Circle's treasury address, and credited it to the real
+Sepolia USDC contract it believed it was watching. The accepting transaction is
+[`0x7d81c702…`](https://creditcoin-testnet.blockscout.com/tx/0x7d81c7023aa1b0a6b820670332603489d94a9dc9591bcdbee12e4797d7c56947).
+
+Attestcoin did nothing wrong there. The proof is correct — that Sepolia transaction really
+happened and really emitted that log. What fails is the inference the consuming contract drew
+from a correct proof.
 
 Two suggestions, both cheap:
 
