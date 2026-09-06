@@ -1,0 +1,12 @@
+target chain: Ethereum mainnet, Attestcoin chain key 3
+tx:           0x77e7a60b4c1b02970ed9f09cceb7211b52a2a2d33061aa3319be90997af45a7f  (block 25,916,354)
+decoder:      0x731c345d79Fb8BbDC541f9DF3b6317585F849F9f on CC3 testnet (chainId 102031)
+
+proof built. txBytes 6112 bytes
+decodeReceiptFields → status 1, gasUsed 281868, 8 logs
+
+getLogsByEventSignature · SDK-ABI selector     0x2414a709  REVERT — execution reverted (no data present; likely require(false) occurred; revert data 0x
+getLogsByEventSignature · library selector     0x54014825  OK — 5 Transfer logs from 3 distinct emitters
+      0xdac17f958d2ee523a2206206994597c13d831ec7
+      0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48
+      0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2

@@ -1,0 +1,10 @@
+EvmV1Decoder 0x731c345d79Fb8BbDC541f9DF3b6317585F849F9f on CC3 (chainId 102031)
+runtime bytecode: 9598 bytes
+
+selector    in bytecode  signature
+0xe6c11b43      no       getLogsByEventSignature((address,bytes32[],bytes)[],bytes32)
+0x2414a709      no       getLogsByEventSignature((uint8,uint64,(address,bytes32[],bytes)[],bytes),bytes32)
+0x07648c7a      YES      getLogsByEventSignature(EvmV1Decoder.LogEntry[],bytes32)
+0x54014825      YES      getLogsByEventSignature(EvmV1Decoder.ReceiptFields,bytes32)
+0xfd2a0922      no       getLogsByEventSignature(LogEntry[],bytes32)
+0x44ee82b2      no       getLogsByEventSignature(ReceiptFields,bytes32)

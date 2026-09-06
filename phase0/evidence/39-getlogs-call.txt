@@ -1,0 +1,10 @@
+decoder 0x731c345d79Fb8BbDC541f9DF3b6317585F849F9f   rpc https://rpc.cc3-testnet.creditcoin.network   chainId 102031
+
+overload A · logs array   · SDK ABI selector     0xe6c11b43  REVERT — execution reverted (no data present; likely require(false) occurred
+      revert data: 0x
+overload A · logs array   · library selector     0x07648c7a  OK — 1 log(s), emitter 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
+      calldata 1288 hex chars, returndata 768
+overload B · receipt      · SDK ABI selector     0x2414a709  REVERT — execution reverted (no data present; likely require(false) occurred
+      revert data: 0x
+overload B · receipt      · library selector     0x54014825  OK — 1 log(s), emitter 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
+      calldata 1672 hex chars, returndata 768

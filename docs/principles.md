@@ -62,9 +62,18 @@ continuity proof to a single root and erasing the cost curve. Sampling them once
 produced a result that flatly contradicted Creditcoin's published gas guidance —
 the guidance was right. Use 12,345,678, never 12,000,000.
 
-## 6. When a test fails, suspect the harness before the app
+## 6. When a test fails, suspect the instrument before the subject
 
-Twice now the instrument lied in a way that looked exactly like a finding.
+Three times now the instrument lied in a way that looked exactly like a finding.
+
+**An ABI-derived selector is wrong for a Solidity library.** A public library function refers to a
+struct parameter by canonical name — `EvmV1Decoder.LogEntry[]` — instead of expanding it to a
+tuple, so the selector ethers computes from the shipped ABI JSON is not the one the deployed
+library dispatches. The wrong selector reverts with **no return data**, which is
+indistinguishable from a function that was never deployed. We wrote it up as *"shipped in the ABI
+but not deployed"* and it reached a document we were about to publish. Both functions were there
+the whole time. Retracted in
+[`../PROTOCOL-FINDINGS.md`](../PROTOCOL-FINDINGS.md) finding 3.
 
 **`tsx` breaks Playwright's `addInitScript`.** It rewrites the function body and
 injects a `__name` helper that does not exist in the browser. The script throws,
@@ -76,10 +85,12 @@ string, never as a function.
 measurement is wrong in a plausible direction, so the result reads as a discovery
 rather than as a broken instrument.
 
-The tell in both cases was a result that contradicted something already known to
-be true. When that happens, reproduce the claim by a second route before writing
-it down. A harness bug filed as an app bug wastes a fix; a harness bug filed as a
-protocol finding gets published.
+The tell in all three was a result that contradicted something already known to
+be true — a documented gas curve, a wallet that was plainly installed, a function
+named in the library's own header comment. When that happens, reproduce the claim
+by a second route before writing it down. A harness bug filed as an app bug wastes a fix; a harness bug filed as a
+protocol finding gets published, and then someone has to be told in public that
+they were wrong.
 
 ## 7. Say which number is measured and which is derived
 

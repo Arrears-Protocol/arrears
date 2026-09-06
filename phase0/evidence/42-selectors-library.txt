@@ -1,0 +1,24 @@
+deployed EvmV1Decoder 0x731c345d79Fb8BbDC541f9DF3b6317585F849F9f  (CC3 testnet, chainId 102031)
+runtime bytecode: 9598 bytes
+
+abi selector  library selector  present  signature
+0x9d79c437        —            YES    decodeCommonTxFields(bytes)
+0x0dd5c77e        —            YES    decodeReceiptFields(bytes)
+0x051194bc        —            YES    decodeTransactionType0(bytes)
+0xde4dd61a        —            YES    decodeTransactionType1(bytes)
+0x52ae22a6        —            YES    decodeTransactionType2(bytes)
+0xb2b083b9        —            YES    decodeTransactionType3(bytes)
+0xb5bb2cd9        —            YES    decodeTransactionType4(bytes)
+0xd42370a7        —            YES    decodeTypeSpecificFieldsType0(bytes)
+0xa386042c        —            YES    decodeTypeSpecificFieldsType1(bytes)
+0x7aecc645        —            YES    decodeTypeSpecificFieldsType2(bytes)
+0xc6114836        —            YES    decodeTypeSpecificFieldsType3(bytes)
+0x356954e8        —            YES    decodeTypeSpecificFieldsType4(bytes)
+0xe6c11b43    0x07648c7a       YES    getLogsByEventSignature((address,bytes32[],bytes)[],bytes32)
+0x2414a709    0x54014825       YES    getLogsByEventSignature((uint8,uint64,(address,bytes32[],bytes)[],bytes),bytes32)
+0xcf0d21c9        —            YES    getTransactionType(bytes)
+0x78190020        —            YES    isValidTransactionType(uint8)
+
+16 of 16 ABI functions are dispatchable in the deployed bytecode.
+Nothing is missing. Probe 14 derived two selectors with the contract rule
+instead of the library rule and concluded they were absent.

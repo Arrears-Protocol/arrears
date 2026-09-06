@@ -218,13 +218,24 @@ limits as a safety net, not a default.
 
 ### Two further discrepancies I found
 
-**`getLogsByEventSignature` is not deployed.** Evidence:
-[`14-selectors.txt`](phase0/evidence/14-selectors.txt). The SDK ships a 16-function ABI for
-`EvmV1Decoder`; only **14 are dispatchable** in the bytecode actually deployed at
-`0x731c345d79Fb8BbDC541f9DF3b6317585F849F9f`. Both `getLogsByEventSignature` overloads are
-**absent** and revert with a bare `require(false)` and no return data. index41 says "9 public
-selectors"; the real number is 14. Any Arrears contract that wants log filtering must embed the
-library, not call the deployed one.
+> **Corrected 7 September 2026.** This section originally read *"`getLogsByEventSignature` is not
+> deployed"*, on the strength of [`14-selectors.txt`](phase0/evidence/14-selectors.txt). **That was
+> wrong.** Both overloads are deployed and both work. `EvmV1Decoder` is a Solidity `library`, and a
+> public library function refers to a struct parameter by canonical name instead of expanding it to
+> a tuple — so the selectors are `0x07648c7a` and `0x54014825`, not the `0xe6c11b43` and
+> `0x2414a709` that ethers derives from the shipped ABI JSON. The wrong selector reverts with no
+> return data, which is indistinguishable from a missing function. Re-tested by explicit selector
+> against the same address: [`42-selectors-library.txt`](phase0/evidence/42-selectors-library.txt)
+> (16 of 16 dispatchable), [`39-getlogs-call.txt`](phase0/evidence/39-getlogs-call.txt),
+> [`41-getlogs-endtoend.txt`](phase0/evidence/41-getlogs-endtoend.txt). See finding 3 in
+> [`PROTOCOL-FINDINGS.md`](PROTOCOL-FINDINGS.md).
+>
+> The one claim here that survives is the documentation count: index41 says "9 public selectors";
+> the deployed library dispatches **16**.
+
+**Arrears embeds the filtering logic rather than calling the deployed library** — a choice that
+predates this correction and is unaffected by it, since we need an emitter check the library does
+not provide (finding 4).
 
 **MAX_GAS_CAP is real.** The SDK constant `75,000,000` matches the live CC3 block `gasLimit`
 exactly. Confirmed against block 5,439,007.

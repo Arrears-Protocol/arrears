@@ -7,8 +7,10 @@ Everything below was produced by running against the live network — the public
 hosted prover, and Ethereum mainnet.
 
 Six findings. Two are things the documentation gets right and that deserve saying out loud, one
-is a security note on the reference library, and three are gaps between what is documented or
-shipped and what is actually deployed.
+is a security note on the reference library, two are gaps between what is documented or shipped
+and what is actually deployed, and one — finding 3 — is a **retraction of an earlier claim in
+this document**, kept in place rather than deleted because the mistake is a trap other builders
+will hit.
 
 Versions under test: `@gluwa/usc-sdk@0.18.0`, `@gluwa/usc-contracts@0.1.2`, CC3 testnet at block
 ~5,439,000, Ethereum mainnet attested tip ~25,916,390.
@@ -108,45 +110,66 @@ behaviour warrants.
 
 ---
 
-## 3. `getLogsByEventSignature` ships in the SDK ABI but is not deployed
+## 3. Deriving a selector from a library's ABI JSON gives you the wrong selector
 
-**Status: gap between the shipped ABI and the deployed bytecode.**
+**Status: retracted and replaced. An earlier draft of this document reported that both
+`getLogsByEventSignature` overloads were missing from the deployed bytecode. That was wrong.
+Both are deployed and both work. The error was mine, and it is worth writing up because the
+thing that caused it will catch other builders.**
 
-`@gluwa/usc-sdk/dist/utils/evmV1DecoderAbi.json` declares 16 functions for `EvmV1Decoder`. The
-library deployed at `0x731c345d79Fb8BbDC541f9DF3b6317585F849F9f` on CC3 testnet — 9,598 bytes of
-runtime bytecode — dispatches only **14** of them.
+`EvmV1Decoder` is a **`library`**, not a contract ([`EvmV1Decoder.sol:35`](https://www.npmjs.com/package/@gluwa/usc-contracts)).
+Solidity computes the external signature of a *public library* function differently from a
+contract's: **struct parameters are referred to by their canonical name, not expanded to a
+tuple.** So the selector is `keccak("getLogsByEventSignature(EvmV1Decoder.LogEntry[],bytes32)")`,
+not `keccak("getLogsByEventSignature((address,bytes32[],bytes)[],bytes32)")`.
 
-Both overloads of `getLogsByEventSignature` are absent:
+The ABI JSON cannot express this. `@gluwa/usc-sdk/dist/utils/evmV1DecoderAbi.json` declares the
+tuple-expanded parameter types, which is what ABI JSON always does — and every tool that computes
+a selector from an ABI (ethers, viem, web3.js) therefore produces a selector the deployed library
+does not dispatch:
 
-| selector | signature | in deployed bytecode |
-|---|---|---|
-| `0xe6c11b43` | `getLogsByEventSignature((address,bytes32[],bytes)[],bytes32)` | **no** |
-| `0x2414a709` | `getLogsByEventSignature((uint8,uint64,(address,bytes32[],bytes)[],bytes),bytes32)` | **no** |
+| overload | selector from the ABI JSON | selector the library dispatches | deployed |
+|---|---|---|---|
+| `(LogEntry[], bytes32)` | `0xe6c11b43` ✗ | **`0x07648c7a`** | yes |
+| `(ReceiptFields, bytes32)` | `0x2414a709` ✗ | **`0x54014825`** | yes |
 
-The other 14 — `decodeReceiptFields`, `decodeCommonTxFields`, the five
-`decodeTransactionTypeN`, the five `decodeTypeSpecificFieldsTypeN`, `getTransactionType`,
-`isValidTransactionType` — are all present and work.
+Called with the right selector, both work on the live decoder. Called with the ABI-derived one,
+both revert with **no return data**, which ethers surfaces as `require(false)` — indistinguishable
+from a function that is not there. That is what I misread.
 
-**The failure mode is unhelpful.** Calling either overload does not produce a "function not found"
-error. It reverts with **no return data at all**, which ethers reports as
-`require(false)`. A developer following the library's own documented usage pattern —
-`getLogsByEventSignature` is one of only two helpers named in the `EvmV1Decoder` header comment —
-gets a bare revert with nothing to search for.
+This affects only these two functions, because they are the only public entry points in the
+library that take a struct. The other 14 take `bytes`/`uint8` and their ABI selectors are correct.
+**All 16 are dispatchable** — reproduce with [`probes/42-selectors-library.ts`](phase0/probes/42-selectors-library.ts).
 
-Either the deployed library should be updated to match the shipped ABI, or the ABI should drop
-the two functions and the header comment should stop recommending them.
+> ### ⚠️ If you call a Solidity library from off chain, do not trust an ABI-derived selector
+>
+> This is a Solidity rule, not a Creditcoin bug, and it is silent: the revert carries no data, so
+> it reads as "not deployed" rather than "wrong selector". Any public library function taking a
+> struct is affected. Build the calldata with the library-qualified signature, or link the library
+> and let the compiler do it.
 
-Reproduce: `probes/14-selectors.ts` — reads the deployed bytecode and checks each ABI selector
-against it.
+**What is worth fixing on the Attestcoin side** is only the failure mode's legibility: nothing in
+the SDK or the docs warns that the shipped ABI cannot be used to call these two functions
+directly. A note next to the ABI, or a helper in the SDK that emits the correct calldata, would
+have saved this.
+
+Reproduce, calling by explicit selector against the live decoder:
+[`probes/39-getlogs-call.ts`](phase0/probes/39-getlogs-call.ts) ·
+[transcript](phase0/evidence/39-getlogs-call.txt). End to end from a real mainnet transaction:
+[`probes/41-getlogs-endtoend.ts`](phase0/probes/41-getlogs-endtoend.ts) ·
+[transcript](phase0/evidence/41-getlogs-endtoend.txt).
 
 ---
 
 ## 4. `getLogsByEventSignature` matches on signature alone and never checks the emitter
 
-**Status: security note on the reference implementation.**
+**Status: security note, confirmed against the deployed library.**
 
-This concerns the library *source*, which builders copy or link even where the deployed copy is
-unavailable. From `contracts/decoding/EvmV1Decoder.sol`:
+Unlike finding 3, this one survived re-testing — and now with on-chain evidence rather than only
+a source reading. Calling the **deployed** decoder at `0x54014825` with two `Transfer` logs, one
+from real USDC and one from `0x…DeaDBeef`, returns **both**
+([`probes/40-emitter.ts`](phase0/probes/40-emitter.ts) · [transcript](phase0/evidence/40-emitter.txt)).
+From `contracts/decoding/EvmV1Decoder.sol`:
 
 ```solidity
 function getLogsByEventSignature(LogEntry[] memory logs, bytes32 eventSignature)
@@ -314,7 +337,7 @@ are plain TypeScript over `ethers` v6 and the published SDK:
 |---|---|---|
 | 1 — gas model | `probes/20-deep-history-honest.ts`, `probes/16-marginal.ts` | `evidence/20-deep-history-honest.txt` |
 | 2 — estimator accuracy | `probes/17-estimator-trust.ts` | `evidence/17-estimator-trust.txt` |
-| 3 — undeployed selectors | `probes/14-selectors.ts` | `evidence/14-selectors.txt` |
+| 3 — library selectors | `probes/42-selectors-library.ts`, `probes/39-getlogs-call.ts`, `probes/41-getlogs-endtoend.ts` | `evidence/42-selectors-library.txt`, `evidence/39-getlogs-call.txt`, `evidence/41-getlogs-endtoend.txt` |
 | 4 — emitter check | source reading; `probes/13b-impostor-real.ts` | `evidence/13b-impostor-real.txt` |
 | 5 — batch cap | `probes/08-batchlimit.ts` | `evidence/08-batchlimit.txt` |
 | 6 — failed transactions | `probes/04-kill.ts`, `probes/10-survey.ts` | `evidence/04-kill-reverted-1inch.txt` |
