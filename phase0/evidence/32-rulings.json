@@ -1,0 +1,53 @@
+{
+  "court": "0xdcB573069D8A58b97732b6b1DdaF859A85be702f",
+  "operatorId": "0xa44376b5c17e6f02e94be4defe83a08796188649a012d588fff22ffeabf21b40",
+  "relayer": "0xD675A0C01511bC5a41169Dc2b93d8C9C13C27030",
+  "beneficiary": "0xD2973C898c3B028ad71763FD7444E537148e77d0",
+  "rulings": {
+    "slash": {
+      "hash": "0xa7b1e50e66cff9d5c3e43fc9a6f3986e918b845756dc240c0fe1735b6c976be2",
+      "status": 1,
+      "gasUsed": 620046,
+      "sourceTx": "0xe11a3557f5e32c939f05c6d752036131cde5ed498520887b36b9f68676bbbf12",
+      "sourceBlock": 11646331,
+      "verdict": "OutOfGas",
+      "slashedWei": "2000000000000000000",
+      "beneficiary": "0xD2973C898c3B028ad71763FD7444E537148e77d0",
+      "claimId": "0xaae7c9af0e18d6f1eb8ad4ef66d61bba57d42ee29896f9b4d07d7d64b73f6e42",
+      "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xa7b1e50e66cff9d5c3e43fc9a6f3986e918b845756dc240c0fe1735b6c976be2"
+    },
+    "refusal": {
+      "hash": "0xe585da11125f0ccbe147ce7ee96642d4e4e8cecd9b253a4d3a0362a3c5cda6c1",
+      "status": 1,
+      "gasUsed": 528388,
+      "sourceTx": "0x9477726d63d97f22bb4a836e30eba335f0381e8626b59b31a2c102eead6c79e7",
+      "sourceBlock": 11646964,
+      "verdict": "ExplicitRevert",
+      "slashedWei": "0",
+      "refusalReasonSelector": "0x6bf93631",
+      "namedError": "NotSlashableExplicitRevert",
+      "claimId": "0x8db8df2a6e62c13b79cef2ede0d9a4b3b6e8bf6c33e2880f1d31bbd33d9edbaa",
+      "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xe585da11125f0ccbe147ce7ee96642d4e4e8cecd9b253a4d3a0362a3c5cda6c1"
+    },
+    "strictRefusal": {
+      "error": "AlreadyClaimed(0x8db8df2a6e62c13b79cef2ede0d9a4b3b6e8bf6c33e2880f1d31bbd33d9edbaa)",
+      "rawRevertData": "0xc84264848db8df2a6e62c13b79cef2ede0d9a4b3b6e8bf6c33e2880f1d31bbd33d9edbaa"
+    },
+    "outOfScope": {
+      "sourceTx": "0x5c02af742744810c9caa683acdcd2e9fd8ab983f3c81edcc6edaa85b91c3f251",
+      "sourceBlock": 11646965,
+      "minedTx": "0xd9f9628472e227ab97d52db043c9941af17308f3b2fd72d972ffd2c797a95685",
+      "error": "OutOfScope(Selector, 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14, 0x2e1a7d4d, 11646965)",
+      "missAxis": "Selector",
+      "rawRevertData": "0x9b7cd6670000000000000000000000000000000000000000000000000000000000000004000000000000000000000000fff9976782d46cc05630d1f6ebab18b2324d6b142e1a7d4d000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b1b7f5",
+      "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xd9f9628472e227ab97d52db043c9941af17308f3b2fd72d972ffd2c797a95685"
+    }
+  },
+  "finalState": {
+    "bondedWei": "18000000000000000000",
+    "slashedWei": "2000000000000000000",
+    "creditLimitWei": "750000000000000000000",
+    "premiumBps": 650,
+    "strikes": 1
+  }
+}

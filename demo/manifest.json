@@ -28,7 +28,8 @@
       "address": "0x57b758c8137d0454f84fcCDc6a5b1f62D33c9e52",
       "deployTx": "0x5148501878e948579d3a403c1e6f4824566838ee2ed65c23fdd949b45963fb6e",
       "chain": "cc3",
-      "note": "Public, permissionless, view-only. Proves through the precompile and classifies with ArrearsVerdict - the same library ArrearsCourt uses to rule."
+      "note": "Public, permissionless, view-only. Proves through the precompile and classifies with ArrearsVerdict - the same library ArrearsCourt uses to rule.",
+      "verified": true
     },
     "naiveSettlementASC": {
       "address": "0x5e81f5A15a389F9CeAd6fCCE9B2f60035415d1a2",
@@ -42,6 +43,21 @@
       "address": "0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8",
       "chain": "sepolia",
       "deployTx": "0xe28f4d23e3da3e6426aa2f1b9a321017777f5123eb8779fe4a7a2852bbd04bce"
+    },
+    "arrearsRegistry": {
+      "address": "0x66bBEAe928E6E86263E0161948F9309d53f56454",
+      "chain": "cc3",
+      "verified": true
+    },
+    "arrearsCreditLine": {
+      "address": "0x53853218595a0219499E2422e641F03B2b5f38DD",
+      "chain": "cc3",
+      "verified": true
+    },
+    "arrearsCourt": {
+      "address": "0xdcB573069D8A58b97732b6b1DdaF859A85be702f",
+      "chain": "cc3",
+      "verified": true
     }
   },
   "exploits": {
@@ -86,7 +102,32 @@
     "gasLimit": 30000,
     "honestlyNeeded": 45418,
     "expectedVerdict": "OutOfGas",
-    "note": "Real WETH.deposit() sent 30,000 gas against the 45,418 it honestly needs. Enters the contract, starts work, dies mid-SSTORE. Not a contract built to burn gas."
+    "note": "Real WETH.deposit() sent 30,000 gas against the 45,418 it honestly needs. Enters the contract, starts work, dies mid-SSTORE. Not a contract built to burn gas.",
+    "sourceFailures": {
+      "outOfGas": {
+        "tx": "0xe11a3557f5e32c939f05c6d752036131cde5ed498520887b36b9f68676bbbf12",
+        "block": 11646331,
+        "gasUsed": 30000,
+        "gasLimit": 30000,
+        "verdict": "OutOfGas"
+      },
+      "explicitRevert": {
+        "tx": "0x9477726d63d97f22bb4a836e30eba335f0381e8626b59b31a2c102eead6c79e7",
+        "block": 11646964,
+        "gasUsed": 24187,
+        "gasLimit": 100000,
+        "verdict": "ExplicitRevert",
+        "selectorName": "transfer(address,uint256)"
+      },
+      "outOfScope": {
+        "tx": "0x5c02af742744810c9caa683acdcd2e9fd8ab983f3c81edcc6edaa85b91c3f251",
+        "block": 11646965,
+        "gasUsed": 23671,
+        "gasLimit": 100000,
+        "selectorName": "withdraw(uint256)",
+        "note": "in no coverage scope"
+      }
+    }
   },
   "gallery": {
     "title": "Seven real Ethereum mainnet failures, 2023-2025",
@@ -191,5 +232,94 @@
         "from": "0x3e34a07FdbF16533411a838131A09e6c0E2045A4"
       }
     ]
+  },
+  "operator": {
+    "operatorId": "0xa44376b5c17e6f02e94be4defe83a08796188649a012d588fff22ffeabf21b40",
+    "sourceAddress": "0x9733EcE9ba9351f70942E1241D875b878f6B178E",
+    "sourceChain": "sepolia",
+    "chainKey": 1,
+    "controller": "0xD675A0C01511bC5a41169Dc2b93d8C9C13C27030",
+    "treasury": "0x2C48F9bCf1eb912d26186ffb899bA457285Bdc5a",
+    "registrationTx": "0xc2b08dac8893950a2713e650422b3d91bf84b1d07a15155abc80eaecffd63678",
+    "bondTx": "0xd2bf83b028a0d8bdcd96db8f24b93a7ea6bd6f70fd722a1fad2c5ea1add249a1",
+    "coverages": [
+      {
+        "id": "0xea06a4c944141e97574579e2ad642cff420dba190cedfc6008c2d0e976c9efa2",
+        "target": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "targetName": "Sepolia WETH9",
+        "selector": "0xd0e30db0",
+        "selectorName": "deposit()",
+        "fromHeight": 11646000,
+        "toHeight": 11700000,
+        "tx": "0x139adb8395ab636cd3fcffab3ff3b32710264754e8294c79341b28c3eb09fbdf"
+      },
+      {
+        "id": "0xcd05a125a8b7a63a244567a6072c5fca30f6bc9ffecfcbe959f488319392d0f5",
+        "target": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "targetName": "Sepolia WETH9",
+        "selector": "0xa9059cbb",
+        "selectorName": "transfer(address,uint256)",
+        "fromHeight": 11646000,
+        "toHeight": 11700000,
+        "tx": "0x62d674284259d19cd2ffe5b2c1bba69ed83d462c75bf5b0aa3858ec79a67b631"
+      }
+    ],
+    "note": "withdraw(uint256) is deliberately in NO coverage, so an out-of-scope claim has an axis to name."
+  },
+  "rulings": {
+    "note": "Mined rulings from the deployed court. The refusals matter as much as the slash: they are what show the rule is real rather than permissive.",
+    "relayer": "0xD675A0C01511bC5a41169Dc2b93d8C9C13C27030",
+    "beneficiary": "0xD2973C898c3B028ad71763FD7444E537148e77d0",
+    "slash": {
+      "hash": "0xa7b1e50e66cff9d5c3e43fc9a6f3986e918b845756dc240c0fe1735b6c976be2",
+      "status": 1,
+      "gasUsed": 620046,
+      "sourceTx": "0xe11a3557f5e32c939f05c6d752036131cde5ed498520887b36b9f68676bbbf12",
+      "sourceBlock": 11646331,
+      "verdict": "OutOfGas",
+      "slashedWei": "2000000000000000000",
+      "beneficiary": "0xD2973C898c3B028ad71763FD7444E537148e77d0",
+      "claimId": "0xaae7c9af0e18d6f1eb8ad4ef66d61bba57d42ee29896f9b4d07d7d64b73f6e42",
+      "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xa7b1e50e66cff9d5c3e43fc9a6f3986e918b845756dc240c0fe1735b6c976be2"
+    },
+    "refusal": {
+      "hash": "0xe585da11125f0ccbe147ce7ee96642d4e4e8cecd9b253a4d3a0362a3c5cda6c1",
+      "status": 1,
+      "gasUsed": 528388,
+      "sourceTx": "0x9477726d63d97f22bb4a836e30eba335f0381e8626b59b31a2c102eead6c79e7",
+      "sourceBlock": 11646964,
+      "verdict": "ExplicitRevert",
+      "slashedWei": "0",
+      "refusalReasonSelector": "0x6bf93631",
+      "namedError": "NotSlashableExplicitRevert",
+      "claimId": "0x8db8df2a6e62c13b79cef2ede0d9a4b3b6e8bf6c33e2880f1d31bbd33d9edbaa",
+      "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xe585da11125f0ccbe147ce7ee96642d4e4e8cecd9b253a4d3a0362a3c5cda6c1"
+    },
+    "strictRefusal": {
+      "error": "AlreadyClaimed(0x8db8df2a6e62c13b79cef2ede0d9a4b3b6e8bf6c33e2880f1d31bbd33d9edbaa)",
+      "rawRevertData": "0xc84264848db8df2a6e62c13b79cef2ede0d9a4b3b6e8bf6c33e2880f1d31bbd33d9edbaa"
+    },
+    "outOfScope": {
+      "sourceTx": "0x5c02af742744810c9caa683acdcd2e9fd8ab983f3c81edcc6edaa85b91c3f251",
+      "sourceBlock": 11646965,
+      "minedTx": "0xd9f9628472e227ab97d52db043c9941af17308f3b2fd72d972ffd2c797a95685",
+      "error": "OutOfScope(Selector, 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14, 0x2e1a7d4d, 11646965)",
+      "missAxis": "Selector",
+      "rawRevertData": "0x9b7cd6670000000000000000000000000000000000000000000000000000000000000004000000000000000000000000fff9976782d46cc05630d1f6ebab18b2324d6b142e1a7d4d000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b1b7f5",
+      "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xd9f9628472e227ab97d52db043c9941af17308f3b2fd72d972ffd2c797a95685"
+    },
+    "finalState": {
+      "bondedWei": "18000000000000000000",
+      "slashedWei": "2000000000000000000",
+      "creditLimitWei": "750000000000000000000",
+      "premiumBps": 650,
+      "strikes": 1
+    }
+  },
+  "attestation": {
+    "measuredLagBlocks": 41,
+    "measuredLagSecondsApprox": 480,
+    "chain": "sepolia",
+    "note": "Broadcast to provable. Makes Arrears a settlement-time mechanism, not an interception one. The demo opens on already-attested artifacts so nothing waits."
   }
 }

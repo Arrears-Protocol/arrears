@@ -89,6 +89,80 @@ caught by a script rather than on camera.
 
 ---
 
+## The rulings, and why the refusals matter as much as the slash
+
+Mined by the deployed [`ArrearsCourt`](https://creditcoin-testnet.blockscout.com/address/0xdcB573069D8A58b97732b6b1DdaF859A85be702f),
+source-verified so the explorer decodes these events itself. A relayer paid the gas; a separate
+beneficiary was credited, which is how sponsored submission works without any meta-transaction
+machinery.
+
+### The slash
+
+[`0xa7b1e50e…`](https://creditcoin-testnet.blockscout.com/tx/0xa7b1e50e66cff9d5c3e43fc9a6f3986e918b845756dc240c0fe1735b6c976be2)
+· status 1 · 620,046 gas
+
+```
+previewClaim (free)  valid=true  verdict=OutOfGas  miss=None  wouldSlash=2.0 tCTC
+ClaimRuled           verdict=OutOfGas  slashed=2.0 tCTC  beneficiary=0xD2973C89…
+BondSlashed          2.0 tCTC taken, 18.0 remaining
+LineRepriced         limit 1000 → 750 tCTC, premium 500 → 650 bps, strikes 1
+treasury             0.0 → 2.0 tCTC
+```
+
+The free preview predicted the ruling exactly. The reprice happened in the same transaction as the
+slash, so there is no window where the bond has moved but the credit line still shows the old
+price.
+
+### The refusals
+
+A rule that only ever says yes is not a rule. These are the mined transactions where the court
+says no, and they are worth as much as the slash.
+
+**Explicit revert — recorded, not slashed.**
+[`0xe585da11…`](https://creditcoin-testnet.blockscout.com/tx/0xe585da11125f0ccbe147ce7ee96642d4e4e8cecd9b253a4d3a0362a3c5cda6c1)
+· status 1 · 528,388 gas
+
+```
+ClaimRuled    verdict=ExplicitRevert  slashed=0.0 tCTC
+SlashRefused  reason=0x6bf93631  gasUsed=24187  gasLimit=100000
+```
+
+`0x6bf93631` is the selector of `NotSlashableExplicitRevert`, so the refusal is a named error in
+the ABI rather than a string — a client decodes it against the same error list the strict path
+reverts with. The treasury did not move. The failure is on the operator's record and cost them
+nothing, which is the intended outcome: the callee rejected the call, and Arrears cannot prove
+from attested bytes that the state had not moved underneath them.
+
+**Out of scope — refused, naming the axis.**
+[`0xd9f96284…`](https://creditcoin-testnet.blockscout.com/tx/0xd9f9628472e227ab97d52db043c9941af17308f3b2fd72d972ffd2c797a95685)
+· mined as a failed transaction
+
+```
+OutOfScope(miss=Selector, target=0xfFf99767…6B14, selector=0x2e1a7d4d, height=11646965)
+```
+
+A real WETH `withdraw()` failure by the bonded operator, inside the covered window, on the covered
+contract — and refused, because `withdraw(uint256)` is in no coverage's scope. The error names
+`Selector` specifically, so the submitter learns the one thing that missed rather than being told
+only that something did.
+
+Worth noting how that was read: the mined transaction returned **no revert data**, because
+`pallet-evm` does not propagate precompile revert reasons on a mined transaction. The same call
+over `eth_call` returns them in full. That is the behaviour documented in
+[`../PROTOCOL-FINDINGS.md`](../PROTOCOL-FINDINGS.md) finding 2, showing up in practice — and the
+reason a front-end should always preview over `eth_call` rather than reading a failed
+transaction's reason off chain.
+
+### Final operator state
+
+```
+bonded 18.0   committed 8.0   slashed 2.0 tCTC
+credit limit 750.0 tCTC   premium 650 bps   strikes 1
+claims on record: 2
+```
+
+---
+
 ## Timing
 
 Broadcast to provable on Sepolia is **41 blocks, about eight minutes** — measured, not estimated.

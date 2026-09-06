@@ -15,3 +15,25 @@ judge    0xD2973C898c3B028ad71763FD7444E537148e77d0  (credited, holds no CTC)
   source 0x9477726d63d97f22bb4a836e30eba335f0381e8626b59b31a2c102eead6c79e7 @ Sepolia 11646964  (gasUsed 24187 of 100000)
      waiting for attestation: tip 11646950, need 11646964
      waiting for attestation: tip 11646950, need 11646964
+     waiting for attestation: tip 11646960, need 11646964
+     waiting for attestation: tip 11646960, need 11646964
+  submitClaim -> status 1  gas 528388  0xe585da11125f0ccbe147ce7ee96642d4e4e8cecd9b253a4d3a0362a3c5cda6c1
+  ClaimRuled    verdict=ExplicitRevert slashed=0.0 tCTC
+  SlashRefused  reason=0x6bf93631  gasUsed=24187 gasLimit=100000
+  reason selector matches NotSlashableExplicitRevert: true  (0x6bf93631)
+  treasury unchanged: true
+
+=== 3. STRICT PATH on the same evidence: reverts with the named error ===
+  REVERTED AlreadyClaimed(0x8db8df2a6e62c13b79cef2ede0d9a4b3b6e8bf6c33e2880f1d31bbd33d9edbaa)
+
+=== 4. OUT OF SCOPE: a selector no coverage names ===
+  source 0x5c02af742744810c9caa683acdcd2e9fd8ab983f3c81edcc6edaa85b91c3f251 @ Sepolia 11646965  selector 0x2e1a7d4d (withdraw(uint256))
+  previewClaim (free): valid=true verdict=ExplicitRevert miss=Selector coverage=0x0000000000000000000000000000000000000000000000000000000000000000
+  REVERTED revert data not returned by the node
+  mined as a failed transaction: https://creditcoin-testnet.blockscout.com/tx/0xd9f9628472e227ab97d52db043c9941af17308f3b2fd72d972ffd2c797a95685
+  decoded via eth_call: OutOfScope(miss=Selector, target=0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14, selector=0x2e1a7d4d, height=11646965)
+
+=== final operator state ===
+  bonded 18.0  committed 8.0  slashed 2.0
+  credit limit 750.0 tCTC  premium 650 bps  strikes 1
+  claims on record: 2
