@@ -1,3 +1,19 @@
 === a fresh explicit revert on Sepolia ===
   0xdc8730cf0576169a82b1e4ef185487f501421ab2a52656ed9940d3f9fac1b933  block 11647014  status 0x0  gasUsed 24187/100000
   waiting: tip 11646980, need 11647014
+  waiting: tip 11646980, need 11647014
+  waiting: tip 11646990, need 11647014
+  waiting: tip 11646990, need 11647014
+  waiting: tip 11647000, need 11647014
+  waiting: tip 11647000, need 11647014
+  waiting: tip 11647010, need 11647014
+  attested (tip 11647020)
+
+=== STRICT PATH FIRST, as a real transaction ===
+  nothing has been recorded against this evidence yet, so the claim id is free
+  mined and REVERTED: 0xc0bf98c0231b2d059fd8a824c1c41f4cd224698cf159629582f64e2f7c4463c7
+  https://creditcoin-testnet.blockscout.com/tx/0xc0bf98c0231b2d059fd8a824c1c41f4cd224698cf159629582f64e2f7c4463c7
+  decoded via eth_call: NotSlashableExplicitRevert(24187, 100000)
+  selector 0x6bf93631 == NotSlashableExplicitRevert.selector 0x6bf93631
+
+  nothing was recorded: claim.ruledAt == 0  (the strict path leaves no trace)

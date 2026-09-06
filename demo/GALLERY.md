@@ -153,6 +153,26 @@ over `eth_call` returns them in full. That is the behaviour documented in
 reason a front-end should always preview over `eth_call` rather than reading a failed
 transaction's reason off chain.
 
+**Strict path — refuses and records nothing.**
+[`0xc0bf98c0…`](https://creditcoin-testnet.blockscout.com/tx/0xc0bf98c0231b2d059fd8a824c1c41f4cd224698cf159629582f64e2f7c4463c7)
+· mined as a failed transaction
+
+```
+NotSlashableExplicitRevert(24187, 100000)
+```
+
+`submitClaim` and `submitSlashingClaim` see the same evidence and answer differently by design:
+one records the failure and declines to slash it, the other declines outright and leaves no trace.
+After this transaction `claim.ruledAt == 0` — nothing was written, which is the whole point of
+offering both shapes. A caller who only wants to slash spends nothing on a claim that would not
+have slashed.
+
+**Order matters, and finding this out cost us a transaction.** The first attempt asked for the
+strict refusal *after* `submitClaim` had already recorded the same evidence, and got
+`AlreadyClaimed` instead of the named error. Recording is what consumes the globally unique claim
+id, so the strict path has to be asked first. That was a flaw in the driver script, not in the
+contract, and it is worth knowing before a front-end wires the two buttons up in the wrong order.
+
 ### Final operator state
 
 ```

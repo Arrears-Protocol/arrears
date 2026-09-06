@@ -1,0 +1,12 @@
+{
+  "note": "Corrects the ordering flaw in probe 32 step 3. The strict path must be asked BEFORE the recording path, because recording consumes the globally unique claim id.",
+  "sourceTx": "0xdc8730cf0576169a82b1e4ef185487f501421ab2a52656ed9940d3f9fac1b933",
+  "sourceBlock": 11647014,
+  "sourceGasUsed": 24187,
+  "sourceGasLimit": 100000,
+  "minedTx": "0xc0bf98c0231b2d059fd8a824c1c41f4cd224698cf159629582f64e2f7c4463c7",
+  "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xc0bf98c0231b2d059fd8a824c1c41f4cd224698cf159629582f64e2f7c4463c7",
+  "error": "NotSlashableExplicitRevert(24187, 100000)",
+  "namedError": "NotSlashableExplicitRevert",
+  "recordedAnything": false
+}

@@ -296,8 +296,16 @@
       "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xe585da11125f0ccbe147ce7ee96642d4e4e8cecd9b253a4d3a0362a3c5cda6c1"
     },
     "strictRefusal": {
-      "error": "AlreadyClaimed(0x8db8df2a6e62c13b79cef2ede0d9a4b3b6e8bf6c33e2880f1d31bbd33d9edbaa)",
-      "rawRevertData": "0xc84264848db8df2a6e62c13b79cef2ede0d9a4b3b6e8bf6c33e2880f1d31bbd33d9edbaa"
+      "note": "The strict path asked BEFORE anything was recorded, so the claim id was free. Probe 32 asked it after recording and got AlreadyClaimed - a flaw in that script s ordering, not in the contract.",
+      "sourceTx": "0xdc8730cf0576169a82b1e4ef185487f501421ab2a52656ed9940d3f9fac1b933",
+      "sourceBlock": 11647014,
+      "sourceGasUsed": 24187,
+      "sourceGasLimit": 100000,
+      "minedTx": "0xc0bf98c0231b2d059fd8a824c1c41f4cd224698cf159629582f64e2f7c4463c7",
+      "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xc0bf98c0231b2d059fd8a824c1c41f4cd224698cf159629582f64e2f7c4463c7",
+      "error": "NotSlashableExplicitRevert(24187, 100000)",
+      "namedError": "NotSlashableExplicitRevert",
+      "recordedAnything": false
     },
     "outOfScope": {
       "sourceTx": "0x5c02af742744810c9caa683acdcd2e9fd8ab983f3c81edcc6edaa85b91c3f251",
