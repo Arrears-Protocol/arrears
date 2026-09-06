@@ -1,0 +1,87 @@
+{
+  "url": "https://arrears-jagadeesh-bs-projects.vercel.app",
+  "status": 200,
+  "javaScriptEnabled": false,
+  "checks": [
+    {
+      "name": "hero: opens on a refusal",
+      "present": true
+    },
+    {
+      "name": "hero axis 1 operator",
+      "present": true
+    },
+    {
+      "name": "hero axis 2 chain",
+      "present": true
+    },
+    {
+      "name": "hero axis 3 window",
+      "present": true
+    },
+    {
+      "name": "hero axis 4 contract",
+      "present": true
+    },
+    {
+      "name": "hero axis 5 selector MISSED",
+      "present": true
+    },
+    {
+      "name": "hero: refusal error named",
+      "present": true
+    },
+    {
+      "name": "fault line",
+      "present": true
+    },
+    {
+      "name": "ledger delta 1: bond moved",
+      "present": true
+    },
+    {
+      "name": "ledger delta 2: record kept",
+      "present": true
+    },
+    {
+      "name": "ledger delta 3: turned away",
+      "present": true
+    },
+    {
+      "name": "refusal framed as working",
+      "present": true
+    },
+    {
+      "name": "ruling hash 1 (slash)",
+      "present": true
+    },
+    {
+      "name": "ruling hash 2 (refusal)",
+      "present": true
+    },
+    {
+      "name": "ruling hash 3 (out of scope)",
+      "present": true
+    },
+    {
+      "name": "ruling hash 4 (strict)",
+      "present": true
+    },
+    {
+      "name": "gallery",
+      "present": true
+    },
+    {
+      "name": "trust assumption named",
+      "present": true
+    },
+    {
+      "name": "settlement framing",
+      "present": true
+    }
+  ],
+  "blockscoutLinks": 14,
+  "etherscanLinks": 10,
+  "failures": 0,
+  "at": "2026-09-06T15:45:27.864Z"
+}

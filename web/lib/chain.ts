@@ -19,7 +19,7 @@
  * return access-control-allow-origin: *, so the browser talks to them directly and the read
  * path needs no backend at all.
  */
-import { JsonRpcProvider, Contract, Interface } from 'ethers';
+import { JsonRpcProvider, Contract, Interface, AbiCoder, keccak256 } from 'ethers';
 import { M } from './manifest';
 
 export const cc3 = () => new JsonRpcProvider(M.chains.cc3.rpc, undefined, { staticNetwork: true });
@@ -142,6 +142,26 @@ export async function operatorState() {
     strikes: Number(terms.strikes),
     claimCount: claims.length as number,
   };
+}
+
+/**
+ * Which pool evidence has already been ruled on.
+ *
+ * One RPC call, not one per item: `claimsAgainst` returns every claim id against the operator,
+ * and `claimIdOf` is pure — keccak256(chainKey, height, txIndex) — so the ids for the pool are
+ * computed locally and intersected. Without this a reload re-offers spent evidence and the
+ * judge's first click is refused, which reads as broken even though the relayer handles it
+ * cleanly.
+ */
+export function claimIdFor(chainKey: number, height: number, txIndex: number): string {
+  return keccak256(
+    AbiCoder.defaultAbiCoder().encode(['uint64', 'uint64', 'uint64'], [chainKey, height, txIndex]),
+  );
+}
+
+export async function ruledClaimIds(): Promise<Set<string>> {
+  const ids: string[] = await court().claimsAgainst(M.operator.operatorId);
+  return new Set(ids.map((i) => i.toLowerCase()));
 }
 
 export async function coveragePayable(coverageId: string): Promise<bigint> {

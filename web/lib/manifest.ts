@@ -40,6 +40,7 @@ export interface Ruling {
   refusalReasonSelector?: string; namedError?: string; error?: string;
   missAxis?: string; recordedAnything?: boolean; note?: string;
   sourceGasUsed?: number; sourceGasLimit?: number;
+  cc3Block?: number; ruledAtISO?: string;
 }
 
 export interface GalleryItem {

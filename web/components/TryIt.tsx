@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { formatEther, getAddress, isAddress } from 'ethers';
 import { M, type PoolItem } from '../lib/manifest';
-import { preview, type Preview } from '../lib/chain';
+import { preview, claimIdFor, ruledClaimIds, type Preview } from '../lib/chain';
 import { Live } from './Live';
 import { Tx } from './Hash';
 
@@ -33,7 +33,27 @@ export function TryIt() {
   const oog = useMemo(() => pool.filter((i) => i.kind === 'OutOfGas'), [pool]);
   const rev = useMemo(() => pool.filter((i) => i.kind === 'ExplicitRevert'), [pool]);
 
+  // Evidence already ruled on, read from chain on load. A reload must not re-offer spent
+  // evidence: the relayer would refuse it correctly, but a refused first click reads as broken.
   const [used, setUsed] = useState<Set<string>>(new Set());
+  const [poolChecked, setPoolChecked] = useState(false);
+
+  useEffect(() => {
+    let dead = false;
+    ruledClaimIds()
+      .then((ruled) => {
+        if (dead) return;
+        const spent = new Set(
+          pool
+            .filter((i) => ruled.has(claimIdFor(M.operator.chainKey, i.block, (i as any).txIndex).toLowerCase()))
+            .map((i) => i.txHash),
+        );
+        setUsed((s) => new Set([...s, ...spent]));
+        setPoolChecked(true);
+      })
+      .catch(() => setPoolChecked(true)); // chain unreachable: offer everything, the relayer still guards
+    return () => { dead = true; };
+  }, [pool]);
   const [kind, setKind] = useState<'ExplicitRevert' | 'OutOfGas'>('ExplicitRevert');
   const [shape, setShape] = useState<Shape>('record');
   const [ben, setBen] = useState(DEFAULT_BENEFICIARY);

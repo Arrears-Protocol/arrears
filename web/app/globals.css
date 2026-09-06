@@ -128,3 +128,24 @@ ul.plain { list-style: none; padding: 0; margin: 0; }
 ul.plain li { padding: 7px 0; border-bottom: 1px solid var(--line-soft); color: var(--ink-2); font-size: 14px; }
 ul.plain li:last-child { border-bottom: 0; }
 footer { padding: 40px 0 60px; color: var(--ink-3); font-size: 13px; }
+
+/* ── the "as at" stamp on a frozen ruling card ─────────────────────────────── */
+.asof { font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: 0.02em;
+  padding: 6px 0 12px; border-bottom: 1px dashed var(--line); margin-bottom: 12px; }
+
+/* ── the live operator panel: deliberately louder than the frozen cards ────── */
+.nowpanel { margin-top: 22px; background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 12px; padding: 24px; position: relative; }
+.nowpanel::before { content: ''; position: absolute; inset: -1px -1px auto -1px; height: 2px;
+  border-radius: 12px 12px 0 0; background: linear-gradient(90deg, var(--moved), var(--kept), var(--away)); }
+.nowhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+  flex-wrap: wrap; margin-bottom: 18px; }
+.nowtag { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--ink); margin-bottom: 4px; }
+.nowgrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: var(--line);
+  border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+@media (max-width: 860px) { .nowgrid { grid-template-columns: repeat(2, 1fr); } }
+.nowcell { background: var(--panel); padding: 14px 12px; }
+.nowk { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--ink-3); margin-bottom: 6px; }
+.nowv { font-family: var(--mono); font-size: 15px; color: var(--ink); font-weight: 600; }

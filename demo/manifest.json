@@ -292,7 +292,9 @@
       "slashedWei": "2000000000000000000",
       "beneficiary": "0xD2973C898c3B028ad71763FD7444E537148e77d0",
       "claimId": "0xaae7c9af0e18d6f1eb8ad4ef66d61bba57d42ee29896f9b4d07d7d64b73f6e42",
-      "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xa7b1e50e66cff9d5c3e43fc9a6f3986e918b845756dc240c0fe1735b6c976be2"
+      "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xa7b1e50e66cff9d5c3e43fc9a6f3986e918b845756dc240c0fe1735b6c976be2",
+      "cc3Block": 5440296,
+      "ruledAtISO": "2026-09-06T11:32:30.000Z"
     },
     "refusal": {
       "hash": "0xe585da11125f0ccbe147ce7ee96642d4e4e8cecd9b253a4d3a0362a3c5cda6c1",
@@ -305,7 +307,9 @@
       "refusalReasonSelector": "0x6bf93631",
       "namedError": "NotSlashableExplicitRevert",
       "claimId": "0x8db8df2a6e62c13b79cef2ede0d9a4b3b6e8bf6c33e2880f1d31bbd33d9edbaa",
-      "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xe585da11125f0ccbe147ce7ee96642d4e4e8cecd9b253a4d3a0362a3c5cda6c1"
+      "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xe585da11125f0ccbe147ce7ee96642d4e4e8cecd9b253a4d3a0362a3c5cda6c1",
+      "cc3Block": 5440310,
+      "ruledAtISO": "2026-09-06T11:36:00.000Z"
     },
     "strictRefusal": {
       "note": "The strict path asked BEFORE anything was recorded, so the claim id was free. Probe 32 asked it after recording and got AlreadyClaimed - a flaw in that script s ordering, not in the contract.",
@@ -317,7 +321,9 @@
       "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xc0bf98c0231b2d059fd8a824c1c41f4cd224698cf159629582f64e2f7c4463c7",
       "error": "NotSlashableExplicitRevert(24187, 100000)",
       "namedError": "NotSlashableExplicitRevert",
-      "recordedAnything": false
+      "recordedAnything": false,
+      "cc3Block": 5440353,
+      "ruledAtISO": "2026-09-06T11:46:45.000Z"
     },
     "outOfScope": {
       "sourceTx": "0x5c02af742744810c9caa683acdcd2e9fd8ab983f3c81edcc6edaa85b91c3f251",
@@ -326,7 +332,9 @@
       "error": "OutOfScope(Selector, 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14, 0x2e1a7d4d, 11646965)",
       "missAxis": "Selector",
       "rawRevertData": "0x9b7cd6670000000000000000000000000000000000000000000000000000000000000004000000000000000000000000fff9976782d46cc05630d1f6ebab18b2324d6b142e1a7d4d000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b1b7f5",
-      "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xd9f9628472e227ab97d52db043c9941af17308f3b2fd72d972ffd2c797a95685"
+      "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xd9f9628472e227ab97d52db043c9941af17308f3b2fd72d972ffd2c797a95685",
+      "cc3Block": 5440311,
+      "ruledAtISO": "2026-09-06T11:36:15.000Z"
     },
     "finalState": {
       "bondedWei": "18000000000000000000",

@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { formatEther } from 'ethers';
 import { M } from '../lib/manifest';
-import { preview, type MissName } from '../lib/chain';
+import { preview, operatorState, type MissName } from '../lib/chain';
 import { Live } from './Live';
 import { Tx, Addr } from './Hash';
 import { short } from '../lib/explorer';
@@ -21,17 +22,23 @@ export function Hero() {
   const cov = M.operator.coverages[0];
   const [live, setLive] = useState<'idle' | 'ok' | 'fail'>('idle');
   const [miss, setMiss] = useState<MissName | null>(null);
+  // Read the bond rather than asserting it: every demo claim moves it, and a hardcoded figure
+  // would be wrong within the hour.
+  const [bonded, setBonded] = useState<string | null>(null);
 
   useEffect(() => {
     const ac = new AbortController();
     preview(r.sourceTx, ac.signal)
       .then((p) => { setMiss(p.miss); setLive(p.miss === 'Selector' ? 'ok' : 'fail'); })
       .catch(() => setLive('fail'));
+    operatorState()
+      .then((s) => setBonded(Number(formatEther(s.bonded)).toLocaleString('en-US')))
+      .catch(() => {});
     return () => ac.abort();
   }, [r.sourceTx]);
 
   const axes = [
-    { k: 'operator', v: short(M.operator.sourceAddress, 10, 4), n: 'bonded on Creditcoin', ok: true },
+    { k: 'operator', v: short(M.operator.sourceAddress, 10, 4), n: bonded ? `${bonded} tCTC bonded` : 'bonded on Creditcoin', ok: true },
     { k: 'chain', v: 'Ethereum Sepolia', n: 'Attestcoin chain key 1', ok: true },
     { k: 'window', v: `${cov.fromHeight.toLocaleString('en-US')} – ${cov.toHeight.toLocaleString('en-US')}`, n: `block ${r.sourceBlock.toLocaleString('en-US')} is inside`, ok: true },
     { k: 'contract', v: short('0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14', 10, 4), n: 'WETH9 — covered', ok: true },
@@ -44,10 +51,10 @@ export function Hero() {
         <h2>Arrears · Creditcoin CC3 · Attestcoin</h2>
         <h1>A real failure. A bonded operator. Turned away.</h1>
         <p className="lede">
-          This transaction failed on Ethereum. The account that sent it has {' '}
-          <strong>48 tCTC bonded</strong> on Creditcoin. It happened inside the covered window, on
-          a covered contract. Arrears refused to touch the bond, because the operator never
-          promised to answer for <code>withdraw()</code>.
+          This transaction failed on Ethereum. The account that sent it has{' '}
+          <strong>{bonded ? `${bonded} tCTC` : 'a bond'} posted</strong> on Creditcoin. It happened
+          inside the covered window, on a covered contract. Arrears refused to touch the bond,
+          because the operator never promised to answer for <code>withdraw()</code>.
         </p>
         <p>
           A rule that only ever says yes is not a rule. Start here, not at the payout.

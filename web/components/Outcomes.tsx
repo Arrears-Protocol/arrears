@@ -55,6 +55,7 @@ export function Outcomes() {
         ['strikes', '0 → 1', true],
         ['claims on record', '+1', true],
       ],
+      at: R.slash,
       hashes: [{ label: 'the ruling', hash: R.slash.hash!, note: `status 1 · ${R.slash.gasUsed?.toLocaleString('en-US')} gas` }],
       foot: 'previewClaim predicted OutOfGas and 2.0 tCTC before a wei was spent. The ruling matched exactly, and the reprice happened in the same transaction as the slash.',
     },
@@ -69,6 +70,7 @@ export function Outcomes() {
         ['strikes', 'unchanged', false],
         ['claims on record', '+1', true],
       ],
+      at: R.refusal,
       hashes: [{ label: 'the ruling', hash: R.refusal.hash!, note: `status 1 · ${R.refusal.gasUsed?.toLocaleString('en-US')} gas` }],
       foot: `SlashRefused carried ${R.refusal.refusalReasonSelector} — the selector of NotSlashableExplicitRevert, so the refusal is a named error in the ABI rather than a string. The failure is on the operator's record and cost them nothing.`,
     },
@@ -83,6 +85,7 @@ export function Outcomes() {
         ['strikes', 'unchanged', false],
         ['claims on record', strictTrace === 0 ? '0 — confirmed live' : '0', true],
       ],
+      at: R.outOfScope,
       hashes: [
         { label: 'out of scope', hash: R.outOfScope.minedTx!, note: R.outOfScope.missAxis ? `miss = ${R.outOfScope.missAxis}` : '' },
         { label: 'strict path', hash: R.strictRefusal.minedTx!, note: 'nothing written' },
@@ -110,6 +113,12 @@ export function Outcomes() {
               <div className="tag">{c.tag}</div>
               <h3>{OUTCOME[c.cls].label}</h3>
               <div className="sub">{OUTCOME[c.cls].sub}</div>
+              {c.at?.cc3Block && (
+                <div className="asof">
+                  as at CC3 block {c.at.cc3Block.toLocaleString('en-US')}
+                  {c.at.ruledAtISO ? ` · ${c.at.ruledAtISO.slice(0, 16).replace('T', ' ')} UTC` : ''}
+                </div>
+              )}
               <ul className="delta">
                 {c.rows.map(([l, v, chg]) => (
                   <li key={String(l)}>
@@ -131,27 +140,48 @@ export function Outcomes() {
           ))}
         </div>
 
-        <div className="panel" style={{ marginTop: 18 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+        <div className="nowpanel">
+          <div className="nowhead">
             <div>
-              <div className="small" style={{ marginBottom: 6 }}>operator, read live from the registry</div>
-              <dl className="kv">
-                <dt>bonded</dt><dd>{state ? `${Number(formatEther(state.bonded)).toLocaleString('en-US')} tCTC` : eth(R.finalState.bondedWei)}</dd>
-                <dt>slashed</dt><dd>{state ? `${Number(formatEther(state.slashed)).toLocaleString('en-US')} tCTC` : eth(R.finalState.slashedWei)}</dd>
-                <dt>credit limit</dt><dd>{state ? `${Number(formatEther(state.limit)).toLocaleString('en-US')} tCTC` : eth(R.finalState.creditLimitWei)}</dd>
-                <dt>premium</dt><dd>{state ? state.premiumBps : R.finalState.premiumBps} bps</dd>
-                <dt>strikes</dt><dd>{state ? state.strikes : R.finalState.strikes}</dd>
-                <dt>claims</dt><dd>{state ? state.claimCount : 2}</dd>
-              </dl>
+              <div className="nowtag">the operator right now</div>
+              <div className="small" style={{ margin: 0 }}>
+                read live from the registry, this second
+              </div>
             </div>
-            <div style={{ maxWidth: '40ch' }}>
-              <p className="small" style={{ margin: 0 }}>
-                A relayer paid the gas for all four and a separate beneficiary was credited. That
-                is sponsored submission working with no meta-transaction machinery: filing a claim
-                borrows no authority from anyone, so the relayer is simply the sender.
-              </p>
-            </div>
+            <Live state={live} label="live" />
           </div>
+
+          <div className="nowgrid">
+            {[
+              ['bonded', state ? `${Number(formatEther(state.bonded)).toLocaleString('en-US')} tCTC` : eth(R.finalState.bondedWei)],
+              ['slashed', state ? `${Number(formatEther(state.slashed)).toLocaleString('en-US')} tCTC` : eth(R.finalState.slashedWei)],
+              ['credit limit', state ? `${Number(formatEther(state.limit)).toLocaleString('en-US')} tCTC` : eth(R.finalState.creditLimitWei)],
+              ['premium', `${state ? state.premiumBps : R.finalState.premiumBps} bps`],
+              ['strikes', String(state ? state.strikes : R.finalState.strikes)],
+              ['claims on record', String(state ? state.claimCount : 2)],
+            ].map(([k, v]) => (
+              <div className="nowcell" key={k}>
+                <div className="nowk">{k}</div>
+                <div className="nowv">{v}</div>
+              </div>
+            ))}
+          </div>
+
+          <p className="small" style={{ marginTop: 16, marginBottom: 0 }}>
+            <strong>These numbers are further along than the three cards above, and that gap is
+            the point.</strong> Each card is frozen at the block it was ruled at. Every claim
+            filed since — including any a visitor filed from this page — has moved the operator
+            on: more strikes, a lower limit, a higher premium. The record only accumulates.
+            {state && state.claimCount > 4 && (
+              <> {state.claimCount - 4} claim{state.claimCount - 4 === 1 ? ' has' : 's have'} been
+              filed since those four.</>
+            )}
+          </p>
+          <p className="small" style={{ marginTop: 10, marginBottom: 0 }}>
+            A relayer paid the gas for all of them and a separate beneficiary was credited each
+            time. That is sponsored submission working with no meta-transaction machinery: filing
+            a claim borrows no authority from anyone, so the relayer is simply the sender.
+          </p>
         </div>
       </div>
     </section>
