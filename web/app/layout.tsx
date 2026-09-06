@@ -12,6 +12,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${fontVars} dark`} suppressHydrationWarning>
+      <head>
+        {/* Sets `js` before first paint, so scroll-reveals hide only when they
+            can also un-hide. Without JS this never runs and nothing is hidden. */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
       <body>
         <ThemeProvider>{children}</ThemeProvider>
       </body>

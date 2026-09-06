@@ -48,6 +48,29 @@ const MUST_CONTAIN: Array<[string, string]> = [
     if (!ok) bad++;
   }
 
+  /* ── VISIBILITY, not just presence ───────────────────────────────────────
+     The content assertions above passed on a build where every section was
+     rendered at opacity 0 by a scroll-reveal that serialised its hidden state
+     into the HTML. The page was blank and the suite was green. Presence in the
+     DOM is not the claim being made; a reader seeing it is. */
+  console.log('');
+  for (const [name, sel] of [
+    ['hero', '#hero'], ['fault line', '#rule'], ['outcomes', '#outcomes'],
+    ['try it', '#try'], ['gallery', '#gallery'], ['trust', '#trust'],
+  ] as const) {
+    const el = page.locator(sel).first();
+    const shown = await el.isVisible().catch(() => false);
+    const opacity = await el.evaluate((e) => {
+      let o = 1, x: Element | null = e;
+      while (x) { o *= parseFloat(getComputedStyle(x).opacity || '1'); x = x.parentElement; }
+      return o;
+    }).catch(() => 0);
+    const ok = shown && opacity > 0.05;
+    console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${name} is VISIBLE with JS off  (effective opacity ${opacity.toFixed(2)})`);
+    if (!ok) bad++;
+  }
+  console.log('');
+
   const bs = (html.match(/creditcoin-testnet\.blockscout\.com\/(tx|address)\//g) ?? []).length;
   const es = (html.match(/etherscan\.io\/(tx|address)\//g) ?? []).length;
   console.log(`\n  deep links present with JS off: ${bs} Blockscout, ${es} Etherscan`);

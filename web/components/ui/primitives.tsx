@@ -1,7 +1,6 @@
 'use client';
-import { motion, useInView } from 'motion/react';
-import { useRef } from 'react';
 import { cn } from '../../lib/cn';
+export { Reveal } from './Reveal';
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Harvested primitives, normalised onto the Arrears token system.
@@ -38,25 +37,6 @@ export const Ambient = ({ className }: { className?: string }) => (
   </div>
 );
 
-/** Reveal on scroll. Content arrives as you reach it, then stays put.
- *  `once` so nothing re-animates on scroll-back. */
-export function Reveal({
-  children, delay = 0, y = 14, className,
-}: { children: React.ReactNode; delay?: number; y?: number; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-12% 0px -8% 0px' });
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y }}
-      animate={inView ? { opacity: 1, y: 0 } : undefined}
-      transition={{ duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
 
 export const Eyebrow = ({ children, className }: { children: React.ReactNode; className?: string }) => (
   <div className={cn('mono text-[11px] uppercase tracking-[0.16em] text-fg-3', className)}>{children}</div>
