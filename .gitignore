@@ -7,3 +7,5 @@ node_modules/
 phase0/node_modules/
 contracts/out/
 contracts/cache/
+phase0/verify/shots/
+phase0/verify/*.png
