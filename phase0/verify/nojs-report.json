@@ -1,5 +1,5 @@
 {
-  "url": "https://arrears-jagadeesh-bs-projects.vercel.app",
+  "url": "http://localhost:3000",
   "status": 200,
   "javaScriptEnabled": false,
   "checks": [
@@ -80,8 +80,8 @@
       "present": true
     }
   ],
-  "blockscoutLinks": 14,
+  "blockscoutLinks": 11,
   "etherscanLinks": 10,
   "failures": 0,
-  "at": "2026-09-06T15:45:27.864Z"
+  "at": "2026-09-06T18:09:00.916Z"
 }

@@ -6,24 +6,23 @@ import { preview, operatorState, type MissName } from '../lib/chain';
 import { Live } from './Live';
 import { Tx, Addr } from './Hash';
 import { short } from '../lib/explorer';
+import { Container, Ambient, Reveal, Eyebrow } from './ui/primitives';
 
 /**
  * The site opens on a REFUSAL, not the slash.
  *
- * Any project can pay out. What shows the rule is load-bearing is the system turning away a real
- * failure it had every opportunity to punish: a genuine WETH.withdraw() failure, by the bonded
- * operator, inside the covered window, on the covered contract — refused, because that one
- * selector is not in scope.
+ * Shell harvested from proactiv-marketing-template: centred heading over a framed
+ * slot below. Their slot holds a scroll-rotated product PNG; ours holds a live
+ * component reading CC3, and the 20° rotate is dropped — that is product-screenshot
+ * language and would read as gimmick under a data surface.
  *
- * Four of the five axes pass. That is the point.
+ * Everything here renders server-side. The live reads only add confirmation.
  */
 export function Hero() {
   const r = M.rulings.outOfScope;
   const cov = M.operator.coverages[0];
   const [live, setLive] = useState<'idle' | 'ok' | 'fail'>('idle');
   const [miss, setMiss] = useState<MissName | null>(null);
-  // Read the bond rather than asserting it: every demo claim moves it, and a hardcoded figure
-  // would be wrong within the hour.
   const [bonded, setBonded] = useState<string | null>(null);
 
   useEffect(() => {
@@ -38,73 +37,95 @@ export function Hero() {
   }, [r.sourceTx]);
 
   const axes = [
-    { k: 'operator', v: short(M.operator.sourceAddress, 10, 4), n: bonded ? `${bonded} tCTC bonded` : 'bonded on Creditcoin', ok: true },
+    { k: 'operator', v: short(M.operator.sourceAddress, 12, 4), n: bonded ? `${bonded} tCTC bonded` : 'bonded on Creditcoin', ok: true },
     { k: 'chain', v: 'Ethereum Sepolia', n: 'Attestcoin chain key 1', ok: true },
     { k: 'window', v: `${cov.fromHeight.toLocaleString('en-US')} – ${cov.toHeight.toLocaleString('en-US')}`, n: `block ${r.sourceBlock.toLocaleString('en-US')} is inside`, ok: true },
-    { k: 'contract', v: short('0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14', 10, 4), n: 'WETH9 — covered', ok: true },
+    { k: 'contract', v: short('0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14', 12, 4), n: 'WETH9 — covered', ok: true },
     { k: 'selector', v: '0x2e1a7d4d', n: 'withdraw(uint256) — in no coverage', ok: false },
   ];
 
   return (
-    <section id="hero">
-      <div className="wrap">
-        <h2>Arrears · Creditcoin CC3 · Attestcoin</h2>
-        <h1>A real failure. A bonded operator. Turned away.</h1>
-        <p className="lede">
-          This transaction failed on Ethereum. The account that sent it has{' '}
-          <strong>{bonded ? `${bonded} tCTC` : 'a bond'} posted</strong> on Creditcoin. It happened
-          inside the covered window, on a covered contract. Arrears refused to touch the bond,
-          because the operator never promised to answer for <code>withdraw()</code>.
-        </p>
-        <p>
-          A rule that only ever says yes is not a rule. Start here, not at the payout.
-        </p>
+    <section id="hero" className="relative overflow-hidden pt-20 pb-24 md:pt-28">
+      <Ambient />
+      <Container className="relative">
+        <Reveal>
+          <Eyebrow>A failed transaction is evidence</Eyebrow>
+          <h1 className="display mt-5 max-w-[17ch] text-[46px] leading-[1.04] tracking-[-0.02em] md:text-[68px]">
+            A real failure.<br />A bonded operator.<br />Turned away.
+          </h1>
+        </Reveal>
 
-        <div className="panel" style={{ marginTop: 26 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
-            <div className="mono" style={{ fontSize: 13 }}>
-              Sepolia · block {r.sourceBlock.toLocaleString('en-US')} · WETH.withdraw()
+        <Reveal delay={0.08}>
+          <p className="mt-7 max-w-[58ch] text-[17px] leading-[1.62] text-fg-2">
+            This transaction failed on Ethereum. The account that sent it has{' '}
+            <span className="mono text-fg">{bonded ? `${bonded} tCTC` : 'a bond'}</span> posted on
+            Creditcoin. It happened inside the covered window, on a covered contract. Arrears
+            refused to touch the bond, because the operator never promised to answer for{' '}
+            <code className="text-fg">withdraw()</code>.
+          </p>
+          <p className="mt-4 max-w-[58ch] text-[15px] leading-[1.6] text-fg-3">
+            A rule that only ever says yes is not a rule. Start here, not at the payout.
+          </p>
+        </Reveal>
+
+        {/* The slot proactiv fills with a PNG. Ours holds the live scope card. */}
+        <Reveal delay={0.16} y={22}>
+          <div className="mt-12 rounded-[16px] border border-line bg-bg-raised p-1.5 shadow-[0_1px_0_0_rgb(0_0_0/0.04)]">
+            <div className="rounded-[11px] border border-line-soft bg-bg">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line-soft px-5 py-3.5">
+                <div className="mono text-[12.5px] text-fg-2">
+                  Sepolia · block <span className="text-fg">{r.sourceBlock.toLocaleString('en-US')}</span> · WETH.withdraw()
+                </div>
+                <Live state={live} label={miss ? `confirmed live · miss = ${miss}` : 'confirmed live'} />
+              </div>
+
+              <table className="w-full">
+                <tbody>
+                  {axes.map((a) => (
+                    <tr
+                      key={a.k}
+                      className="border-b border-line-soft last:border-0"
+                      style={!a.ok ? { background: 'color-mix(in oklab, var(--miss) 7%, transparent)' } : undefined}
+                    >
+                      <td className="mono w-[92px] py-3 pl-5 pr-2 align-top text-[12.5px] text-fg-3">{a.k}</td>
+                      <td className="mono py-3 pr-3 align-top text-[12.5px] text-fg">{a.v}</td>
+                      <td className="mono hidden py-3 pr-3 align-top text-[12.5px] text-fg-3 sm:table-cell">{a.n}</td>
+                      <td
+                        className="mono py-3 pr-5 text-right align-top text-[12px] whitespace-nowrap"
+                        style={{ color: a.ok ? 'var(--pass)' : 'var(--miss)', fontWeight: a.ok ? 400 : 600 }}
+                      >
+                        {a.ok ? 'matches' : 'NOT IN SCOPE'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="border-t border-line-soft px-5 py-4">
+                <div className="mono text-[13px] leading-relaxed break-all" style={{ color: 'var(--miss)' }}>
+                  {r.error ?? 'OutOfScope(Selector, …)'}
+                </div>
+                <p className="mt-2 max-w-[74ch] text-[13.5px] leading-relaxed text-fg-3">
+                  Nothing was slashed. Nothing was recorded. The refusal names the one axis that
+                  missed, so a submitter learns what to change rather than only that something did.
+                </p>
+              </div>
+
+              <div className="mono flex flex-wrap gap-x-7 gap-y-2 border-t border-line-soft px-5 py-3.5 text-[12px] text-fg-3">
+                {r.minedTx && <span>ruling <Tx chain="cc3" hash={r.minedTx} /></span>}
+                <span>source failure <Tx chain="sepolia" hash={r.sourceTx} /></span>
+                <span>operator <Addr chain="sepolia" addr={M.operator.sourceAddress} /></span>
+              </div>
             </div>
-            <Live state={live} label={miss ? `confirmed live · miss = ${miss}` : 'confirmed live'} />
           </div>
+        </Reveal>
 
-          <table className="axes">
-            <tbody>
-              {axes.map((a) => (
-                <tr key={a.k} className={a.ok ? '' : 'missed'}>
-                  <td className="k">{a.k}</td>
-                  <td className="v">{a.v}</td>
-                  <td className="n">{a.n}</td>
-                  <td className={`m ${a.ok ? 'ok' : 'no'}`}>{a.ok ? 'matches' : 'NOT IN SCOPE'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--line-soft)' }}>
-            <div className="mono" style={{ color: 'var(--fail)', fontSize: 13.5, marginBottom: 6 }}>
-              {r.error ?? 'OutOfScope(Selector, …)'}
-            </div>
-            <div className="small">
-              Nothing was slashed. Nothing was recorded. The refusal names the one axis that
-              missed, so a submitter learns what to change rather than only that something did.
-            </div>
-          </div>
-
-          <div className="hashes">
-            <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap' }}>
-              {r.minedTx && <span>ruling <Tx chain="cc3" hash={r.minedTx} /></span>}
-              <span>source failure <Tx chain="sepolia" hash={r.sourceTx} /></span>
-              <span>operator <Addr chain="sepolia" addr={M.operator.sourceAddress} /></span>
-            </div>
-          </div>
-        </div>
-
-        <p className="small" style={{ marginTop: 18 }}>
-          No wallet. No account. Nothing installed. Every figure on this page is either a hash in{' '}
-          <code>manifest.json</code> or read live from Creditcoin by your browser.
-        </p>
-      </div>
+        <Reveal delay={0.24}>
+          <p className="mono mt-6 text-[12px] leading-relaxed text-fg-3">
+            No wallet. No account. Nothing installed.
+          </p>
+        </Reveal>
+      </Container>
     </section>
   );
 }

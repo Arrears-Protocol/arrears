@@ -1,5 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
+import { fontVars } from '../lib/fonts';
+import { ThemeProvider } from '../components/ThemeProvider';
 
 export const metadata: Metadata = {
   title: 'Arrears — a failed transaction is evidence',
@@ -9,8 +11,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className={`${fontVars} dark`} suppressHydrationWarning>
+      <body>
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }
