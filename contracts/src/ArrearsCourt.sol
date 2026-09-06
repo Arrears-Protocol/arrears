@@ -6,6 +6,7 @@ import {IArrearsCourt} from "./interfaces/IArrearsCourt.sol";
 import {IArrearsRegistry} from "./interfaces/IArrearsRegistry.sol";
 import {IArrearsCreditLine} from "./interfaces/IArrearsCreditLine.sol";
 import {IBlockProver, BlockProverLib} from "./IBlockProver.sol";
+import {ArrearsVerdict} from "./ArrearsVerdict.sol";
 import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol";
 
 /**
@@ -93,11 +94,10 @@ contract ArrearsCourt is IArrearsCourt {
         d.txIndex = VERIFIER.calculateTxIndex(mp);
     }
 
-    /// @dev The fault line. `receiptStatus == 0` and `gasUsed >= gasLimit` is the sender's own
-    ///      under-provisioning and nobody else's doing; every other failure is not.
+    /// @dev The fault line, delegated to `ArrearsVerdict` so the court and the public
+    ///      `VerdictProbe` that backs the evidence gallery cannot drift apart.
     function _classify(Decoded memory d) private pure returns (ArrearsTypes.Verdict) {
-        if (d.receiptStatus == 1) return ArrearsTypes.Verdict.Succeeded;
-        return d.gasUsed >= d.gasLimit ? ArrearsTypes.Verdict.OutOfGas : ArrearsTypes.Verdict.ExplicitRevert;
+        return ArrearsVerdict.classify(d.receiptStatus, d.gasUsed, d.gasLimit);
     }
 
     /**

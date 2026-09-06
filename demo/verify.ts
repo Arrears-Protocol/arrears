@@ -13,7 +13,8 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const A = JSON.parse(readFileSync(join(HERE, 'artifacts.json'), 'utf8'));
+const M = JSON.parse(readFileSync(join(HERE, 'manifest.json'), 'utf8'));
+const A = { cc3: M.chains.cc3, sepolia: M.chains.sepolia, halfOne: M.exploits.halfOne, halfTwo: M.exploits.halfTwo };
 
 const CC3 = new JsonRpcProvider(process.env.CC3_RPC ?? A.cc3.rpc);
 const SEP = new JsonRpcProvider(process.env.SEPOLIA_RPC ?? A.sepolia.rpc);

@@ -13,10 +13,15 @@ one guard inside the consumer.
 
 ```bash
 npm install
-npm run verify          # both halves
-npm run verify:one      # the reverted-transaction half
-npm run verify:two      # the impostor half
+npm run verify           # everything: both exploit halves, then the evidence gallery
+npm run verify:exploits  # just the two exploits
+npm run gallery          # just the evidence gallery and the slash artifact
 ```
+
+The demo has two surfaces and this README covers the first. The second — seven real mainnet
+failures plus the live Sepolia slash — is in [`GALLERY.md`](GALLERY.md).
+[`manifest.json`](manifest.json) is the single source of truth for both, and for the frontend:
+hashes and addresses only, no fixtures.
 
 No key, no funding, no `.env`, no build step, nothing to deploy. The script re-reads every value
 live from CC3, Sepolia and Ethereum mainnet on each run — [`artifacts.json`](artifacts.json)

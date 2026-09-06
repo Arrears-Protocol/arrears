@@ -5,10 +5,19 @@
   "type": "module",
   "description": "Both halves of the Arrears exploit demo, verifiable live from a clean clone.",
   "scripts": {
-    "verify": "tsx verify.ts",
+    "verify": "tsx verify.ts && tsx gallery.ts",
+    "verify:exploits": "tsx verify.ts",
     "verify:one": "tsx verify.ts one",
-    "verify:two": "tsx verify.ts two"
+    "verify:two": "tsx verify.ts two",
+    "gallery": "tsx gallery.ts"
   },
-  "dependencies": { "ethers": "^6.13.4" },
-  "devDependencies": { "tsx": "^4.19.2", "typescript": "^5.7.2", "@types/node": "^22.10.0" }
+  "dependencies": {
+    "ethers": "^6.13.4",
+    "@gluwa/usc-sdk": "0.18.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "@types/node": "^22.10.0"
+  }
 }

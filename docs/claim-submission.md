@@ -190,3 +190,35 @@ with a progress indicator — do not hide it behind a spinner that implies the s
    history rather than by storage layout.
 2. **Is there a claimant reward?** Settled: no. See the limitation recorded in the README.
 3. **Sepolia for the live path.** Settled — see above.
+
+---
+
+## Attestation lag: a settlement-time mechanism, not an interception one
+
+Measured, broadcast to provable: **41 blocks on Sepolia, about eight minutes.** That number is
+not hidden anywhere in this project and should not be. It is stated on the demo surface as a
+measured figure, and the demo opens on an artifact that is *already attested* so nothing waits
+while someone is watching.
+
+The lag is worth being precise about because it defines what Arrears is:
+
+**Arrears cannot intercept a failure. It was never able to.** By the time a transaction is
+provable it has been final on Ethereum for several minutes; nothing Creditcoin does can reach
+back and stop it. Any design that needed to *prevent* the failure would be defeated by this
+cadence before it started.
+
+**But slashing a bond after a proven failure has no real-time requirement.** The failure already
+happened. The operator's fault is already fixed. Whether the bond moves eight minutes later or
+eight days later changes nothing about who was at fault or how much they owe — and the record
+being durable matters far more than it being fast. Attestcoin's provable-history floor for
+Ethereum mainnet is block 0, so evidence surfacing years afterwards is as admissible as evidence
+surfacing this afternoon; the gallery proves failures from 2023 against the live precompile today.
+
+So the eight minutes costs the design nothing. It would be fatal to a liquidation guard or a
+front-running blocker. Arrears is neither. It is a settlement-time mechanism, and settlement is
+the one place a few minutes is free.
+
+The honest consequence for the UI: **no spinner.** A spinner implies the system is slow at
+something it should be fast at. Show the measured number, say what it is waiting for, and open on
+something already attested so the wait is a fact on the page rather than an experience the viewer
+has to sit through.

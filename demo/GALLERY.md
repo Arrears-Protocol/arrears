@@ -1,0 +1,101 @@
+# The evidence gallery
+
+Seven real Ethereum mainnet failures, 2023–2025, plus the live Sepolia slash artifact. Each is
+proven through the block-prover precompile and classified by the deployed
+[`VerdictProbe`](../contracts/src/VerdictProbe.sol) on CC3.
+
+```bash
+npm install && npm run gallery
+```
+
+No key, no funding, no `.env`. Every value is re-read from chain on each run;
+[`manifest.json`](manifest.json) holds hashes and addresses and nothing else. Non-zero exit if any
+check fails.
+
+---
+
+## Why there are two surfaces, and why that is the argument
+
+**The gallery and the Sepolia slash run the identical verification path.** `VerdictProbe`
+classifies with [`ArrearsVerdict`](../contracts/src/ArrearsVerdict.sol) — the same library
+[`ArrearsCourt`](../contracts/src/ArrearsCourt.sol) uses to reach a ruling. Not a
+reimplementation, not a mirror: the same `internal` function, linked into both. Nothing can drift.
+
+What each surface establishes is different, and neither is complete alone:
+
+| | what it proves |
+|---|---|
+| **The mainnet gallery** | that the classification is *right*, against real failures at real scale — seven of them, across three years and four separate market events, none of them constructed by us |
+| **The Sepolia slash** | that the ruling those classifications lead to *lands* — a bond, a coverage, a proven failure, a slash, end to end |
+
+No bond attaches to the mainnet seven, because nobody here holds those keys. That is not a gap in
+the demo — **it is the identity binding working.** Arrears' registry requires an operator to prove
+control of the source-chain address its bond answers for, so a project that could slash arbitrary
+mainnet addresses on demand would be one that never checked. The split exists because the check is
+real, and it is evidence of that rather than a limitation of it.
+
+---
+
+## The slash artifact
+
+| | |
+|---|---|
+| Source | [`0xe11a3557…`](https://sepolia.etherscan.io/tx/0xe11a3557f5e32c939f05c6d752036131cde5ed498520887b36b9f68676bbbf12) — Sepolia block 11,646,331, index 97 |
+| What it is | a real `WETH.deposit()` that honestly needed **45,418 gas** and was sent **30,000** |
+| Result | enters the contract, starts work, dies mid-SSTORE. `gasUsed == gasLimit == 30,000`, `receiptStatus 0`, zero logs |
+| Verdict | **`OutOfGas` — slashable** |
+
+Not a contract built to burn gas. An under-provisioned limit against real work, which is exactly
+how it happens in production when someone hardcodes a stale number. Same artifact class as the
+mainnet Uniswap V2 router failure below, on a chain where we hold the key.
+
+## The seven
+
+Every one classified **`OutOfGas`**. Every one carries zero logs, as every reverted transaction
+does. Continuity-proof length varies with how far the block sits from an attestation checkpoint,
+which is why the older entries are dearer to prove.
+
+| window | source | block | continuity roots | gasUsed / gasLimit |
+|---|---|---|---|---|
+| USDC depeg (SVB) | [`0xc22eb305…`](https://etherscan.io/tx/0xc22eb305d884a45228068337df490470661882e5e0efb1ff901b93fd192a8096) — Uniswap V2 Router `swapExactTokensForETHSupportingFee` | 16,806,527 | 474 | 324,239 / 324,239 |
+| USDC depeg (SVB) | [`0x1dd76820…`](https://etherscan.io/tx/0x1dd76820f55cc790a57ed33eee30ed25d120f6f0820a89c1f55a6c2dc7e71c22) | 16,806,523 | 478 | 77,600 / 77,600 |
+| Yen carry unwind | [`0x252a53c5…`](https://etherscan.io/tx/0x252a53c5d5fa0706ba15624c62db62300708eb9dbe14454af7a73f8fed6625e4) | 20,462,242 | 759 | 134,138 / 134,138 |
+| Yen carry unwind | [`0xbf4a6412…`](https://etherscan.io/tx/0xbf4a64126832f98707b723de0bc68b5883144313d5e8f2cb627847193aa206d0) — USDT transfer | 20,462,236 | 765 | 76,808 / 76,808 |
+| Feb 2025 selloff | [`0x3198a097…`](https://etherscan.io/tx/0x3198a097f62d37dc2463b87adf87419621a8bf45e014491c0f9911aa09224fcc) | 21,769,440 | 561 | 134,482 / 134,482 |
+| Oct 2025 cascade | [`0x27cb5855…`](https://etherscan.io/tx/0x27cb58551d34f7b1a48fabdbfc8ca078a2e7aaf0bed52b425a980cd11d4a967c) — USDT transfer | 23,549,876 | 125 | 120,000 / 120,000 |
+| Oct 2025 cascade | [`0xee76fbbb…`](https://etherscan.io/tx/0xee76fbbb8fe207a1af967a751dd5dd2c0b3fb6ae3f061ec108fc13d12df3c756) — USDT transfer | 23,549,876 | 125 | 80,000 / 80,000 |
+
+### They were re-classified, not carried over
+
+These were first classified during Phase 0, from mainnet RPC receipts, **before `Verdict` existed
+and before the slashable class was narrowed to out-of-gas.** Carrying that forward on trust would
+have been exactly the kind of unchecked claim this project exists to avoid, so all seven were
+re-run through the deployed classifier and diffed against what the Phase 0 transcript asserted:
+
+```
+re-classified 7 of 7 through the deployed classifier
+all proofs valid:      true
+all zero logs:         true
+classified OutOfGas:   7/7
+
+NO DISCREPANCIES. Every Phase 0 classification survives the narrowed rule.
+```
+
+The on-chain decoded `gasUsed` and `gasLimit` match the mainnet receipts exactly in all seven
+cases. Transcript: [`../phase0/evidence/29-reclassify.json`](../phase0/evidence/29-reclassify.json).
+Re-run it yourself with `npx tsx probes/29-reclassify.ts` from `phase0/` — it exits non-zero on
+any divergence, so a future change to the classification rule that would move one of these gets
+caught by a script rather than on camera.
+
+---
+
+## Timing
+
+Broadcast to provable on Sepolia is **41 blocks, about eight minutes** — measured, not estimated.
+The gallery opens on artifacts that are already attested, so nothing waits.
+
+That lag makes Arrears a **settlement-time mechanism rather than an interception one**. It cannot
+stop a failure; by the time anything is provable the transaction has been final for minutes. But
+slashing a bond after a proven failure has no real-time requirement — the failure already
+happened and the fault is already fixed — so the cadence costs the design nothing. See
+[`../docs/claim-submission.md`](../docs/claim-submission.md).

@@ -65,6 +65,24 @@ The block-prover precompile verifies **inclusion in a block**, which is not the 
 
 ---
 
+## Seven real failures, and one real slash
+
+[`demo/GALLERY.md`](demo/GALLERY.md) — `cd demo && npm run gallery`
+
+Seven Ethereum mainnet failures spanning the 2023 USDC depeg to the 2025 cascade, each proven
+against the live precompile and each classified **`OutOfGas`** by the deployed
+[`VerdictProbe`](contracts/src/VerdictProbe.sol). Alongside them, a genuine Sepolia
+[`WETH.deposit()`](https://sepolia.etherscan.io/tx/0xe11a3557f5e32c939f05c6d752036131cde5ed498520887b36b9f68676bbbf12)
+that needed 45,418 gas and was sent 30,000.
+
+**Both run the identical verification path** — the probe classifies with
+[`ArrearsVerdict`](contracts/src/ArrearsVerdict.sol), the same library the court uses to rule. The
+gallery shows the classification is right against real failures at real scale; Sepolia shows the
+slash it leads to, end to end. No bond attaches to the mainnet seven because nobody here holds
+those keys — which is the identity binding working, not a gap in the demo.
+
+---
+
 ## Why this project exists
 
 If a failed transaction can be proven, then a bonded operator's failures become a credit record
@@ -134,7 +152,9 @@ obvious upgrade if this ever matters.
 
 | path | what it is |
 |---|---|
-| [`demo/`](demo/) | both exploit halves, verifiable live with one command |
+| [`demo/`](demo/) | the demo surface — both exploit halves, the evidence gallery and the slash, verifiable with one command |
+| [`demo/manifest.json`](demo/manifest.json) | single source of truth for the demo and the frontend: hashes and addresses, no fixtures |
+| [`demo/GALLERY.md`](demo/GALLERY.md) | seven real mainnet failures, 2023–2025, plus the live Sepolia slash |
 | [`contracts/src/`](contracts/src/) | the protocol — registry, court, credit line — and the demo contracts |
 | [`contracts/test/`](contracts/test/) | 31 tests, including the revocation and coverage-selection boundaries |
 | [`docs/claim-submission.md`](docs/claim-submission.md) | how a judge triggers a real ruling with sponsored gas |
