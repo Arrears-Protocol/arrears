@@ -87,13 +87,57 @@ is the only slashable class. Explicit reverts are recorded and never slashable.
 
 ---
 
+## Limitations, and the one thing we take on trust
+
+Arrears' pitch is that it takes nobody's word for anything. That is nearly true, and the exception
+should be named here rather than discovered in a code comment.
+
+### The identity binding is a signature, not a proof
+
+**This is the only thing in the system the precompile does not verify.**
+
+Everything else is proven. That a transaction was included, that it reverted, what it called, how
+much gas it burned — all of it comes out of bytes the block-prover precompile verified, and none
+of it requires trusting anyone. But the bond lives on Creditcoin while the evidence names an
+*Ethereum* address, and **nothing in an Attestcoin proof connects those two identities.**
+
+So the registry closes the gap with an EIP-191 signature: the source-chain key signs a digest
+binding it to its Creditcoin controller, and `ecrecover` checks it. Sound in practice — an
+operator gains nothing by binding an address they do not control, since it only creates liability
+they could otherwise avoid — but it is a different *kind* of claim from everything around it. A
+compromised source-chain key means a wrongly attributable bond, and no amount of proving would
+catch it.
+
+An alternative exists and was considered: have the operator send a marker transaction on the
+source chain and prove it through Attestcoin itself, closing the loop with no signature scheme at
+all. It costs the operator real mainnet gas and a round-trip through attestation before they can
+register, so it is not the default — but it would remove the exception entirely, and it is the
+obvious upgrade if this ever matters.
+
+### Other limitations
+
+- **No claimant reward, deliberately.** A bounty would make `beneficiary` a value the submitting
+  relayer could redirect, turning every sponsored submission into value for whoever pays the gas.
+  So the claimant's reward is the slash landing where it belongs, and nothing more. That is a real
+  weakness of unrewarded fraud proofs: nobody is paid to go looking. Pricing a bounty without
+  creating a redirection vector is a later extension, not an oversight.
+- **Explicit reverts are never slashable.** Only `gasUsed >= gasLimit` is. An operator who fails
+  by any other means is recorded and not punished, which is deliberate — see above — but it does
+  mean a sufficiently careful operator can fail without consequence by always over-provisioning
+  gas.
+- **Testnet, unaudited.** The bond is play money until it is not.
+- **One relayer key.** Concurrent sponsored submissions will collide on nonces until the relayer
+  runs a queue or a key pool. Operational, not contractual — noted in
+  [`docs/claim-submission.md`](docs/claim-submission.md).
+
 ## Layout
 
 | path | what it is |
 |---|---|
 | [`demo/`](demo/) | both exploit halves, verifiable live with one command |
-| [`contracts/src/interfaces/`](contracts/src/interfaces/) | the scoped-coverage design — registry, court, credit line |
-| [`contracts/src/`](contracts/src/) | the demo contracts, deployed on CC3 and Sepolia |
+| [`contracts/src/`](contracts/src/) | the protocol — registry, court, credit line — and the demo contracts |
+| [`contracts/test/`](contracts/test/) | 31 tests, including the revocation and coverage-selection boundaries |
+| [`docs/claim-submission.md`](docs/claim-submission.md) | how a judge triggers a real ruling with sponsored gas |
 | [`Phase0-Report.md`](Phase0-Report.md) | every finding, with the evidence that settled it |
 | [`PROTOCOL-FINDINGS.md`](PROTOCOL-FINDINGS.md) | measured protocol facts, written to be posted publicly |
 | [`phase0/evidence/`](phase0/evidence/) | raw transcripts of every live run |

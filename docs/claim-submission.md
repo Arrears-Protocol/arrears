@@ -126,38 +126,52 @@ settling early — it is the most likely thing to break during a live demo.
 
 ---
 
-## The demo needs Sepolia as its source chain, and this is the constraint to absorb now
+## The live slash runs on Sepolia, and that is the honest thing to demonstrate
 
-The registry proves that a Creditcoin controller owns the source-chain address its bond answers
-for, by signature. That is the right design — without it Arrears slashes the wrong party.
+Arrears is honest about who it can slash. The registry proves that a Creditcoin controller owns
+the source-chain address its bond answers for, by signature — so **you cannot bond an operator
+whose keys you do not hold.** That is the whole point of the identity binding, and it applies to
+us exactly as it applies to anyone else.
 
-It also means **we cannot register a real Ethereum mainnet operator**, because we do not control
-the private key of whoever sent those historical failing transactions. The seven mainnet failures
-from Phase 0 are perfectly good *evidence*, but no bond can honestly be attached to them.
+So the demo has two surfaces, and each says something the other cannot:
 
-So the live, judge-triggered path uses **Sepolia (chain key 1)** as the source chain:
+**Live, on Sepolia (chain key 1).** We hold the operator's key, so registration is honest, the
+signature check stays on, and the bond genuinely answers for that address. The failure is real
+and deliberately produced: a plain
+[`WETH.deposit()`](https://sepolia.etherscan.io/tx/0xe11a3557f5e32c939f05c6d752036131cde5ed498520887b36b9f68676bbbf12)
+that honestly needed 45,418 gas and was sent 30,000 — above the 21,064 intrinsic, below what the
+SSTORE needs, so it enters the contract, starts real work and dies partway through.
+`gasUsed == gasLimit == 30,000`, `receiptStatus 0`, zero logs. Not a contract built to burn gas;
+an under-provisioned limit against real work, which is exactly how it happens in production when
+someone hardcodes a stale number. Same artifact class as mainnet
+[`0xc22eb305…`](https://etherscan.io/tx/0xc22eb305d884a45228068337df490470661882e5e0efb1ff901b93fd192a8096),
+on a chain where we hold the key.
 
-- we control the operator address, so registration is honest and the signature check stays on
-- we can deliberately send a genuine out-of-gas transaction — a real `gasUsed == gasLimit`
-  failure, not a simulated one
-- it proves through the identical precompile and the identical code path
-- Sepolia attestation lag measured at ~40 blocks, roughly eight minutes, which is the one number
-  that shapes the demo's pacing
+**Historical, on Ethereum mainnet.** Seven real failures spanning the 2023 USDC depeg through the
+2025 cascade, each verified against the live precompile, each in the slashable class. No bond can
+honestly attach to them, because we do not own those keys — so they stand as a **read-only gallery
+of what the protocol would have caught**, and nothing more.
 
-The mainnet historical failures stay in the product as the read-only evidence gallery — the thing
-that shows the reach is real, spanning the 2023 USDC depeg through the 2025 cascade. Two surfaces,
-honestly labelled: **one live and interactive on Sepolia, one historical and verifiable on
-mainnet.**
+Put together they demonstrate something neither half proves alone: **the identity binding is real
+rather than assumed.** A system that could slash arbitrary mainnet addresses on demand would be
+one that never checked who it was slashing. The fact that our own demo has to run on a chain where
+we hold the key is the evidence that the check is load-bearing.
 
-Weakening the registry to allow unproven mainnet registration would make the demo slightly
-flashier and the protocol dishonest. Not worth it.
+Weakening the registry to allow unproven mainnet registration would make the demo flashier and the
+protocol dishonest. It is not on the table.
+
+One operational number shapes the pacing: **Sepolia attestation lag is roughly 40 blocks, about
+eight minutes.** A judge clicking "prove this failure" on a freshly produced transaction waits
+that long. Either pre-produce the failure so it is already attested, or show the wait honestly
+with a progress indicator — do not hide it behind a spinner that implies the system is slow.
 
 ---
 
 ## Decisions needed before implementation
 
-1. **`coverageId` or `operatorId` in `submitClaim`?** Determines whether the overlapping-coverage
-   griefing vector exists at all. Recommend `operatorId` with court-side selection.
-2. **Is there a claimant reward?** If yes, `beneficiary` needs thinking about. Recommend no reward
-   for now.
-3. **Sepolia for the live path — confirm.** Everything above assumes it.
+1. **`coverageId` or `operatorId` in `submitClaim`?** Settled: `operatorId`, with the court
+   applying the fixed selection rule documented on `IArrearsCourt.selectCoverage` — widest
+   payable, ties to earliest declared, iterating an append-only array so order is fixed by
+   history rather than by storage layout.
+2. **Is there a claimant reward?** Settled: no. See the limitation recorded in the README.
+3. **Sepolia for the live path.** Settled — see above.

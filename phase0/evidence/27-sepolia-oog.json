@@ -1,0 +1,15 @@
+{
+  "chain": "ethereum-sepolia",
+  "chainKey": 1,
+  "operator": "0x9733EcE9ba9351f70942E1241D875b878f6B178E",
+  "target": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+  "selector": "0xd0e30db0",
+  "txHash": "0xe11a3557f5e32c939f05c6d752036131cde5ed498520887b36b9f68676bbbf12",
+  "block": 11646331,
+  "gasUsed": 30000,
+  "gasLimit": 30000,
+  "honestlyNeeded": 45418,
+  "receiptStatus": "0x0",
+  "logs": 0,
+  "explorer": "https://sepolia.etherscan.io/tx/0xe11a3557f5e32c939f05c6d752036131cde5ed498520887b36b9f68676bbbf12"
+}

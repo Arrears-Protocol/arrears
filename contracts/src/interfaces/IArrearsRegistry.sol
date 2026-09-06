@@ -35,6 +35,8 @@ interface IArrearsRegistry {
     );
     event CoverageScopeAdded(bytes32 indexed coverageId, address indexed target, bytes4 indexed selector);
     event CoverageRevoked(bytes32 indexed coverageId, uint64 at);
+    event CoverageReleased(bytes32 indexed coverageId, uint256 returned);
+    event BondSlashedFrom(bytes32 indexed operatorId, bytes32 indexed coverageId, uint256 amount, uint256 remaining);
 
     // ─────────────────────────────────────────────────────────────────────────
     // Errors
@@ -55,6 +57,8 @@ interface IArrearsRegistry {
     error WindowInverted(uint64 fromHeight, uint64 toHeight);
     /// @notice Coverage may only name the chain the operator registered on.
     error ChainKeyMismatch(uint64 coverageChainKey, uint64 operatorChainKey);
+    error CoverageAlreadyRevoked(bytes32 coverageId);
+    error CoverageAlreadyReleased(bytes32 coverageId);
 
     // ─────────────────────────────────────────────────────────────────────────
     // Identity
@@ -151,6 +155,28 @@ interface IArrearsRegistry {
      */
     function revokeCoverage(bytes32 coverageId) external;
 
+    /// @notice Revoke from an explicit source-chain height. See the implementation for why
+    ///         revocation is a height boundary and not a timestamp one.
+    function revokeCoverage(bytes32 coverageId, uint64 atHeight) external;
+
+    /// @notice After `claimDeadline`, return a coverage's untouched commitment to free bond.
+    function releaseCoverage(bytes32 coverageId) external;
+
+    /// @notice Whether a coverage admits a failure at `height` on all four scope axes.
+    function admits(bytes32 coverageId, uint64 chainKey, uint64 height, address target, bytes4 selector)
+        external view returns (bool);
+
+    /// @notice What a coverage would actually pay for one claim right now:
+    ///         `min(perClaimCap, committed - drawn)`.
+    function payable_(bytes32 coverageId) external view returns (uint256);
+
+    /// @notice Coverages of an operator, in declaration order. An append-only array, so the
+    ///         court's selection rule iterates a sequence fixed by history.
+    function coveragesOf(bytes32 operatorId) external view returns (bytes32[] memory);
+
+    /// @notice Take `amount` from a coverage, capped at `payable_`. Court only.
+    function slash(bytes32 operatorId, bytes32 coverageId, uint256 amount) external returns (uint256);
+
     // ─────────────────────────────────────────────────────────────────────────
     // Views
     // ─────────────────────────────────────────────────────────────────────────
@@ -161,6 +187,9 @@ interface IArrearsRegistry {
 
     /// @notice Whether a (target, selector) pair is inside a coverage's declared scope.
     function inScope(bytes32 coverageId, address target, bytes4 selector) external view returns (bool);
+
+    /// @notice Whether a coverage names this contract under any selector at all.
+    function coversTarget(bytes32 coverageId, address target) external view returns (bool);
 
     /// @notice Bond not earmarked by live coverage, and therefore requestable for withdrawal.
     function freeBond(bytes32 operatorId) external view returns (uint256);

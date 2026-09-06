@@ -109,6 +109,8 @@ interface IArrearsCourt {
 
     error AlreadyClaimed(bytes32 claimId);
     error CoverageInactive(bytes32 coverageId);
+    /// @notice The operator has no coverage at all that admits this proof.
+    error NoCoveringCoverage(bytes32 operatorId, address target, bytes4 selector, uint64 height);
     error ClaimWindowClosed(uint64 claimDeadline, uint64 nowTs);
     error NothingLeftToSlash(bytes32 operatorId);
 
@@ -129,13 +131,21 @@ interface IArrearsCourt {
      *      refused cheaply with `AlreadyClaimed` and a relayer retrying a transaction it is
      *      unsure landed cannot double-rule.
      *
+     *      ── Why this takes an operatorId and not a coverageId ──
+     *
+     *      An earlier shape let the submitter name the coverage. That was a griefing vector: an
+     *      operator holding two overlapping coverages could be claimed against the one with the
+     *      smaller `perClaimCap`, consuming the globally unique claim id and capping the slash
+     *      far below what the other coverage would have paid. The submitter no longer chooses.
+     *      The court selects, by the fixed rule in `selectCoverage`.
+     *
      * @param beneficiary Credited with the claim. Pass `msg.sender` for self-submission.
      * @return claimId The deterministic claim id.
      * @return verdict What the evidence turned out to be.
      * @return slashed Amount taken from the bond. Zero unless `verdict == OutOfGas`.
      */
     function submitClaim(
-        bytes32 coverageId,
+        bytes32 operatorId,
         uint64 height,
         bytes calldata txBytes,
         IBlockProver.MerkleProof calldata merkleProof,
@@ -150,7 +160,7 @@ interface IArrearsCourt {
      *      explicit revert and `SourceTransactionSucceeded` on a success, leaving no record.
      */
     function submitSlashingClaim(
-        bytes32 coverageId,
+        bytes32 operatorId,
         uint64 height,
         bytes calldata txBytes,
         IBlockProver.MerkleProof calldata merkleProof,
@@ -166,7 +176,7 @@ interface IArrearsCourt {
      *      and keeps sponsored submission from paying for claims that would be rejected.
      */
     function previewClaim(
-        bytes32 coverageId,
+        bytes32 operatorId,
         uint64 height,
         bytes calldata txBytes,
         IBlockProver.MerkleProof calldata merkleProof,
@@ -174,7 +184,49 @@ interface IArrearsCourt {
     )
         external
         view
-        returns (bool proofValid, ArrearsTypes.Verdict verdict, ArrearsTypes.ScopeMiss miss, uint256 wouldSlash);
+        returns (
+            bool proofValid,
+            ArrearsTypes.Verdict verdict,
+            ArrearsTypes.ScopeMiss miss,
+            bytes32 selectedCoverage,
+            uint256 wouldSlash
+        );
+
+    /**
+     * @notice The coverage the court will use for a given failure. Deterministic, and public so
+     *         an operator can see their own exposure before it is used against them.
+     *
+     * @dev THE SELECTION RULE, fixed and total:
+     *
+     *        1. Consider every coverage of `operatorId`, in declaration order. Declaration order
+     *           is an append-only array, never a mapping, so iteration order is fixed by history
+     *           and cannot be perturbed by anything a caller does.
+     *        2. Keep those that admit the failure on all four axes: chain key, block window,
+     *           target contract, selector. A revoked coverage is still kept if the failure
+     *           happened inside its window and its claim deadline has not passed.
+     *        3. Of those, take the one whose PAYABLE AMOUNT is largest, where payable is
+     *           `min(perClaimCap, committed - alreadyDrawn)` — what the coverage would actually
+     *           pay, not what it nominally promises.
+     *        4. Ties break to the EARLIEST declared.
+     *
+     *      Step 3 chooses the largest rather than the smallest deliberately. It makes an
+     *      operator's liability MONOTONIC in the coverage they declare: adding a coverage can
+     *      only ever increase what a given failure costs them, never decrease it. Under an
+     *      earliest-declared rule the reverse holds — an operator could declare a token
+     *      coverage with a one-wei cap on day one and shelter every later, larger promise behind
+     *      it. Widest-payable closes that, and because the court and not the submitter applies
+     *      it, it closes the griefing direction at the same time.
+     *
+     *      Using payable rather than nominal `perClaimCap` matters once a coverage has been
+     *      drawn down: a coverage promising a large cap over an exhausted commitment would win
+     *      the comparison and then pay almost nothing.
+     *
+     * @return coverageId The selected coverage, or `bytes32(0)` if none admits the failure.
+     */
+    function selectCoverage(bytes32 operatorId, uint64 height, address target, bytes4 selector)
+        external
+        view
+        returns (bytes32 coverageId);
 
     // ─────────────────────────────────────────────────────────────────────────
     // Views

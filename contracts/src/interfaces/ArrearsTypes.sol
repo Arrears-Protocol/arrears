@@ -81,6 +81,8 @@ library ArrearsTypes {
         /// @dev Bond earmarked for this coverage. Slashes draw from it; it cannot be withdrawn
         ///      while the coverage can still be claimed against.
         uint256 committed;
+        /// @dev Already paid out of `committed` by slashes against this coverage.
+        uint256 drawn;
         /// @dev Maximum a single claim may take, so one bad hour cannot zero a bond.
         uint256 perClaimCap;
         /// @dev CC3 timestamp after which no NEW claim may be filed. Set strictly later than the
@@ -89,6 +91,14 @@ library ArrearsTypes {
         uint64 claimDeadline;
         /// @dev False once revoked. Revocation stops future coverage, never past liability.
         bool active;
+        /// @dev Source-chain height at which revocation took effect; 0 while active. Failures at
+        ///      or below this height remain claimable until `claimDeadline`.
+        uint64 revokedAtHeight;
+        /// @dev True once the leftover commitment has been returned to free bond after
+        ///      `claimDeadline`. Prevents double release.
+        bool released;
+        /// @dev Declaration sequence number. Fixes tie-break order independently of storage layout.
+        uint64 seq;
     }
 
     /// @notice One (contract, selector) pair inside a coverage's scope.
@@ -147,7 +157,13 @@ library ArrearsTypes {
         /// @dev The contract is covered but this selector on it is not.
         Selector,
         /// @dev Proven `commonTx.from` is not the operator this coverage belongs to.
-        Operator
+        Operator,
+        /// @dev Fully in scope, but the coverage was revoked from a height below this failure.
+        Revoked,
+        /// @dev Fully in scope, but the claim deadline has passed. Liability is time-barred.
+        Expired,
+        /// @dev Fully in scope and live, but the commitment is already drawn to nothing.
+        Exhausted
     }
 
     /// @notice The terms a credit line is priced on.
