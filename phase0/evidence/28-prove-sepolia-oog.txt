@@ -1,1 +1,19 @@
   waiting: tip 11646290, need 11646331 (41 behind)
+  waiting: tip 11646300, need 11646331 (31 behind)
+  waiting: tip 11646310, need 11646331 (21 behind)
+  waiting: tip 11646310, need 11646331 (21 behind)
+  waiting: tip 11646320, need 11646331 (11 behind)
+  waiting: tip 11646330, need 11646331 (1 behind)
+  waiting: tip 11646330, need 11646331 (1 behind)
+attested (tip 11646340 >= 11646331)
+
+verifySingle          true
+receiptStatus         0
+receiptGasUsed        30000
+commonTx.gasLimit     30000
+logs                  0
+from                  0x9733EcE9ba9351f70942E1241D875b878f6B178E
+to                    0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14
+selector              0xd0e30db0
+
+Arrears verdict:      OutOfGas -> SLASHABLE

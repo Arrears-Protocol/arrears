@@ -147,6 +147,21 @@ someone hardcodes a stale number. Same artifact class as mainnet
 [`0xc22eb305…`](https://etherscan.io/tx/0xc22eb305d884a45228068337df490470661882e5e0efb1ff901b93fd192a8096),
 on a chain where we hold the key.
 
+**Confirmed end to end against the live precompile** — `verifySingle` returned `true` at Sepolia
+height 11,646,331, index 97, 10 continuity roots. Everything the court needs decodes out of the
+attested bytes and nothing else:
+
+| decoded field | value | what the court does with it |
+|---|---|---|
+| `commonTx.from` | `0x9733EcE9…178E` | matched against the registered operator |
+| `commonTx.to` | `0xfFf99767…6B14` (Sepolia WETH) | the scope's target axis |
+| selector | `0xd0e30db0` (`deposit()`) | the scope's selector axis |
+| `receiptStatus` | `0` | it failed |
+| `receiptGasUsed` / `gasLimit` | `30000` / `30000` | **equal, so `Verdict.OutOfGas` — slashable** |
+| `receiptLogs` | `0` | as always for a revert; the court reads none |
+
+Attestation took 41 blocks, about eight minutes, from broadcast to provable.
+
 **Historical, on Ethereum mainnet.** Seven real failures spanning the 2023 USDC depeg through the
 2025 cascade, each verified against the live precompile, each in the slashable class. No bond can
 honestly attach to them, because we do not own those keys — so they stand as a **read-only gallery
