@@ -74,18 +74,9 @@ indistinguishable from a function that was never deployed. We wrote it up as *"s
 but not deployed"*. Both functions were there the whole time. Rewritten as
 [`../PROTOCOL-FINDINGS.md`](../PROTOCOL-FINDINGS.md) finding 3.
 
-Two things about this one are worth recording separately from the technical lesson.
-
-**It is the first that reached print.** The other two were caught in the working session that
-produced them. This one survived review, went into a document written to be published, and was
-still there when someone outside the project read it.
-
-**It was not caught by our own testing.** It was caught because Creditcoin asked us for the
-transaction hash and the calldata. We had run the check, saved the transcript and cited it — and
-the transcript was of a wrong measurement, so every later look at it confirmed the error. What
-broke the loop was an outsider asking for the artifact rather than the conclusion. **Publish the
-reproduction, not the result** — it is the only part of a claim that someone else can falsify,
-and on this occasion it is the only reason the claim got fixed before it did damage.
+This is the only one of the three that reached print. The other two were caught in the session
+that produced them; this one survived review and went into a document written to be published.
+Why it survived is rule 7.
 
 **`tsx` breaks Playwright's `addInitScript`.** It rewrites the function body and
 injects a `__name` helper that does not exist in the browser. The script throws,
@@ -104,7 +95,35 @@ by a second route before writing it down. A harness bug filed as an app bug wast
 protocol finding gets published, and then someone has to be told in public that
 they were wrong.
 
-## 7. Say which number is measured and which is derived
+## 7. Publish the reproduction, not the result
+
+**A saved transcript of a wrong measurement is self-reinforcing.** We ran the selector check,
+saved the output, cited it in two documents, and every subsequent look at the claim confirmed it —
+because every look landed on the same bad transcript. Evidence that is only ever re-read by the
+people who produced it does not get more true, it gets more entrenched. Nothing internal was going
+to break that loop.
+
+What broke it was Creditcoin asking for the transaction hash and the calldata rather than for our
+conclusion.
+
+So: **every claim ships with the command that produces it.** A result is something a reader has to
+take on trust; a reproduction is the only part of a claim that a stranger can falsify, and the
+only part that can come back and correct you. In practice, on this project:
+
+- Every finding in [`../PROTOCOL-FINDINGS.md`](../PROTOCOL-FINDINGS.md) links a probe **and** its
+  raw transcript, not a summary of one.
+- Findings that need no funded account say so, so a reader can run them immediately.
+- Reproductions that cost real money — a mined ruling, a consumed piece of evidence — get a free
+  path too (`--preview-only`, `estimateGas`), because a reproduction nobody can afford to run is a
+  result again.
+- A superseded transcript is **kept and marked wrong** rather than deleted. `14-selectors.txt`
+  still sits next to `42-selectors-library.txt`, so the trail shows what we measured, what we
+  concluded, and where the two parted company.
+
+The cost of being wrong in public is small and one-off. The cost of being wrong in private, with a
+transcript that agrees with you, compounds.
+
+## 8. Say which number is measured and which is derived
 
 Every gas figure on this project is either a mined receipt or an `estimateGas`
 validated against mined receipts (0.03–7.56% over, never under). Where a figure

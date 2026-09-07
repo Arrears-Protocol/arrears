@@ -18,8 +18,18 @@ import { Container, Reveal, SectionHead, Panel, Eyebrow } from './ui/primitives'
  *
  * Each card is stamped with the CC3 block it was ruled at, because the live panel
  * below has moved on since — and that gap is evidence, not an inconsistency.
+ *
+ * The card rows are hardcoded deltas because they are facts about one mined
+ * ruling and cannot drift. The live panel's figures come from the chain: read on
+ * the server for the first paint (so a reader with no JavaScript gets real
+ * numbers, not stale ones), then re-read in the browser.
  */
-export function Outcomes() {
+export type InitialState = {
+  bondedWei: string; slashedWei: string; limitWei: string;
+  premiumBps: number; strikes: number; claimCount: number;
+} | null;
+
+export function Outcomes({ initial }: { initial: InitialState }) {
   const R = M.rulings;
   const [live, setLive] = useState<'idle' | 'ok' | 'fail'>('idle');
   const [state, setState] = useState<Awaited<ReturnType<typeof operatorState>> | null>(null);
@@ -70,14 +80,15 @@ export function Outcomes() {
   ];
 
   const now = [
-    ['bonded', state ? `${Number(formatEther(state.bonded)).toLocaleString('en-US')} tCTC` : eth(R.finalState.bondedWei)],
-    ['slashed', state ? `${Number(formatEther(state.slashed)).toLocaleString('en-US')} tCTC` : eth(R.finalState.slashedWei)],
-    ['credit limit', state ? `${Number(formatEther(state.limit)).toLocaleString('en-US')} tCTC` : eth(R.finalState.creditLimitWei)],
-    ['premium', `${state ? state.premiumBps : R.finalState.premiumBps} bps`],
-    ['strikes', String(state ? state.strikes : R.finalState.strikes)],
-    ['claims on record', String(state ? state.claimCount : 2)],
+    ['bonded', state ? `${Number(formatEther(state.bonded)).toLocaleString('en-US')} tCTC` : eth(initial?.bondedWei)],
+    ['slashed', state ? `${Number(formatEther(state.slashed)).toLocaleString('en-US')} tCTC` : eth(initial?.slashedWei)],
+    ['credit limit', state ? `${Number(formatEther(state.limit)).toLocaleString('en-US')} tCTC` : eth(initial?.limitWei)],
+    ['premium', `${state?.premiumBps ?? initial?.premiumBps ?? '—'} bps`],
+    ['strikes', String(state?.strikes ?? initial?.strikes ?? '—')],
+    ['claims on record', String(state?.claimCount ?? initial?.claimCount ?? '—')],
   ];
-  const since = state ? Math.max(0, state.claimCount - 4) : 0;
+  const count = state?.claimCount ?? initial?.claimCount ?? 0;
+  const since = Math.max(0, count - 4);
 
   return (
     <section id="outcomes" className="py-24">

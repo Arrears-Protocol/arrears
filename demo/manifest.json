@@ -335,13 +335,6 @@
       "explorer": "https://creditcoin-testnet.blockscout.com/tx/0xd9f9628472e227ab97d52db043c9941af17308f3b2fd72d972ffd2c797a95685",
       "cc3Block": 5440311,
       "ruledAtISO": "2026-09-06T11:36:15.000Z"
-    },
-    "finalState": {
-      "bondedWei": "18000000000000000000",
-      "slashedWei": "2000000000000000000",
-      "creditLimitWei": "750000000000000000000",
-      "premiumBps": 650,
-      "strikes": 1
     }
   },
   "attestation": {
@@ -351,14 +344,10 @@
     "note": "Broadcast to provable. Makes Arrears a settlement-time mechanism, not an interception one. The demo opens on already-attested artifacts so nothing waits."
   },
   "evidencePool": {
-    "note": "Pre-produced and pre-attested so nothing in the demo waits on a chain. Real WETH9 calls that fail for ordinary reasons: an under-provisioned gas limit, or a zero balance.",
+    "note": "A candidate set, not a count. Items already ruled on are filtered out live against claimsAgainst before anything is offered, so this list only ever shrinks in effect and can never show a wrong number.",
     "target": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
     "operator": "0x9733EcE9ba9351f70942E1241D875b878f6B178E",
     "maxInteractiveSlashes": 400,
-    "counts": {
-      "OutOfGas": 29,
-      "ExplicitRevert": 9
-    },
     "items": [
       {
         "kind": "OutOfGas",
@@ -892,10 +881,6 @@
         "wouldSlashWei": "0",
         "coverageId": "0xcd05a125a8b7a63a244567a6072c5fca30f6bc9ffecfcbe959f488319392d0f5"
       }
-    ],
-    "consumedInTesting": [
-      "0xc4f27e0691f09bd8c2d6290e36c9005b9006f0e55844254b455b8c430461d188",
-      "0x049762f0efd1d4f1e3456be9b6a41a9bf2326ee33420b19abc83b0ad34107a03"
     ]
   }
 }

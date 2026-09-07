@@ -7,6 +7,7 @@ import { Act } from '../components/Act';
 import { Gallery } from '../components/Gallery';
 import { Trust } from '../components/Trust';
 import { DivideX } from '../components/ui/primitives';
+import { operatorState } from '../lib/chain';
 
 /**
  * Six sections, and the order is the argument:
@@ -19,8 +20,28 @@ import { DivideX } from '../components/ui/primitives';
  *
  * Sections 1, 2, 3, 5 and 6 stand without the relayer, and every one of them
  * renders complete server-side. Only the confirmation marks need hydration.
+ *
+ * The operator's current figures are read HERE, on the server, and revalidated —
+ * they used to be frozen into demo/manifest.json as a fallback for the reader
+ * with no JavaScript, and a frozen figure against a live chain is a figure that
+ * silently goes wrong. The manifest now carries hashes and addresses only.
  */
-export default function Page() {
+export const revalidate = 300;
+
+/** Never let a slow or down RPC take the page with it. Rule 3 in lib/chain.ts. */
+async function initialState() {
+  try {
+    const s = await operatorState();
+    return {
+      bondedWei: s.bonded.toString(), slashedWei: s.slashed.toString(),
+      limitWei: s.limit.toString(), premiumBps: s.premiumBps,
+      strikes: s.strikes, claimCount: s.claimCount,
+    };
+  } catch { return null; }
+}
+
+export default async function Page() {
+  const initial = await initialState();
   return (
     <>
       <Navbar />
@@ -29,7 +50,7 @@ export default function Page() {
         <DivideX />
         <FaultLine />
         <DivideX />
-        <Outcomes />
+        <Outcomes initial={initial} />
         <DivideX />
         <TryIt />
         <DivideX />

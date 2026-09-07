@@ -39,7 +39,9 @@ m.rulings = {
   refusal: R.rulings.refusal ?? null,
   strictRefusal: R.rulings.strictRefusal ?? null,
   outOfScope: R.rulings.outOfScope ?? null,
-  finalState: R.finalState ?? null,
+  // NO finalState. Every figure here is a fact about one mined transaction and
+  // cannot drift; the operator's current bond, limit, premium and strike count
+  // move with every claim, so they are read from the chain, never frozen.
 };
 
 m.slash.sourceFailures = {

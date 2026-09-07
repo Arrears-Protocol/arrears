@@ -19,7 +19,7 @@ Two rules carried over from the site, and they matter more on camera than they d
 
 | | |
 |---|---|
-| **Re-freeze `demo/manifest.json` first** | It has drifted a long way. `finalState` says bonded 18, slashed 2.0, limit 750, premium 650 bps, strikes 1. The chain says **47.8 / 2.2 / 237.3 / 1250 bps / 5 strikes** — self-testing and the live rulings moved it. Re-run the freeze before anything is shot, or the first judge who clicks through catches a mismatch. Every figure below marked *(live)* must be re-read after the freeze. |
+| ~~Re-freeze `demo/manifest.json`~~ | **No longer needed — fixed structurally.** The manifest carried a frozen `finalState` that had drifted to 18 / 2.0 / 750 / 650 bps / 1 strike against a chain reading 47.8 / 2.2 / 237.3 / 1250 bps / 5. It now carries no figures that can drift at all; the live panel is read on the server and revalidated. Figures marked *(live)* below are correct at shoot time by construction, but still read them off the screen rather than from this document. |
 | Browser | Clean profile, no extensions bar, MetaMask pinned. Dark theme — the outcome cards were contrast-checked there. |
 | Tabs pre-opened | `arrears.0xo.in`, Blockscout court page, Sepolia Etherscan. Never type a URL on camera. |
 | Wallet | Controller `0xD675A0C0…`, funded. The operator picker will show two — that is intentional, see shot 8. |
@@ -142,8 +142,16 @@ Cut to the JS-disabled pass: **25 checks, effective opacity 1.00 on all six sect
 > "The finding is better than the claim it replaces. It catches every builder who calls a library
 > from off chain."
 
-**Say this plainly and do not rush it.** Being corrected in public and taking it cleanly is the
-shot that makes the other nine credible.
+Then the line the whole shot exists for — **do not cut this one**:
+
+> "We didn't find it by testing harder. We'd run the check, saved the transcript and cited it, so
+> every time we looked, our own evidence agreed with us. It broke because somebody asked for our
+> reproduction instead of our conclusion. That's why every finding we publish ships with the
+> command that produces it."
+
+**Say all of this plainly and do not rush it.** Being corrected in public and taking it cleanly is
+the shot that makes the other nine credible — and a project that shows its own retraction on
+camera is making a claim about how it works that nothing else in the video can make.
 
 ### 11 · Close (2:54–3:00)
 
@@ -176,4 +184,4 @@ they are simply all ours.
 ## Cut if long
 
 In order: shot 3 (half two), then shot 6's second row, then shot 11's second sentence. Never cut
-shot 5 or shot 10.
+shot 5, shot 10, or the reproduction line inside shot 10.

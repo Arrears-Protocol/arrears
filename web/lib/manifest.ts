@@ -23,14 +23,13 @@ export interface Manifest {
   rulings: {
     relayer: string; beneficiary: string;
     slash: Ruling; refusal: Ruling; strictRefusal: Ruling; outOfScope: Ruling;
-    finalState: { bondedWei: string; slashedWei: string; creditLimitWei: string; premiumBps: number; strikes: number };
   };
   gallery: { title: string; note: string; items: GalleryItem[] };
   slash: { sourceTx: string; block: number; txIndex: number; gasUsed: number; gasLimit: number; honestlyNeeded: number;
     operator: string; target: string; targetName: string; selector: string; selectorName: string; expectedVerdict: string; note: string };
   exploits: Record<string, any>;
   attestation: { measuredLagBlocks: number; measuredLagSecondsApprox: number; chain: string; note: string };
-  evidencePool?: { target: string; selectorNames: Record<string, string>; items: PoolItem[] };
+  evidencePool?: { target: string; selectorNames: Record<string, string>; items: PoolItem[]; note?: string };
 }
 
 export interface Ruling {
