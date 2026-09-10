@@ -118,21 +118,16 @@ Each of these is a property of the protocol that shaped a decision, not a bug we
    so "why it failed" is unknowable on chain. That is why the slashable class is the one fact
    that needs no reason: `gasUsed >= gasLimit`. Every explicit revert is recorded and never
    slashed.
-3. **A revert mined through the precompile carries no return data.** Our own out-of-scope ruling
-   ([`0xd9f96284…`](https://creditcoin-testnet.blockscout.com/tx/0xd9f9628472e227ab97d52db043c9941af17308f3b2fd72d972ffd2c797a95685))
-   reverted with none, while the identical call over `eth_call` returned the named error in full.
-   So refusal reasons come from `previewClaim` over `eth_call`, and the interface never tries to
-   read a reason from a failed transaction.
-4. **Attestation lags the source chain** — 41 Sepolia blocks, about eight minutes, broadcast to
+3. **Attestation lags the source chain** — 41 Sepolia blocks, about eight minutes, broadcast to
    provable. Arrears cannot intercept a failure, and does not try: slashing a bond after a proven
    failure has no real-time requirement. The same cadence would be fatal to a liquidation guard.
-5. **A proof says a log exists, not who is entitled to have emitted it.** The precompile is right
+4. **A proof says a log exists, not who is entitled to have emitted it.** The precompile is right
    not to claim that. Arrears never trusts a log, and we demonstrated the documented pattern's
    footgun on chain: a 279-byte contract on Sepolia,
    [`0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8`](https://sepolia.etherscan.io/address/0xfC7eAbb288ca94c8c2E4001696405852f07CAcB8),
    emitted a forged 1,000,000 USDC `Transfer`, and a contract matching by signature credited it in
    [`0x7d81c7023aa1b0a6b820670332603489d94a9dc9591bcdbee12e4797d7c56947`](https://creditcoin-testnet.blockscout.com/tx/0x7d81c7023aa1b0a6b820670332603489d94a9dc9591bcdbee12e4797d7c56947).
-6. **A proof names an Ethereum address and nothing more.** Hence the EIP-191 registration — and
+5. **A proof names an Ethereum address and nothing more.** Hence the EIP-191 registration — and
    hence the one trust assumption, named rather than hidden.
 
 ### What we measured, and what we got wrong

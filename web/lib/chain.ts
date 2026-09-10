@@ -6,10 +6,11 @@
  *  1. eth_call ONLY. Nothing exported here can send a transaction. The relayer is the sole
  *     writer and it lives server-side, in app/api/claim, because it holds a key.
  *
- *  2. NEVER read a failed transaction's revert reason on chain. Our own out-of-scope
- *     transaction returned no revert data at all -- pallet-evm drops precompile revert
- *     reasons on a mined transaction -- while the identical call over eth_call returned
- *     them in full. Refusal reasons come from previewClaim, always.
+ *  2. NEVER read a failed transaction's revert reason on chain. A receipt never carries
+ *     revert data, and the public CC3 RPC offers no debug_traceTransaction, so a mined
+ *     revert's reason can only be recovered by re-running the call. Refusal reasons come
+ *     from previewClaim over eth_call, always. (An earlier version of this comment blamed
+ *     pallet-evm; that was a misreading -- docs/principles.md rule 4.)
  *
  *  3. Nothing waits on a chain. Every artifact is already mined. These calls confirm facts
  *     the page has already rendered from the manifest; if one is slow or fails, the page

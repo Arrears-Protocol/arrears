@@ -34,9 +34,11 @@ than a convention people remember:
    transaction.
 2. **Never read a failed transaction's revert reason on chain.** Our own out-of-scope transaction
    [`0xd9f96284…`](https://creditcoin-testnet.blockscout.com/tx/0xd9f9628472e227ab97d52db043c9941af17308f3b2fd72d972ffd2c797a95685)
-   returned **no revert data** — `pallet-evm` drops precompile revert reasons on a mined
-   transaction — while the same call over `eth_call` returned them in full. Refusal reasons are
-   therefore always obtained by previewing, never by reading a receipt.
+   came back from the node with **no revert data** — as any mined revert does, because a receipt
+   never carries return data — while the same call over `eth_call` returned the named error in
+   full. Refusal reasons are therefore always obtained by previewing, never by reading a receipt.
+   *(Corrected 10 Sep 2026: this line originally blamed `pallet-evm`; see `docs/principles.md`
+   rule 4.)*
 3. **Nothing waits on a chain.** Every artifact is already mined. No attestation polling, no
    spinner on a confirmation. Live calls are confirmations of already-true facts, so they render
    progressively: the page paints instantly from `manifest.json`, and each live check adds a

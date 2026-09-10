@@ -63,7 +63,7 @@ async function main() {
     minedHash = e?.receipt?.hash ?? e?.transaction?.hash ?? '';
     console.log(`  mined and REVERTED: ${minedHash}`);
     console.log(`  ${EX}/tx/${minedHash}`);
-    // pallet-evm drops precompile revert reasons on a mined tx; eth_call returns them
+    // a mined revert's receipt carries no return data (true on any EVM chain); eth_call returns it
     try {
       await CC3.call({ to: D.court, from: relayer.address,
         data: iface.encodeFunctionData('submitSlashingClaim', [D.operatorId, d.headerNumber, d.txBytes, mp, cp, JUDGE]) });

@@ -50,10 +50,22 @@ screen. A narrow document beside a wide console is correct, not an inconsistency
 
 ## 4. Never read a failed transaction's revert reason on chain
 
-`pallet-evm` does not propagate precompile revert reasons on a mined transaction.
-Our own out-of-scope ruling returned no revert data at all, while the identical
-call over `eth_call` returned it in full. Refusal reasons come from
-`previewClaim`, always. See finding 2 in [`../PROTOCOL-FINDINGS.md`](../PROTOCOL-FINDINGS.md).
+A receipt never carries revert data — on any EVM chain — and the public CC3 RPC
+does not expose `debug_traceTransaction`, so a client cannot learn why a mined
+transaction reverted without re-running it. Refusal reasons come from
+`previewClaim` over `eth_call`, before anything is sent, always.
+
+> *Corrected 10 September 2026.* This rule used to say `pallet-evm` does not
+> propagate precompile revert reasons on a mined transaction. That was a misreading.
+> When the relayer submitted the out-of-scope ruling, the node's response carried no
+> revert data (`phase0/evidence/32-rulings.txt`: "revert data not returned by the node") —
+> which is what a client sees for *any* mined revert, and we attributed it to the
+> chain. Blockscout decodes the named error for both mined refusals, `OutOfScope`
+> on `0xd9f96284…` and `NotSlashableExplicitRevert` on `0xc0bf98c0…`, and replaying
+> the call at its parent block over `eth_call` returns the same bytes. The rule
+> stands; its stated cause did not. It also cited "finding 2", which is about
+> `estimateGas` and says nothing of the kind. The rule 6 pattern: the client's view
+> of a transaction, read as a property of the chain.
 
 ## 5. Sample arbitrary heights when benchmarking Attestcoin
 
@@ -74,7 +86,7 @@ indistinguishable from a function that was never deployed. We wrote it up as *"s
 but not deployed"*. Both functions were there the whole time. Rewritten as
 [`../PROTOCOL-FINDINGS.md`](../PROTOCOL-FINDINGS.md) finding 3.
 
-This is the only one of them that reached print. The other two were caught in the session
+This is the only one of them that reached print. The others were caught in the session
 that produced them; this one survived review and went into a document written to be published.
 Why it survived is rule 7.
 
@@ -108,10 +120,10 @@ that reads one node passes or crashes depending on the day. Before the fallback,
 The tell in every one was a result that contradicted something already known to
 be true — a documented gas curve, a wallet that was plainly installed, a function
 named in the library's own header comment, a transaction our own demo had verified
-the day before. When that happens, reproduce the claim
-by a second route before writing it down. A harness bug filed as an app bug wastes a fix; a harness bug filed as a
-protocol finding gets published, and then someone has to be told in public that
-they were wrong.
+the day before. When that happens, reproduce the claim by a second route before
+writing it down. A harness bug filed as an app bug wastes a fix; a harness bug
+filed as a protocol finding gets published, and then someone has to be told in
+public that they were wrong.
 
 ## 7. Publish the reproduction, not the result
 

@@ -146,12 +146,15 @@ contract — and refused, because `withdraw(uint256)` is in no coverage's scope.
 `Selector` specifically, so the submitter learns the one thing that missed rather than being told
 only that something did.
 
-Worth noting how that was read: the mined transaction returned **no revert data**, because
-`pallet-evm` does not propagate precompile revert reasons on a mined transaction. The same call
-over `eth_call` returns them in full. That is the behaviour documented in
-[`../PROTOCOL-FINDINGS.md`](../PROTOCOL-FINDINGS.md) finding 2, showing up in practice — and the
-reason a front-end should always preview over `eth_call` rather than reading a failed
-transaction's reason off chain.
+Worth noting how that was read: the relayer's mined transaction came back from the node with
+**no revert data** — as every mined revert does, because a receipt never carries return data. The
+same call over `eth_call` returns the named error in full, and Blockscout decodes it for the mined
+transaction as well. That is why a front-end should preview over `eth_call` rather than try to
+read a failed transaction's reason off its receipt.
+
+*Corrected 10 September 2026: this paragraph previously blamed `pallet-evm` for the missing data
+and cited PROTOCOL-FINDINGS finding 2, which is about `estimateGas`. See
+[`../docs/principles.md`](../docs/principles.md) rule 4.*
 
 **Strict path — refuses and records nothing.**
 [`0xc0bf98c0…`](https://creditcoin-testnet.blockscout.com/tx/0xc0bf98c0231b2d059fd8a824c1c41f4cd224698cf159629582f64e2f7c4463c7)
