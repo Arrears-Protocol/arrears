@@ -103,12 +103,24 @@ comment may reasonably conclude that estimation cannot be trusted at all. In pra
 - Across every valid proof tested — fourteen heights, batch sizes 1 through 10 — `estimateGas`
   against the precompile **succeeded every time**, including from a zero-balance account. The
   fallback never triggered. It failed only where the call genuinely would revert.
-- Replaying nine mined CC3 transactions at their own parent block, `estimateGas` tracked actual
-  `gasUsed` to within **0.03%–6.81%, and over-estimated in every case** — never under.
+- Against the precompile specifically, seven mined batch verifications (N = 1, 2, 3, 5, 8, 9,
+  10) were estimated before mining and compared with their receipts: **over-estimated by
+  0.17%–7.56% in every case, never under**
+  ([`probes/22`](phase0/probes/22-ceiling-mined.ts) · [transcript](phase0/evidence/22-ceiling-mined.txt)).
+- Replaying general CC3 traffic is less clean, and says so. Of twelve transactions that
+  **succeeded** when mined, replayed at their parent block, nine estimated within
+  **0.03%–6.32%**, all over; **three failed to estimate** although each had succeeded.
+  Parent-block state is not the state a transaction saw inside its own block, so a replay is an
+  imperfect test — but it means a failed estimate is not, on its own, proof the call would revert
+  ([`probes/17`](phase0/probes/17-estimator-trust.ts) · [transcript](phase0/evidence/17-estimator-trust.txt)).
 
-So the heuristic is a correct safety net, but estimation is a sound conservative upper bound on
-CC3 today. Both facts are worth stating together; the comment alone reads more alarming than the
-behaviour warrants.
+> *Corrected 10 September 2026.* This bullet previously read "replaying nine mined CC3
+> transactions … within 0.03%–6.81%". The transcript says twelve replayed, nine estimated, a
+> worst case of 6.32%, and three failures the sentence left out. 6.81% appears in no transcript.
+
+So the heuristic is a correct safety net, and where the precompile call is valid, estimation is a
+sound conservative upper bound on CC3 today. Both facts are worth stating together; the comment
+alone reads more alarming than the behaviour warrants.
 
 ---
 

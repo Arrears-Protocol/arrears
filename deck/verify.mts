@@ -52,6 +52,38 @@ M.gallery.items.forEach((_: any, i: number) => refs.set(`gallery.items.${i}.sour
 M.operator.coverages.forEach((_: any, i: number) => refs.set(`operator.coverages.${i}.target`, 'sepolia'));
 
 /**
+ * The DoraHacks text is held to the same rule as the deck, but it is prose, so
+ * its hashes are typed. Each one must therefore be FOUND in the manifest — a
+ * hash that is not there was typed by hand and could be wrong — and is then
+ * checked on chain like any slide ref. The chain comes from where the value
+ * lives in the manifest, never from guessing at its shape.
+ */
+const DOCS = ['../docs/dorahacks-submission.md'];
+const where = new Map<string, string>();   // lowercased value → manifest path
+(function walk(o: any, p: string) {
+  if (typeof o === 'string' && /^0x[0-9a-fA-F]{40}([0-9a-fA-F]{24})?$/.test(o)) { if (!where.has(o.toLowerCase())) where.set(o.toLowerCase(), p); return; }
+  if (o && typeof o === 'object') for (const [k, v] of Object.entries(o)) walk(v, p ? `${p}.${k}` : k);
+})(M, '');
+function chainFor(path: string): Chain | 'id' | null {
+  if (/(^|\.)(operatorId|claimId|id)$/.test(path)) return 'id';
+  const c = path.match(/^contracts\.(\w+)\.address$/);
+  if (c) return M.contracts[c[1]].chain as Chain;
+  if (/^gallery\.items\.\d+\.sourceTx$|^exploits\.halfOne\.sourceTx$/.test(path)) return 'mainnet';
+  if (/^rulings\.\w+\.sourceTx$|^slash\.|^exploits\.halfTwo\.(forgeTx|impostor|impostorDeployTx|expectedToken|forgedFrom)$|^operator\.(sourceAddress|coverages\.\d+\.target)$|^contracts\.impostor\./.test(path)) return 'sepolia';
+  if (/^rulings\.\w+\.(hash|minedTx)$|^exploits\.half(One|Two)\.(acceptanceTx|contract)$|^operator\.(controller|treasury|registrationTx|bondTx|coverages\.\d+\.tx)$|^rulings\.(relayer|beneficiary)$|^contracts\.\w+\.deployTx$/.test(path)) return 'cc3';
+  return null;
+}
+const docRefs: Array<{ doc: string; value: string; path: string | undefined }> = [];
+for (const d of DOCS) {
+  const text = readFileSync(resolve(HERE, d), 'utf8');
+  const seen = new Set<string>();
+  for (const m of text.matchAll(/0x[0-9a-fA-F]{64}(?![0-9a-fA-F])|0x[0-9a-fA-F]{40}(?![0-9a-fA-F])/g)) {
+    const v = m[0].toLowerCase(); if (seen.has(v)) continue; seen.add(v);
+    docRefs.push({ doc: d.replace('../', ''), value: m[0], path: where.get(v) });
+  }
+}
+
+/**
  * A second route, because the first one lies by omission.
  *
  * The public Sepolia RPC (publicnode) returns null for some transactions that
@@ -104,6 +136,31 @@ for (const [ref, chain] of refs) {
     if (isEoa) ok(`${tag}  account${code === '0x' ? ' (no code, as expected)' : ''}`);
     else if (code === '0x') no(`${tag} — no code on ${chain}`);
     else ok(`${tag}  contract · ${(code.length - 2) / 2} bytes`);
+  }
+}
+
+// the submission text: every hash must come from the manifest, then exist on its chain
+for (const d of new Set(docRefs.map((r) => r.doc))) {
+  const mine = docRefs.filter((r) => r.doc === d);
+  console.log(`\n${d} · ${mine.length} hashes and addresses`);
+  for (const { value, path } of mine) {
+    const tag = `${value.slice(0, 10)}…${value.slice(-6)}`;
+    if (!path) { no(`${tag} — not in demo/manifest.json, so it was typed by hand`); continue; }
+    const chain = chainFor(path);
+    if (chain === null) { no(`${tag}  ${path} — no chain rule for this manifest path; refusing to guess`); continue; }
+    if (chain === 'id') { ok(`${tag}  ${path}  identifier, not a transaction`); continue; }
+    if (refs.get(path) === chain) { ok(`${chain.padEnd(7)} ${tag}  ${path}  (checked above, on the slides)`); continue; }
+    if (value.length === 66) {
+      const [r, t] = await Promise.all([RPC[chain].getTransactionReceipt(value), RPC[chain].getTransaction(value)]);
+      const got = r && t ? { status: r.status, block: r.blockNumber, via: '' } : await secondRoute(chain, value);
+      const e = EXPECT[path];
+      !got ? no(`${chain.padEnd(7)} ${tag}  ${path} — not found by the RPC or by Blockscout`)
+      : e && got.status !== e.status ? no(`${chain.padEnd(7)} ${tag}  ${path} — status ${got.status}, text implies ${e.status}`)
+      : ok(`${chain.padEnd(7)} ${tag}  ${path}  status ${got.status} · block ${got.block.toLocaleString('en-US')}${got.via}`);
+    } else {
+      const code = await RPC[chain].getCode(value);
+      code === '0x' ? no(`${chain.padEnd(7)} ${tag}  ${path} — no code on ${chain}`) : ok(`${chain.padEnd(7)} ${tag}  ${path}  contract · ${(code.length - 2) / 2} bytes`);
+    }
   }
 }
 

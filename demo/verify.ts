@@ -20,6 +20,50 @@ const CC3 = new JsonRpcProvider(process.env.CC3_RPC ?? A.cc3.rpc);
 const SEP = new JsonRpcProvider(process.env.SEPOLIA_RPC ?? A.sepolia.rpc);
 const ETH = new JsonRpcProvider(process.env.ETH_RPC ?? 'https://ethereum-rpc.publicnode.com');
 
+/**
+ * Every receipt is read through a second route, because a public RPC can return
+ * `null` for a transaction that plainly exists — and `null` is what a missing
+ * transaction looks like. On 10 Sep 2026 the public Sepolia endpoint did exactly
+ * that for two transactions this repository cites, both confirmed by Sepolia's
+ * Blockscout. A reproduction a judge runs must not fail on one node's gap, so a
+ * miss falls through to the chain's Blockscout API and says so.
+ * docs/principles.md rule 6.
+ *
+ * FORCE_SECOND_ROUTE=1 skips the RPC entirely, to prove the fallback works.
+ */
+const BLOCKSCOUT = new Map<JsonRpcProvider, string>([
+  [CC3, 'https://creditcoin-testnet.blockscout.com'],
+  [SEP, 'https://eth-sepolia.blockscout.com'],
+  [ETH, 'https://eth.blockscout.com'],
+]);
+let secondRouteUsed = 0;
+async function receipt(rpc: JsonRpcProvider, hash: string): Promise<any> {
+  if (!process.env.FORCE_SECOND_ROUTE) {
+    const r = await rpc.send('eth_getTransactionReceipt', [hash]).catch(() => null);
+    if (r) return r;
+  }
+  const base = BLOCKSCOUT.get(rpc)!;
+  const [t, l]: any[] = await Promise.all([
+    fetch(`${base}/api/v2/transactions/${hash}`).then((r) => r.json()),
+    fetch(`${base}/api/v2/transactions/${hash}/logs`).then((r) => r.json()),
+  ]);
+  if (!t?.hash) return null;
+  secondRouteUsed++;
+  console.log(dim(`     (receipt ${hash.slice(0, 10)}… read from ${new URL(base).host} — the RPC returned nothing)`));
+  return {
+    transactionHash: t.hash,
+    from: t.from?.hash ?? null,
+    to: t.to?.hash ?? null,
+    contractAddress: t.created_contract?.hash ?? null,
+    status: t.status === 'ok' ? '0x1' : '0x0',
+    blockNumber: '0x' + Number(t.block_number ?? t.block).toString(16),
+    gasUsed: '0x' + BigInt(t.gas_used).toString(16),
+    logs: (l.items ?? []).map((x: any) => ({
+      address: x.address.hash, data: x.data, topics: (x.topics ?? []).filter((z: any) => z != null),
+    })),
+  };
+}
+
 const SETTLEMENT = new Interface([
   'event SettlementAccepted(bytes32 indexed key, uint64 indexed chainKey, uint64 height, address payer, address target, uint256 value, bytes4 selector, uint64 gasUsed)',
 ]);
@@ -47,14 +91,14 @@ async function halfOne() {
   console.log(`   ${h.title}\n`);
 
   // 1. the source transaction really did revert on Ethereum mainnet
-  const src = await ETH.send('eth_getTransactionReceipt', [h.sourceTx]);
+  const src = await receipt(ETH, h.sourceTx);
   console.log(`   source (Ethereum mainnet)  ${h.sourceTx}`);
   check(src?.status === '0x0', 'the source transaction REVERTED on mainnet', `receiptStatus=${src?.status}`);
   check(src?.logs.length === 0, 'it carries zero logs (a revert rolls back the journal)', `logs=${src?.logs.length}`);
   check(parseInt(src.blockNumber, 16) === h.sourceBlock, `mainnet block ${h.sourceBlock}`);
 
   // 2. the CC3 ruling accepted it anyway
-  const rc = await CC3.send('eth_getTransactionReceipt', [h.acceptanceTx]);
+  const rc = await receipt(CC3, h.acceptanceTx);
   console.log(`\n   ruling (Creditcoin CC3)    ${h.acceptanceTx}`);
   check(rc?.status === '0x1', 'the naive ASC transaction SUCCEEDED', `status=${rc?.status}`);
   check(getAddress(rc.to) === getAddress(h.contract), `sent to the naive ASC ${h.contract}`);
@@ -92,7 +136,7 @@ async function halfTwo() {
   check((code.length - 2) / 2 < 400, 'it is far too small to be a real ERC-20', `${(code.length - 2) / 2} bytes`);
 
   // 2. it emitted a real Transfer log
-  const frc = await SEP.send('eth_getTransactionReceipt', [h.forgeTx]);
+  const frc = await receipt(SEP, h.forgeTx);
   const log = frc.logs[0];
   console.log(`\n   forged event (Sepolia)     ${h.forgeTx}`);
   check(frc?.status === '0x1', 'the forge transaction succeeded on Sepolia');
@@ -101,7 +145,7 @@ async function halfTwo() {
   console.log(`     claims  ${formatUnits(h.forgedAmount, 6)} USDC from ${h.forgedFrom} ${dim("(Circle's treasury)")}`);
 
   // 3. CC3 accepted it against the real token
-  const rc = await CC3.send('eth_getTransactionReceipt', [h.acceptanceTx]);
+  const rc = await receipt(CC3, h.acceptanceTx);
   console.log(`\n   ruling (Creditcoin CC3)    ${h.acceptanceTx}`);
   check(rc?.status === '0x1', 'the naive ASC transaction SUCCEEDED');
   const proved = rc.logs.filter((l: any) => l.address.toLowerCase() === PRECOMPILE && l.topics[0] === TX_VERIFIED);

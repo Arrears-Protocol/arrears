@@ -219,6 +219,7 @@ obvious upgrade if this ever matters.
 |---|---|
 | [`deck/`](deck/) | the submission deck — [PDF](https://arrears.0xo.in/arrears-deck.pdf) · [light](https://arrears.0xo.in/arrears-deck-light.pdf); every hash filled from the manifest and checked against the chain |
 | [`docs/video-shotlist.md`](docs/video-shotlist.md) | the submission video, shot by shot |
+| [`docs/dorahacks-submission.md`](docs/dorahacks-submission.md) | the DoraHacks form text; every hash must come from the manifest and exist on chain (`cd deck && npx tsx verify.mts`) |
 | [`docs/upstream-selector-issue.md`](docs/upstream-selector-issue.md) | a report for ethers/viem/web3, held until after 13 September |
 | [`selftest/`](selftest/) | walks every write path in a real browser with a real wallet, as a first-time user |
 | [`demo/`](demo/) | the demo surface — both exploit halves, the evidence gallery and the slash, verifiable with one command |

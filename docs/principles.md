@@ -64,7 +64,7 @@ the guidance was right. Use 12,345,678, never 12,000,000.
 
 ## 6. When a test fails, suspect the instrument before the subject
 
-Three times now the instrument lied in a way that looked exactly like a finding.
+Four times now the instrument lied in a way that looked exactly like a finding.
 
 **An ABI-derived selector is wrong for a Solidity library.** A public library function refers to a
 struct parameter by canonical name — `EvmV1Decoder.LogEntry[]` — instead of expanding it to a
@@ -74,7 +74,7 @@ indistinguishable from a function that was never deployed. We wrote it up as *"s
 but not deployed"*. Both functions were there the whole time. Rewritten as
 [`../PROTOCOL-FINDINGS.md`](../PROTOCOL-FINDINGS.md) finding 3.
 
-This is the only one of the three that reached print. The other two were caught in the session
+This is the only one of them that reached print. The other two were caught in the session
 that produced them; this one survived review and went into a document written to be published.
 Why it survived is rule 7.
 
@@ -88,9 +88,27 @@ string, never as a function.
 measurement is wrong in a plausible direction, so the result reads as a discovery
 rather than as a broken instrument.
 
-The tell in all three was a result that contradicted something already known to
+**Public Sepolia RPCs return nothing for some historical transactions.** Not an
+error — a `null` receipt, which is exactly what a transaction that does not exist
+returns. So a single-source lookup silently reports *absence* where it should
+report *failure to look*. Checking the deck, publicnode's Sepolia endpoint returned
+`null` for `0x5c02af74…` and `0xdc8730cf…`. Both exist: Sepolia's Blockscout returns
+them reverted at blocks 11,646,965 and 11,647,014 with the gas on the slides, and a
+second RPC confirmed the second. The same endpoint served a neighbouring
+transaction, `0xe11a3557…`, without trouble, so the gaps are per-transaction,
+not a node that is plainly down. **Never conclude a transaction is missing from
+one source.** A miss falls through to a second route and the output names which
+route answered — `deck/verify.mts` and `demo/verify.ts` both do this against each
+chain's Blockscout API. The gap is also **intermittent**: on one run publicnode dropped
+the forge transaction `0xb7dbe7c2…` and on the next it served it, so a reproduction
+that reads one node passes or crashes depending on the day. Before the fallback,
+`demo/verify.ts` — the command the deck and README hand to judges — crashed with a
+`TypeError` on exactly that gap.
+
+The tell in every one was a result that contradicted something already known to
 be true — a documented gas curve, a wallet that was plainly installed, a function
-named in the library's own header comment. When that happens, reproduce the claim
+named in the library's own header comment, a transaction our own demo had verified
+the day before. When that happens, reproduce the claim
 by a second route before writing it down. A harness bug filed as an app bug wastes a fix; a harness bug filed as a
 protocol finding gets published, and then someone has to be told in public that
 they were wrong.
