@@ -1,0 +1,13 @@
+{
+  "name": "arrears-deck",
+  "private": true,
+  "type": "module",
+  "description": "The submission deck: one HTML file on the site's tokens, printed to PDF, every hash checked against the chain.",
+  "scripts": {
+    "render": "tsx render.mts",
+    "verify": "tsx verify.mts",
+    "build": "tsx verify.mts && tsx render.mts"
+  },
+  "dependencies": { "ethers": "^6.13.4" },
+  "devDependencies": { "playwright": "1.63.0", "tsx": "^4.19.2", "typescript": "^5.7.2", "@types/node": "^22.10.0" }
+}

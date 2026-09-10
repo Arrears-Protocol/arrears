@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<title>Arrears — BUIDL CTC 2026 Fall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=block" rel="stylesheet">
+<!--
+  The deck is the site, printed.
+
+  Same three faces, same tokens, same outcome and axis colours, copied verbatim
+  from web/app/globals.css. Evidence stays mono. Dark is the default; ?theme=light
+  prints the same deck on the light tokens.
+
+  NO HASH IN THIS FILE IS TYPED BY HAND. Every hash, address and CC3 block stamp
+  is a `data-ref` into demo/manifest.json, filled in at render time, so the deck
+  cannot disagree with the manifest — and deck/verify.mts checks the manifest
+  against the chain.
+-->
+<style>
+  :root, .light {
+    --bg:#ffffff; --bg-raised:#f7f8f8; --bg-sunken:#eceef0;
+    --fg:#101317; --fg-2:#5d6773; --fg-3:#838d99;
+    --line:#d8dce0; --line-soft:#eceef0;
+    --pass:#3f6b4d; --miss:#9c4f34; --moved:#966313; --kept:#35688f; --away:#5d6673;
+  }
+  .dark {
+    --bg:#0a0c0f; --bg-raised:#101317; --bg-sunken:#06080a;
+    --fg:#f7f8f8; --fg-2:#b3bac2; --fg-3:#838d99;
+    --line:#272d35; --line-soft:#191d23;
+    --pass:#7fa88a; --miss:#d08a6b; --moved:#d9a13b; --kept:#6d9dc5; --away:#8b93a1;
+  }
+  @page { size: 1920px 1080px; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--fg); }
+  body { font-family: 'Inter Tight', ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+
+  .slide {
+    width: 1920px; height: 1080px; padding: 84px 112px 104px; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; background: var(--bg); break-after: page; page-break-after: always;
+  }
+  .slide:last-child { break-after: auto; page-break-after: auto; }
+
+  /* type */
+  .display { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; letter-spacing: -0.02em; line-height: 1.02; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums slashed-zero; font-feature-settings: "zero" 1, "tnum" 1; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 19px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-3); }
+  h1.display { font-size: 112px; }
+  h2.display { font-size: 84px; max-width: 22ch; }
+  .lead { font-size: 32px; line-height: 1.45; color: var(--fg-2); max-width: 52ch; }
+  .body { font-size: 25px; line-height: 1.55; color: var(--fg-2); }
+  .small { font-size: 20px; line-height: 1.5; color: var(--fg-3); }
+  strong, .fg { color: var(--fg); font-weight: 500; }
+  code, .code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; color: var(--fg); }
+  em { font-style: italic; }
+
+  /* surfaces */
+  .panel { background: var(--bg-raised); border: 1px solid var(--line); border-radius: 14px; }
+  .sunken { background: var(--bg-sunken); border: 1px solid var(--line); border-radius: 14px; }
+  .rule { height: 1px; background: var(--line); }
+  .dash { border-top: 1px dashed var(--line); }
+  .kv { display: grid; grid-template-columns: 220px 1fr; gap: 10px 28px; align-items: baseline; }
+  .kv .k { font-family: 'JetBrains Mono', monospace; font-size: 18px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3); }
+  .kv .v { font-family: 'JetBrains Mono', monospace; font-size: 24px; color: var(--fg); }
+  a { color: inherit; text-decoration: none; }
+  a[data-ref] { border-bottom: 1px solid var(--line); }
+
+  table.data { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums slashed-zero; }
+  table.data th { font-size: 16px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-3); font-weight: 500; text-align: left; padding: 0 20px 14px; border-bottom: 1px solid var(--line); }
+  table.data td { font-size: 22px; color: var(--fg-2); padding: 15px 20px; border-bottom: 1px solid var(--line-soft); }
+  table.data tr:last-child td { border-bottom: 0; }
+  table.data td.num, table.data th.num { text-align: right; }
+  table.data td.fg { color: var(--fg); }       table.data td.moved { color: var(--moved); }
+  table.data td.kept { color: var(--kept); }   table.data td.miss { color: var(--miss); }
+  #coverage td, #coverage th { white-space: nowrap; }
+  /* No ligatures on evidence. JetBrains Mono draws == and >= as single glyphs,
+     and a reader checking code against a contract should see the characters. */
+  .mono, code, .code, pre, table.data, .kv, .axis, .oc, .cx .ck, .foot, .eyebrow { font-variant-ligatures: none; font-feature-settings: "zero" 1, "tnum" 1, "calt" 0, "liga" 0; }
+
+  .moved { color: var(--moved); } .kept { color: var(--kept); } .away { color: var(--away); }
+  .pass { color: var(--pass); } .miss { color: var(--miss); }
+
+  .foot { position: absolute; left: 112px; right: 112px; bottom: 40px; display: flex; justify-content: space-between; align-items: baseline;
+          font-family: 'JetBrains Mono', monospace; font-size: 16px; letter-spacing: 0.08em; color: var(--fg-3); }
+  .foot b { color: var(--fg-2); font-weight: 500; letter-spacing: 0.02em; }
+  .grow { flex: 1; }
+  .row { display: flex; gap: 48px; }
+  .col { display: flex; flex-direction: column; }
+</style>
+</head>
+<body>
+
+<!-- ───────────────────────── 1 · name, one line, the hero refusal ───────────────────────── -->
+<section class="slide" data-n="1">
+  <div class="row grow" style="gap:88px; align-items:stretch">
+    <div class="col" style="flex:1; justify-content:space-between">
+      <div>
+        <div class="eyebrow">BUIDL CTC 2026 Fall · Creditcoin Attestcoin Protocol</div>
+        <h1 class="display" style="font-size:176px; margin-top:34px; line-height:.9">Arrears</h1>
+        <p class="lead" style="margin-top:30px; font-size:36px; color:var(--fg); max-width:24ch">
+          A failed Ethereum transaction, admitted as evidence against a bonded operator.
+        </p>
+      </div>
+      <div>
+        <div class="rule" style="margin-bottom:34px"></div>
+        <h2 class="display" style="font-size:70px">A real failure.<br>A bonded operator.<br>Turned away.</h2>
+        <p class="body" style="margin-top:22px; max-width:44ch">
+          It failed inside the covered window, on a covered contract. Arrears refused to touch the
+          bond, because the operator never promised to answer for <code>withdraw()</code>.
+        </p>
+      </div>
+    </div>
+
+    <div class="panel col" style="width:820px; padding:44px 46px">
+      <div class="eyebrow">The claim, checked against the promise</div>
+      <div style="margin-top:28px">
+        <div class="axis"><span class="k">operator</span><span class="v"><a data-ref="operator.sourceAddress" data-chain="sepolia"></a></span><span class="n">bonded on Creditcoin</span><span class="m pass">✓</span></div>
+        <div class="axis"><span class="k">chain</span><span class="v">Ethereum Sepolia</span><span class="n">Attestcoin chain key 1</span><span class="m pass">✓</span></div>
+        <div class="axis"><span class="k">window</span><span class="v">11,646,000 – 11,700,000</span><span class="n">block <span data-num="rulings.outOfScope.sourceBlock"></span> is inside</span><span class="m pass">✓</span></div>
+        <div class="axis"><span class="k">contract</span><span class="v"><a data-ref="slash.target" data-chain="sepolia"></a></span><span class="n">WETH9 — covered</span><span class="m pass">✓</span></div>
+        <div class="axis miss-row"><span class="k">selector</span><span class="v">0x2e1a7d4d</span><span class="n">withdraw(uint256) — in no coverage</span><span class="m miss">✗</span></div>
+      </div>
+      <div class="grow"></div>
+      <div class="sunken" style="padding:26px 28px">
+        <div class="mono" style="font-size:17px; letter-spacing:.1em; text-transform:uppercase; color:var(--away)">ruling · turned away</div>
+        <div class="mono" style="font-size:23px; margin-top:12px; color:var(--fg); line-height:1.5">OutOfScope(<span class="miss">Selector</span>, <a data-ref="slash.target" data-chain="sepolia"></a>,<br>&nbsp;&nbsp;0x2e1a7d4d, <span data-num="rulings.outOfScope.sourceBlock" data-raw></span>)</div>
+        <div class="mono" style="font-size:19px; margin-top:16px; color:var(--fg-3); line-height:1.7">
+          mined on CC3 &nbsp;<a data-ref="rulings.outOfScope.minedTx" data-chain="cc3"></a><br>
+          the failure &nbsp;&nbsp;<a data-ref="rulings.outOfScope.sourceTx" data-chain="sepolia"></a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <style>
+    .axis { display:grid; grid-template-columns: 150px 1fr 40px; grid-template-rows:auto auto; column-gap:18px; padding:16px 0; border-bottom:1px solid var(--line-soft); }
+    .axis .k { grid-row:1/3; font-family:'JetBrains Mono',monospace; font-size:17px; letter-spacing:.1em; text-transform:uppercase; color:var(--fg-3); padding-top:5px; }
+    .axis .v { font-family:'JetBrains Mono',monospace; font-size:24px; color:var(--fg); }
+    .axis .n { grid-column:2; font-size:19px; color:var(--fg-3); margin-top:4px; }
+    .axis .m { grid-column:3; grid-row:1/3; font-family:'JetBrains Mono',monospace; font-size:28px; text-align:right; align-self:center; }
+    .axis.miss-row .v, .axis.miss-row .n { color: var(--miss); }
+  </style>
+  <div class="foot"><b>Arrears</b><span>arrears.0xo.in</span><span>1 / 13</span></div>
+</section>
+
+<!-- ───────────────────────── 2 · why the refusal is the interesting half ───────────────────────── -->
+<section class="slide" data-n="2">
+  <div class="eyebrow">Why start with a refusal</div>
+  <h2 class="display" style="margin-top:30px; font-size:104px; max-width:17ch">A rule that only ever says yes is not a rule.</h2>
+  <p class="lead" style="margin-top:40px; max-width:60ch">
+    Any contract can move money when it is handed a proof. What makes Arrears a court rather than a
+    payout button is what it declines — on chain, with a named error, in an explorer nobody here controls.
+  </p>
+  <div class="grow"></div>
+  <div class="row" style="gap:28px">
+    <div class="panel" style="flex:1; padding:34px 36px">
+      <div class="mono" style="font-size:72px; color:var(--fg); line-height:1">89.7%</div>
+      <p class="body" style="margin-top:16px">of reverted mainnet transactions are explicit reverts —
+        the contract said no on purpose. Arrears must record every one and slash none of them.</p>
+      <div class="mono small" style="margin-top:14px">647 of 721 · measured, 200 attested blocks</div>
+    </div>
+    <div class="panel" style="flex:1; padding:34px 36px">
+      <div class="mono" style="font-size:72px; line-height:1"><span class="moved">1</span> <span style="color:var(--fg-3)">·</span> <span class="kept">1</span> <span style="color:var(--fg-3)">·</span> <span class="away">2</span></div>
+      <p class="body" style="margin-top:16px">Four mined rulings. One moved a bond, one kept a record,
+        two turned the claim away. None of them is an error.</p>
+      <div class="mono small" style="margin-top:14px">bond moved · record kept · turned away</div>
+    </div>
+    <div class="panel" style="flex:1; padding:34px 36px">
+      <div class="mono" style="font-size:72px; color:var(--fg); line-height:1">0</div>
+      <p class="body" style="margin-top:16px">claims written by the strict path when it refused.
+        It declined and left no trace — demonstrated on chain, not described in a spec.</p>
+      <div class="mono small" style="margin-top:14px">claim.ruledAt == 0 after refusal</div>
+    </div>
+  </div>
+  <div class="foot"><b>Arrears</b><span>arrears.0xo.in</span><span>2 / 13</span></div>
+</section>
+
+<!-- ───────────────────────── 3 · the kill question ───────────────────────── -->
+<section class="slide" data-n="3">
+  <div class="eyebrow">The kill question</div>
+  <h2 class="display" style="margin-top:26px; max-width:none; font-size:76px">Can a <em>reverted</em> Ethereum transaction be proven on Creditcoin?</h2>
+  <div class="row grow" style="margin-top:40px; gap:40px; align-items:stretch">
+    <div class="panel" style="flex:1.25; padding:34px 42px">
+      <div class="eyebrow">Ethereum mainnet · ground truth</div>
+      <div class="kv" style="margin-top:26px">
+        <span class="k">tx</span><span class="v" style="font-size:20px"><a data-ref="exploits.halfOne.sourceTx" data-chain="mainnet" data-full></a></span>
+        <span class="k">block</span><span class="v">25,916,354 · index 85</span>
+        <span class="k">status</span><span class="v miss">0x0 — reverted</span>
+        <span class="k">gas used</span><span class="v">386,677 of 598,875</span>
+        <span class="k">logs</span><span class="v">0</span>
+      </div>
+      <div class="dash" style="margin:30px 0 26px"></div>
+      <div class="eyebrow">On Creditcoin CC3</div>
+      <div class="kv" style="margin-top:22px">
+        <span class="k">precompile</span><span class="v">0x…0FD2 &nbsp;verifySingle → <span class="pass">true</span></span>
+        <span class="k">decoder</span><span class="v">decodeReceiptFields → receiptStatus <span class="miss">0</span></span>
+      </div>
+    </div>
+    <div class="col" style="flex:1; justify-content:space-between">
+      <div>
+        <div class="display" style="font-size:96px; line-height:1">Yes.</div>
+        <p class="lead" style="margin-top:22px; font-size:30px">The proof verifies, and the failure is
+          readable on chain. Nobody had done it; it is the entire premise.</p>
+      </div>
+      <div class="sunken" style="padding:28px 30px">
+        <div class="eyebrow">And it is already exploitable</div>
+        <p class="body" style="margin-top:14px; font-size:23px">A naive contract accepted this exact
+          failure as a completed settlement:</p>
+        <div class="mono" style="font-size:21px; margin-top:12px"><a data-ref="exploits.halfOne.acceptanceTx" data-chain="cc3"></a></div>
+        <p class="small" style="margin-top:14px">Its strict twin refuses the same proof with
+          <code>SourceTransactionReverted(0, 386677, 598875)</code> — every value decoded from the proven bytes.</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><b>Arrears</b><span>arrears.0xo.in</span><span>3 / 13</span></div>
+</section>
+
+<!-- ───────────────────────── 4 · no logs ───────────────────────── -->
+<section class="slide" data-n="4">
+  <div class="eyebrow">What a failure carries</div>
+  <h2 class="display" style="margin-top:30px">A reverted transaction has no logs. Ever.</h2>
+  <div class="row grow" style="margin-top:48px; gap:56px; align-items:stretch">
+    <div class="col" style="flex:1">
+      <div class="mono" style="font-size:120px; line-height:1; color:var(--fg)">813<span style="color:var(--fg-3)"> / </span>813</div>
+      <p class="body" style="margin-top:18px">reverted mainnet transactions with zero logs and an
+        all-zero bloom, across two independent scans. That is EVM semantics, not sampling: a
+        top-level revert rolls back the journal, logs included.</p>
+      <div class="grow"></div>
+      <div class="panel" style="padding:30px 34px">
+        <p class="body" style="font-size:26px; color:var(--fg)">The documented Attestcoin pattern is
+          event-driven — prove a transaction, read its logs. That pattern doesn't reach failures,
+          because a failure has none.</p>
+        <p class="body" style="margin-top:16px">It isn't a limit of the protocol. The decoder reads
+          <code>from</code>, <code>to</code>, calldata and <code>status</code> on any proven
+          transaction, for anyone who thinks to ask. <strong>We were first, not alone.</strong></p>
+      </div>
+    </div>
+    <div class="panel" style="flex:1; padding:34px 38px">
+      <div class="eyebrow">Proven, from the bytes the precompile verified</div>
+      <table class="data" style="margin-top:24px">
+        <thead><tr><th>field</th><th>what it tells Arrears</th></tr></thead>
+        <tbody>
+          <tr><td class="fg">receiptStatus</td><td>that it failed — <span class="miss">0</span></td></tr>
+          <tr><td class="fg">gasUsed · gasLimit</td><td>whose fault it was</td></tr>
+          <tr><td class="fg">to</td><td>which contract</td></tr>
+          <tr><td class="fg">selector</td><td>which promise</td></tr>
+          <tr><td class="fg">from</td><td>whose bond</td></tr>
+          <tr><td style="color:var(--fg-3)">revert reason</td><td style="color:var(--fg-3)">not committed — never recoverable</td></tr>
+        </tbody>
+      </table>
+      <p class="small" style="margin-top:24px">Revert return data is not part of what Attestcoin
+        commits to. Arrears is built entirely on fields that are.</p>
+    </div>
+  </div>
+  <div class="foot"><b>Arrears</b><span>arrears.0xo.in</span><span>4 / 13</span></div>
+</section>
+
+<!-- ───────────────────────── 5 · the fault line ───────────────────────── -->
+<section class="slide" data-n="5">
+  <div class="eyebrow">The fault line</div>
+  <h2 class="display" style="margin-top:30px; max-width:20ch">Reverting is not failing a duty. Running out of gas is.</h2>
+  <div class="row grow" style="margin-top:48px; gap:48px; align-items:stretch">
+    <div class="panel" style="flex:1; padding:34px 38px">
+      <div class="eyebrow">Ethereum mainnet · 200 attested blocks</div>
+      <table class="data" style="margin-top:22px">
+        <tbody>
+          <tr><td>transactions</td><td class="num fg">49,140</td><td class="num">measured</td></tr>
+          <tr><td>reverted</td><td class="num fg">721 · 1.47%</td><td class="num">measured</td></tr>
+          <tr><td>per day</td><td class="num fg">~26,000</td><td class="num">extrapolated</td></tr>
+          <tr><td class="kept">explicit revert</td><td class="num kept">647 · 89.7%</td><td class="num">record, never slash</td></tr>
+          <tr><td class="moved">out of gas</td><td class="num moved">74 · 10.3%</td><td class="num">slashable</td></tr>
+        </tbody>
+      </table>
+      <p class="small" style="margin-top:22px">Reverting is normal: a swap that moved, a check that
+        failed. Punishing it would punish participation.</p>
+    </div>
+    <div class="col" style="flex:1.1">
+      <div class="sunken" style="padding:34px 38px">
+        <div class="eyebrow">ArrearsVerdict.sol — the whole rule</div>
+<pre class="mono" style="margin-top:22px; font-size:22px; line-height:1.6; color:var(--fg-2); white-space:pre">function classify(uint8 receiptStatus,
+                  uint64 gasUsed, uint64 gasLimit)
+    internal pure returns (Verdict)
+{
+    if (receiptStatus == 1) return Verdict.Succeeded;
+    return gasUsed <span class="fg">&gt;=</span> gasLimit
+        ? Verdict.<span class="moved">OutOfGas</span>
+        : Verdict.<span class="kept">ExplicitRevert</span>;
+}</pre>
+      </div>
+      <p class="body" style="margin-top:30px; font-size:26px"><strong>The sender chose the limit.</strong>
+        Nobody can race them into choosing it badly, so it is the one failure that is unambiguously theirs.</p>
+      <p class="small" style="margin-top:14px"><code>internal</code>, so the compiler inlines it into
+        both the court and the probe: the gallery and the slash run the same bytes.</p>
+    </div>
+  </div>
+  <div class="foot"><b>Arrears</b><span>arrears.0xo.in</span><span>5 / 13</span></div>
+</section>
+
+<!-- ───────────────────────── 6 · three outcomes, four rulings ───────────────────────── -->
+<section class="slide" data-n="6">
+  <div class="eyebrow">Three outcomes · four rulings · all mined</div>
+  <h2 class="display" style="margin-top:30px">A refusal is the system working.</h2>
+  <div class="row grow" style="margin-top:44px; gap:28px; align-items:stretch">
+    <div class="panel col oc" style="--t:var(--moved)">
+      <div class="tag">outcome 1 of 3</div><div class="nm">Bond moved</div><div class="sb">out of gas — the sender chose the limit</div>
+      <div class="stamp">as at CC3 block <span data-num="rulings.slash.cc3Block"></span></div>
+      <div class="dl"><span>bond</span><b>−2.0 tCTC</b></div>
+      <div class="dl"><span>treasury</span><b>+2.0 tCTC</b></div>
+      <div class="dl"><span>credit limit</span><b>1,000 → 750</b></div>
+      <div class="dl"><span>premium</span><b>500 → 650 bps</b></div>
+      <div class="dl"><span>strikes</span><b>0 → 1</b></div>
+      <div class="dl"><span>claims on record</span><b>+1</b></div>
+      <div class="grow"></div>
+      <div class="hx"><a data-ref="rulings.slash.hash" data-chain="cc3"></a><br><span>WETH9 deposit() · 30,000 of 30,000 gas</span></div>
+    </div>
+    <div class="panel col oc" style="--t:var(--kept)">
+      <div class="tag">outcome 2 of 3</div><div class="nm">Record kept</div><div class="sb">explicit revert — on the record, never slashable</div>
+      <div class="stamp">as at CC3 block <span data-num="rulings.refusal.cc3Block"></span></div>
+      <div class="dl q"><span>bond</span><b>unchanged</b></div>
+      <div class="dl q"><span>treasury</span><b>unchanged</b></div>
+      <div class="dl q"><span>credit limit</span><b>unchanged</b></div>
+      <div class="dl q"><span>premium</span><b>unchanged</b></div>
+      <div class="dl q"><span>strikes</span><b>unchanged</b></div>
+      <div class="dl"><span>claims on record</span><b>+1</b></div>
+      <div class="grow"></div>
+      <div class="hx"><a data-ref="rulings.refusal.hash" data-chain="cc3"></a><br><span>NotSlashableExplicitRevert · 0x6bf93631</span></div>
+    </div>
+    <div class="panel col oc" style="--t:var(--away)">
+      <div class="tag">outcome 3 of 3</div><div class="nm">Turned away</div><div class="sb">outside the promise — nothing happened at all</div>
+      <div class="stamp">as at CC3 blocks <span data-num="rulings.outOfScope.cc3Block"></span> · <span data-num="rulings.strictRefusal.cc3Block"></span></div>
+      <div class="dl q"><span>bond</span><b>unchanged</b></div>
+      <div class="dl q"><span>treasury</span><b>unchanged</b></div>
+      <div class="dl q"><span>credit limit</span><b>unchanged</b></div>
+      <div class="dl q"><span>premium</span><b>unchanged</b></div>
+      <div class="dl q"><span>strikes</span><b>unchanged</b></div>
+      <div class="dl"><span>claims on record</span><b>0</b></div>
+      <div class="grow"></div>
+      <div class="hx"><a data-ref="rulings.outOfScope.minedTx" data-chain="cc3"></a> <span>out of scope</span><br>
+        <a data-ref="rulings.strictRefusal.minedTx" data-chain="cc3"></a> <span>strict path</span></div>
+    </div>
+  </div>
+  <style>
+    .oc { flex:1; padding:32px 34px; border-top:3px solid var(--t); }
+    .oc .tag { font-family:'JetBrains Mono',monospace; font-size:16px; letter-spacing:.13em; text-transform:uppercase; color:var(--t); }
+    .oc .nm { font-family:'Instrument Serif',serif; font-size:52px; line-height:1; margin-top:12px; }
+    .oc .sb { font-size:19px; color:var(--fg-3); margin-top:10px; }
+    .oc .stamp { font-family:'JetBrains Mono',monospace; font-size:16px; color:var(--fg-3); border-top:1px dashed var(--line); border-bottom:1px dashed var(--line); padding:10px 0; margin:18px 0 8px; }
+    .oc .dl { display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:19px; padding:9px 0; border-bottom:1px solid var(--line-soft); }
+    .oc .dl span { color:var(--fg-3); } .oc .dl b { color:var(--t); font-weight:600; }
+    .oc .dl.q b { color:var(--fg-2); font-weight:400; }
+    .oc .hx { font-family:'JetBrains Mono',monospace; font-size:18px; line-height:1.75; color:var(--fg); border-top:1px solid var(--line-soft); padding-top:16px; }
+    .oc .hx span { color:var(--fg-3); }
+  </style>
+  <div class="foot"><b>Arrears</b><span>arrears.0xo.in</span><span>6 / 13</span></div>
+</section>
+
+<!-- ───────────────────────── 7 · ruledAt == 0 ───────────────────────── -->
+<section class="slide" data-n="7">
+  <div class="eyebrow">Demonstrated, not designed</div>
+  <h2 class="display mono" style="margin-top:30px; font-family:'JetBrains Mono',monospace; font-size:78px; letter-spacing:-0.01em">claim.ruledAt == 0</h2>
+  <p class="lead" style="margin-top:30px; max-width:62ch">The strict path refused an explicit revert and
+    wrote nothing. After the refusal, the claim that would have existed still reads as never ruled.</p>
+  <div class="row grow" style="margin-top:48px; gap:32px; align-items:stretch">
+    <div class="panel" style="flex:1; padding:34px 38px">
+      <div class="mono" style="font-size:24px; color:var(--fg)">submitClaim</div>
+      <p class="body" style="margin-top:14px">Records every proven failure. Slashes only if it is
+        slashable. An explicit revert lands as <span class="kept">Record kept</span>.</p>
+      <div class="dash" style="margin:26px 0 20px"></div>
+      <div class="mono" style="font-size:24px; color:var(--fg)">submitSlashingClaim</div>
+      <p class="body" style="margin-top:14px">Slash or nothing. An explicit revert reverts the whole
+        call — no record, no strike, no state.</p>
+    </div>
+    <div class="sunken" style="flex:1.2; padding:34px 38px">
+      <div class="eyebrow">The strict path, on chain</div>
+      <div class="kv" style="margin-top:24px; grid-template-columns:200px 1fr">
+        <span class="k">the failure</span><span class="v" style="font-size:21px"><a data-ref="rulings.strictRefusal.sourceTx" data-chain="sepolia"></a></span>
+        <span class="k">gas used</span><span class="v">24,187 of 100,000</span>
+        <span class="k">submitted</span><span class="v" style="font-size:21px"><a data-ref="rulings.strictRefusal.minedTx" data-chain="cc3"></a></span>
+        <span class="k">error</span><span class="v" style="font-size:21px">NotSlashableExplicitRevert(24187, 100000)</span>
+        <span class="k">recorded</span><span class="v away">nothing — ruledAt 0</span>
+      </div>
+      <p class="small" style="margin-top:26px">The reason is read from <code>previewClaim</code> over
+        <code>eth_call</code>. A revert mined through the precompile carries no return data, so the
+        UI never tries to read one from a failed transaction.</p>
+    </div>
+  </div>
+  <div class="foot"><b>Arrears</b><span>arrears.0xo.in</span><span>7 / 13</span></div>
+</section>
+
+<!-- ───────────────────────── 8 · the gallery ───────────────────────── -->
+<section class="slide" data-n="8">
+  <div class="eyebrow">Classification at real scale</div>
+  <h2 class="display" style="margin-top:30px; max-width:none">Seven mainnet failures, three years.</h2>
+  <div class="panel" style="margin-top:44px; padding:30px 34px 20px">
+    <table class="data" id="gallery">
+      <thead><tr><th>stress window</th><th class="num">block</th><th class="num">gas used / limit</th><th>verdict</th><th>transaction</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div class="row" style="margin-top:34px; gap:48px; align-items:flex-start">
+    <p class="body" style="flex:1.4">Each proven against the live precompile and classified by the same
+      inlined <code>ArrearsVerdict</code> that slashes on Sepolia. <strong>No bond attaches</strong> —
+      nobody here holds those keys, so they stand as a record of what the protocol would have caught.</p>
+    <div class="sunken mono" style="flex:1; padding:20px 26px; font-size:21px; color:var(--fg)">
+      <span style="color:var(--fg-3)">$</span> cd demo &amp;&amp; npm run gallery<br>
+      <span style="color:var(--fg-3); font-size:18px">re-proves all seven live · no key, no funds</span>
+    </div>
+  </div>
+  <div class="foot"><b>Arrears</b><span>arrears.0xo.in</span><span>8 / 13</span></div>
+</section>
+
+<!-- ───────────────────────── 9 · scope ───────────────────────── -->
+<section class="slide" data-n="9">
+  <div class="eyebrow">Scope is the product</div>
+  <h2 class="display" style="margin-top:30px; max-width:20ch">A bond answers for a promise, not for everything.</h2>
+  <div class="row grow" style="margin-top:48px; gap:48px; align-items:stretch">
+    <div class="panel" style="flex:1.35; padding:32px 36px">
+      <div class="eyebrow">The demo operator's declared coverage · Sepolia</div>
+      <table class="data" id="coverage" style="margin-top:20px">
+        <thead><tr><th>contract</th><th>selector</th><th class="num">blocks</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="small" style="margin-top:18px">Coverage is a (contract, selector) set plus a window.
+        Where several cover a claim, the court takes the widest payable, ties to the earliest declared.</p>
+    </div>
+    <div class="col" style="flex:1">
+      <div class="sunken" style="padding:30px 34px">
+        <div class="eyebrow">OutOfScope names the axis that missed</div>
+        <div class="mono" style="margin-top:20px; font-size:24px; line-height:1.9; color:var(--fg-2)">
+          Operator · Chain · Window<br>Target · <span class="miss">Selector</span><br>Revoked · Expired · Exhausted
+        </div>
+      </div>
+      <p class="body" style="margin-top:30px; font-size:26px"><strong>Revocation stops future cover.
+        It never removes past liability.</strong> A failure at or below the revocation height stays
+        claimable until the deadline passes — tested on both sides of the boundary.</p>
+    </div>
+  </div>
+  <div class="foot"><b>Arrears</b><span>arrears.0xo.in</span><span>9 / 13</span></div>
+</section>
+
+<!-- ───────────────────────── 10 · what we found — and the correction ───────────────────────── -->
+<section class="slide" data-n="10">
+  <div class="eyebrow">What we found building on the protocol</div>
+  <div class="row grow" style="margin-top:30px; gap:44px; align-items:stretch">
+    <div class="col" style="flex:0.86; gap:24px">
+      <div class="panel" style="padding:28px 32px">
+        <div class="mono" style="font-size:17px; letter-spacing:.1em; text-transform:uppercase; color:var(--fg-3)">undocumented</div>
+        <div class="display" style="font-size:44px; margin-top:8px">The batch cap is ten.</div>
+        <p class="body" style="font-size:21px; margin-top:12px">Both <code>verify</code> and
+          <code>verifyAndEmit</code> take up to 10 proofs. The 11th reverts with
+          <code>heights: Value is too large for length</code>. A protocol bound, not a gas one —
+          ten used 0.515% of the block cap.</p>
+      </div>
+      <div class="panel grow" style="padding:28px 32px">
+        <div class="mono" style="font-size:17px; letter-spacing:.1em; text-transform:uppercase; color:var(--fg-3)">a footgun in the documented pattern</div>
+        <div class="display" style="font-size:44px; margin-top:8px">Nobody checks the emitter.</div>
+        <p class="body" style="font-size:21px; margin-top:12px">The precompile proves inclusion and makes
+          no claim about who emitted a log — correct behaviour. But matching an event by signature
+          invites a check nobody performs. A 279-byte contract on Sepolia emitted a forged
+          1,000,000 USDC <code>Transfer</code>; a naive contract credited it, with
+          <code>emitterWasExpected = false</code> in the same event.</p>
+        <div class="mono" style="font-size:18px; margin-top:14px; color:var(--fg-3); line-height:1.7">
+          accepted &nbsp;<a data-ref="exploits.halfTwo.acceptanceTx" data-chain="cc3"></a><br>
+          impostor &nbsp;<a data-ref="exploits.halfTwo.impostor" data-chain="sepolia"></a>
+        </div>
+        <p class="small" style="margin-top:16px">The fix is one comparison. Its strict twin makes it and
+          refuses the same proof with <code>WrongEmitter</code>.</p>
+      </div>
+    </div>
+
+    <div class="panel col" style="flex:1.14; padding:36px 42px; border-color:var(--fg-3)">
+      <div class="mono" style="font-size:17px; letter-spacing:.1em; text-transform:uppercase; color:var(--fg)">a finding we got wrong</div>
+      <div class="display" style="font-size:60px; margin-top:10px; line-height:1.02">We reported a missing function. It was there.</div>
+
+      <div class="cx">
+        <span class="ck">what we said</span>
+        <p><code>getLogsByEventSignature</code> ships in the SDK's ABI but isn't deployed.</p>
+        <span class="ck">what's true</span>
+        <p><strong>We were wrong.</strong> Both overloads are deployed and both work — 16 of 16 functions dispatch.</p>
+        <span class="ck">why</span>
+        <p><code>EvmV1Decoder</code> is a <em>library</em>. A public library function names a struct
+          parameter canonically, so it dispatches <code class="pass">0x07648c7a</code>. Standard ABI
+          tooling derives <code class="miss">0xe6c11b43</code> from the ABI's <code>type</code> field — and
+          that reverts with no data, indistinguishable from a function that isn't there.</p>
+        <span class="ck">how it surfaced</span>
+        <p>Not by our testing. Our saved transcript agreed with us every time we looked. Creditcoin
+          asked for our <strong>reproduction</strong> rather than our conclusion — and the reproduction
+          is what broke.</p>
+      </div>
+      <div class="grow"></div>
+      <div class="sunken" style="padding:20px 26px; margin-top:20px">
+        <p class="body" style="font-size:23px; color:var(--fg)">So every finding we publish ships with
+          the command that produces it.</p>
+      </div>
+    </div>
+  </div>
+  <style>
+    .cx { display:grid; grid-template-columns: 190px 1fr; gap:16px 26px; margin-top:28px; align-items:baseline; }
+    .cx .ck { font-family:'JetBrains Mono',monospace; font-size:16px; letter-spacing:.1em; text-transform:uppercase; color:var(--fg-3); }
+    .cx p { font-size:22px; line-height:1.5; color:var(--fg-2); }
+  </style>
+  <div class="foot"><b>Arrears</b><span>arrears.0xo.in</span><span>10 / 13</span></div>
+</section>
+
+<!-- ───────────────────────── 11 · who buys this, and why Creditcoin ───────────────────────── -->
+<section class="slide" data-n="11">
+  <div class="eyebrow">Who buys this, and why it's on Creditcoin</div>
+  <h2 class="display" style="margin-top:28px; font-size:66px; max-width:none">An operator bonds because bonding buys credit. A proven failure record prices it.</h2>
+  <div class="row grow" style="margin-top:44px; gap:44px; align-items:stretch">
+    <div class="col" style="flex:1; gap:26px">
+      <div>
+        <div class="eyebrow">Who</div>
+        <p class="body" style="margin-top:12px">Anyone whose transactions other people depend on —
+          relayers, keepers, solvers, bridge and intent executors. Their counterparties can't see
+          how reliable they are. <strong>A scoped bond and a record nobody can edit</strong> let them.</p>
+      </div>
+      <div>
+        <div class="eyebrow">Why Creditcoin</div>
+        <p class="body" style="margin-top:12px">The record and the line belong on a chain built for
+          credit history. <strong>Attestcoin is how an Ethereum failure arrives as evidence without an
+          oracle</strong> — and the price is a pure function anyone can evaluate. A pricing rule nobody
+          can check is an oracle.</p>
+      </div>
+      <div class="grow"></div>
+      <p class="small">Built: the bond, scoped coverage, the slash, the price. Not built: drawing on the line.</p>
+    </div>
+    <div class="panel" style="flex:1; padding:32px 36px">
+      <div class="mono" style="font-size:20px; color:var(--fg-2)">ArrearsCreditLine.quote(1,000 tCTC, 500 bps, strikes)</div>
+      <table class="data" style="margin-top:20px">
+        <thead><tr><th>strikes</th><th class="num">limit · tCTC</th><th class="num">premium</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td class="num fg">1,000.00</td><td class="num">500 bps</td></tr>
+          <tr><td>1</td><td class="num fg">750.00</td><td class="num">650 bps</td></tr>
+          <tr><td>2</td><td class="num fg">562.50</td><td class="num">800 bps</td></tr>
+          <tr><td>3</td><td class="num fg">421.88</td><td class="num">950 bps</td></tr>
+          <tr><td>4</td><td class="num fg">316.41</td><td class="num">1,100 bps</td></tr>
+          <tr><td class="moved">5</td><td class="num moved">237.30</td><td class="num moved">1,250 bps</td></tr>
+        </tbody>
+      </table>
+      <p class="small" style="margin-top:20px">−25% compounding and +150 bps per strike, read back from
+        the deployed contract. The demo operator sits at strike 5 — exactly the highlighted row — as at
+        CC3 block <span class="mono" id="asat">5,463,719</span>.</p>
+    </div>
+  </div>
+  <div class="foot"><b>Arrears</b><span>arrears.0xo.in</span><span>11 / 13</span></div>
+</section>
+
+<!-- ───────────────────────── 12 · the one thing we take on trust ───────────────────────── -->
+<section class="slide" data-n="12">
+  <div class="eyebrow">What we take on trust</div>
+  <h2 class="display" style="margin-top:30px">One thing, and the precompile does not verify it.</h2>
+  <div class="row grow" style="margin-top:46px; gap:48px; align-items:stretch">
+    <div class="col" style="flex:1.2">
+      <p class="lead" style="font-size:30px; max-width:none">Everything else here is proven — that a
+        transaction was included, that it failed, what it called, how much gas it burned. But
+        <strong>the bond lives on Creditcoin while the evidence names an Ethereum address</strong>, and
+        nothing in an Attestcoin proof connects those two identities.</p>
+      <p class="body" style="margin-top:26px">The registry closes the gap with an EIP-191 signature,
+        checked with <code>ecrecover</code>. Sound in practice — nobody gains by binding an address they
+        don't control. But a compromised source-chain key means a wrongly attributable bond that no
+        amount of proving would catch.</p>
+      <div class="grow"></div>
+      <p class="small">Named in the README's limitations and on the site — not in a code comment.</p>
+    </div>
+    <div class="panel" style="flex:1; padding:30px 36px">
+      <div class="eyebrow">And the limits we chose</div>
+      <div class="lim"><b>No claimant reward.</b> A bounty would make the beneficiary something a paying relayer could redirect.</div>
+      <div class="lim"><b>A careful operator can fail without consequence.</b> Only <code>gasUsed &gt;= gasLimit</code> is slashable.</div>
+      <div class="lim"><b>Settlement-time, not interception.</b> Broadcast to provable is 41 blocks, about eight minutes, measured.</div>
+      <div class="lim"><b>Testnet, unaudited.</b> The bond is play money until it is not.</div>
+    </div>
+  </div>
+  <style>
+    .lim { font-size:21px; line-height:1.5; color:var(--fg-2); padding:16px 0; border-bottom:1px solid var(--line-soft); }
+    .lim:last-child { border-bottom:0; }
+    .lim b { color:var(--fg); font-weight:500; display:block; margin-bottom:3px; }
+  </style>
+  <div class="foot"><b>Arrears</b><span>arrears.0xo.in</span><span>12 / 13</span></div>
+</section>
+
+<!-- ───────────────────────── 13 · what's live ───────────────────────── -->
+<section class="slide" data-n="13">
+  <div class="eyebrow">What's live</div>
+  <h2 class="display" style="margin-top:30px">Open any of it. We don't control the explorer.</h2>
+  <div class="row grow" style="margin-top:46px; gap:44px; align-items:stretch">
+    <div class="panel" style="flex:1.1; padding:30px 36px">
+      <div class="eyebrow">Creditcoin CC3 testnet · verified on Blockscout</div>
+      <table class="data" style="margin-top:18px">
+        <tbody>
+          <tr><td class="fg">ArrearsRegistry</td><td><a data-ref="contracts.arrearsRegistry.address" data-chain="cc3"></a></td></tr>
+          <tr><td class="fg">ArrearsCourt</td><td><a data-ref="contracts.arrearsCourt.address" data-chain="cc3"></a></td></tr>
+          <tr><td class="fg">ArrearsCreditLine</td><td><a data-ref="contracts.arrearsCreditLine.address" data-chain="cc3"></a></td></tr>
+          <tr><td class="fg">VerdictProbe</td><td><a data-ref="contracts.verdictProbe.address" data-chain="cc3"></a></td></tr>
+        </tbody>
+      </table>
+      <div class="kv" style="margin-top:30px; grid-template-columns:150px 1fr">
+        <span class="k">site</span><span class="v"><a href="https://arrears.0xo.in">arrears.0xo.in</a></span>
+        <span class="k">source</span><span class="v"><a href="https://github.com/Arrears-Protocol/arrears">github.com/Arrears-Protocol/arrears</a></span>
+      </div>
+    </div>
+    <div class="col" style="flex:1">
+      <div class="sunken mono" style="padding:28px 32px; font-size:23px; color:var(--fg); line-height:1.6">
+        <span style="color:var(--fg-3)">$</span> cd demo &amp;&amp; npm install &amp;&amp; npm run verify
+        <div style="font-size:18px; color:var(--fg-3); margin-top:8px; line-height:1.5">both exploit halves and all seven mainnet failures,
+          re-read live · no key, no funds, no .env</div>
+      </div>
+      <p class="body" style="margin-top:28px"><code>PROTOCOL-FINDINGS.md</code> — six findings, each
+        with its probe and the raw transcript. <code>selftest/</code> walks every write path in a real
+        browser with a real wallet.</p>
+      <div class="grow"></div>
+      <div class="display" style="font-size:58px; line-height:1.06">Publish the reproduction,<br>not the result.</div>
+    </div>
+  </div>
+  <div class="foot"><b>Arrears</b><span>arrears.0xo.in</span><span>13 / 13</span></div>
+</section>
+
+<script>
+  // Theme: dark by default, ?theme=light prints the same deck on the light tokens.
+  if (new URLSearchParams(location.search).get('theme') === 'light') {
+    document.documentElement.className = 'light';
+  }
+
+  const EXPL = {
+    cc3: 'https://creditcoin-testnet.blockscout.com',
+    sepolia: 'https://sepolia.etherscan.io',
+    mainnet: 'https://etherscan.io',
+  };
+  const get = (o, path) => path.split('.').reduce((a, k) => (a == null ? a : a[/^\d+$/.test(k) ? +k : k]), o);
+  const short = (v) => v.slice(0, 10) + '…' + v.slice(-6);
+  const link = (v, chain) => `${EXPL[chain]}/${v.length === 66 ? 'tx' : 'address'}/${v}`;
+
+  function fill(M) {
+    document.querySelectorAll('[data-ref]').forEach((el) => {
+      const v = get(M, el.dataset.ref);
+      if (typeof v !== 'string') return;              // left empty: render.mts refuses to print
+      el.dataset.hash = v;
+      el.href = link(v, el.dataset.chain);
+      el.textContent = el.hasAttribute('data-full') ? v : short(v);
+    });
+    document.querySelectorAll('[data-num]').forEach((el) => {
+      const v = get(M, el.dataset.num);
+      if (typeof v !== 'number') return;
+      el.dataset.value = String(v);
+      el.textContent = el.hasAttribute('data-raw') ? String(v) : v.toLocaleString('en-US');
+    });
+
+    const gb = document.querySelector('#gallery tbody');
+    gb.innerHTML = M.gallery.items.map((g) => `
+      <tr>
+        <td class="fg">${g.window}</td>
+        <td class="num">${g.block.toLocaleString('en-US')}</td>
+        <td class="num">${g.expectedGasUsed.toLocaleString('en-US')} / ${g.expectedGasLimit.toLocaleString('en-US')}</td>
+        <td class="moved">${g.expectedVerdict}</td>
+        <td><a data-ref="gallery.items.${M.gallery.items.indexOf(g)}.sourceTx" data-chain="mainnet"
+               data-hash="${g.sourceTx}" href="${link(g.sourceTx, 'mainnet')}">${short(g.sourceTx)}</a></td>
+      </tr>`).join('');
+
+    const cb = document.querySelector('#coverage tbody');
+    const rows = M.operator.coverages.map((c, i) => `
+      <tr>
+        <td><a data-ref="operator.coverages.${i}.target" data-chain="sepolia"
+               data-hash="${c.target}" href="${link(c.target, 'sepolia')}">${c.targetName.replace(/^Sepolia /, '')}</a></td>
+        <td class="fg">${c.selectorName}</td>
+        <td class="num">${c.fromHeight.toLocaleString('en-US')} – ${c.toHeight.toLocaleString('en-US')}</td>
+      </tr>`);
+    rows.push(`<tr><td>${M.operator.coverages[0].targetName.replace(/^Sepolia /, '')}</td><td class="miss">withdraw(uint256)</td><td class="num miss">in no coverage</td></tr>`);
+    cb.innerHTML = rows.join('');
+
+    document.documentElement.dataset.filled = '1';
+  }
+
+  // render.mts injects the manifest as a string before any page script runs.
+  // Opened by hand, it tries the repo-relative path instead.
+  if (window.__M) fill(window.__M);
+  else fetch('../demo/manifest.json').then((r) => r.json()).then(fill).catch(() => {});
+</script>
+</body>
+</html>
