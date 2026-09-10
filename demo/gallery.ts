@@ -18,10 +18,15 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { proofProvider } from '@gluwa/usc-sdk';
+import { code as readCode, rpcUrl } from '../lib/chain-read.mts';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const M = JSON.parse(readFileSync(join(HERE, 'manifest.json'), 'utf8'));
-const CC3 = new JsonRpcProvider(process.env.CC3_RPC ?? M.chains.cc3.rpc);
+// The gallery EXECUTES a view call on CC3, which no explorer can stand in for, so it needs a
+// reachable RPC. Passing the chain id WITH staticNetwork is what stops ethers detecting the
+// network — without the id it ignores the flag and retries a dead endpoint forever, which is
+// what the first version of this line did. Existence checks go through ../lib/chain-read.mts.
+const CC3 = new JsonRpcProvider(rpcUrl('cc3'), M.chains.cc3.chainId, { staticNetwork: true });
 
 const PROBE_ABI = [
   'function read(uint64 chainKey, uint64 height, bytes txBytes, (bytes32,(bytes32,bool)[]) merkleProof, (bytes32,bytes32[]) continuityProof) view returns ((bool proofValid, uint8 verdict, uint8 receiptStatus, uint64 gasUsed, uint64 gasLimit, uint256 logCount, address from, address target, bytes4 selector, uint64 txIndex))',
@@ -56,8 +61,9 @@ async function main() {
   console.log(dim('The same ArrearsVerdict library ArrearsCourt uses to rule. Nothing here is a fixture.\n'));
 
   const probe = new Contract(M.contracts.verdictProbe.address, PROBE_ABI, CC3);
-  const code = await CC3.getCode(M.contracts.verdictProbe.address);
-  check(code.length > 2, `VerdictProbe is deployed on CC3`, `${(code.length - 2) / 2} bytes`);
+  const pc = await readCode('cc3', M.contracts.verdictProbe.address);
+  if (pc.via !== 'rpc') console.log(dim(`     (${pc.note})`));
+  check(pc.bytes > 0, `VerdictProbe is deployed on CC3`, `${pc.bytes} bytes`);
 
   // ── the live slash artifact ──────────────────────────────────────────────
   console.log(b('\n  THE SLASH — Ethereum Sepolia, an operator whose key we hold'));
@@ -113,4 +119,15 @@ async function main() {
     process.exitCode = 1;
   }
 }
-main().catch((e) => { console.error('\nerror:', e.message ?? e); process.exitCode = 1; });
+main().catch((e) => {
+  const unreachable = /ECONNREFUSED|ENOTFOUND|ETIMEDOUT|EAI_AGAIN|fetch failed|timeout/i.test(String(e?.code ?? '') + ' ' + String(e?.message ?? e));
+  if (unreachable) {
+    console.error(`\nerror: could not reach the CC3 RPC at ${rpcUrl('cc3')} (${e?.code ?? e?.message}).`);
+    console.error('The gallery EXECUTES each classification as an eth_call on CC3, which no explorer can do in its');
+    console.error('place, so it has no fallback. This is a failure to reach the chain, not a failed classification.');
+    console.error('Set CC3_RPC to another endpoint, or run `npm run verify:exploits`, which needs no RPC at all.');
+  } else {
+    console.error('\nerror:', e.message ?? e);
+  }
+  process.exitCode = 1;
+});

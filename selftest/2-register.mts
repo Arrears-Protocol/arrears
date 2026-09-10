@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs'; import { homedir } from 'node:os'; impor
 
 const U = process.argv[2];
 const kf = JSON.parse(readFileSync(join(homedir(), '.config', 'creditcoin', 'arrears-testnet.json'), 'utf8'));
-const rpc = new JsonRpcProvider(M.chains.cc3.rpc, undefined, { staticNetwork: true });
+const rpc = new JsonRpcProvider(M.chains.cc3.rpc, M.chains.cc3.chainId, { staticNetwork: true });
 const out: string[] = [];
 const note = (s: string, w: string, x: string) => { out.push(`${s}|${w}|${x}`); console.log(`  ${s}  ${w} — ${x}`); };
 const ok = (s: string) => console.log(`  PASS  ${s}`);

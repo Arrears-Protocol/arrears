@@ -6,63 +6,22 @@
  * script re-reads them each time it runs rather than trusting anything committed here.
  *
  *   npm install && npm run verify
+ *
+ * Every lookup goes through ../lib/chain-read.mts: a public RPC that returns null for a
+ * transaction that exists falls through to Blockscout, and an endpoint that cannot be reached is
+ * reported as a failure to look — never as evidence that something is missing. This is the one
+ * script a judge runs from a clean clone, so it must not fail on one node's gap.
+ * FORCE_SECOND_ROUTE=1 skips the RPC entirely.
  */
-import { JsonRpcProvider, Interface, id, formatUnits, getAddress } from 'ethers';
+import { Interface, id, formatUnits, getAddress } from 'ethers';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { receipt, code, LookupFailed, type Chain, type Receipt } from '../lib/chain-read.mts';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const M = JSON.parse(readFileSync(join(HERE, 'manifest.json'), 'utf8'));
 const A = { cc3: M.chains.cc3, sepolia: M.chains.sepolia, halfOne: M.exploits.halfOne, halfTwo: M.exploits.halfTwo };
-
-const CC3 = new JsonRpcProvider(process.env.CC3_RPC ?? A.cc3.rpc);
-const SEP = new JsonRpcProvider(process.env.SEPOLIA_RPC ?? A.sepolia.rpc);
-const ETH = new JsonRpcProvider(process.env.ETH_RPC ?? 'https://ethereum-rpc.publicnode.com');
-
-/**
- * Every receipt is read through a second route, because a public RPC can return
- * `null` for a transaction that plainly exists — and `null` is what a missing
- * transaction looks like. On 10 Sep 2026 the public Sepolia endpoint did exactly
- * that for two transactions this repository cites, both confirmed by Sepolia's
- * Blockscout. A reproduction a judge runs must not fail on one node's gap, so a
- * miss falls through to the chain's Blockscout API and says so.
- * docs/principles.md rule 6.
- *
- * FORCE_SECOND_ROUTE=1 skips the RPC entirely, to prove the fallback works.
- */
-const BLOCKSCOUT = new Map<JsonRpcProvider, string>([
-  [CC3, 'https://creditcoin-testnet.blockscout.com'],
-  [SEP, 'https://eth-sepolia.blockscout.com'],
-  [ETH, 'https://eth.blockscout.com'],
-]);
-let secondRouteUsed = 0;
-async function receipt(rpc: JsonRpcProvider, hash: string): Promise<any> {
-  if (!process.env.FORCE_SECOND_ROUTE) {
-    const r = await rpc.send('eth_getTransactionReceipt', [hash]).catch(() => null);
-    if (r) return r;
-  }
-  const base = BLOCKSCOUT.get(rpc)!;
-  const [t, l]: any[] = await Promise.all([
-    fetch(`${base}/api/v2/transactions/${hash}`).then((r) => r.json()),
-    fetch(`${base}/api/v2/transactions/${hash}/logs`).then((r) => r.json()),
-  ]);
-  if (!t?.hash) return null;
-  secondRouteUsed++;
-  console.log(dim(`     (receipt ${hash.slice(0, 10)}… read from ${new URL(base).host} — the RPC returned nothing)`));
-  return {
-    transactionHash: t.hash,
-    from: t.from?.hash ?? null,
-    to: t.to?.hash ?? null,
-    contractAddress: t.created_contract?.hash ?? null,
-    status: t.status === 'ok' ? '0x1' : '0x0',
-    blockNumber: '0x' + Number(t.block_number ?? t.block).toString(16),
-    gasUsed: '0x' + BigInt(t.gas_used).toString(16),
-    logs: (l.items ?? []).map((x: any) => ({
-      address: x.address.hash, data: x.data, topics: (x.topics ?? []).filter((z: any) => z != null),
-    })),
-  };
-}
 
 const SETTLEMENT = new Interface([
   'event SettlementAccepted(bytes32 indexed key, uint64 indexed chainKey, uint64 height, address payer, address target, uint256 value, bytes4 selector, uint64 gasUsed)',
@@ -84,6 +43,19 @@ function check(ok: boolean, label: string, detail = '') {
 }
 const rule = () => console.log(dim('─'.repeat(78)));
 
+/** A receipt, or a FAIL line saying exactly why there is none. Never a TypeError. */
+async function read(chain: Chain, hash: string, what: string): Promise<Receipt | null> {
+  try {
+    const rc = await receipt(chain, hash);
+    if (rc && rc.via !== 'rpc') console.log(dim(`     (${hash.slice(0, 10)}… ${rc.note})`));
+    if (!rc) check(false, `${what} exists`, `the RPC and Blockscout both answered, and neither has ${hash}`);
+    return rc;
+  } catch (e: any) {
+    check(false, `${what} could be looked up`, e instanceof LookupFailed ? e.message : String(e?.message ?? e));
+    return null;
+  }
+}
+
 async function halfOne() {
   const h = A.halfOne;
   console.log(b('\nHALF ONE — a proven FAILURE accepted as a genuine settlement'));
@@ -91,19 +63,22 @@ async function halfOne() {
   console.log(`   ${h.title}\n`);
 
   // 1. the source transaction really did revert on Ethereum mainnet
-  const src = await receipt(ETH, h.sourceTx);
+  const src = await read('mainnet', h.sourceTx, 'the mainnet source transaction');
   console.log(`   source (Ethereum mainnet)  ${h.sourceTx}`);
-  check(src?.status === '0x0', 'the source transaction REVERTED on mainnet', `receiptStatus=${src?.status}`);
-  check(src?.logs.length === 0, 'it carries zero logs (a revert rolls back the journal)', `logs=${src?.logs.length}`);
-  check(parseInt(src.blockNumber, 16) === h.sourceBlock, `mainnet block ${h.sourceBlock}`);
+  if (src) {
+    check(src.status === '0x0', 'the source transaction REVERTED on mainnet', `receiptStatus=${src.status}`);
+    check(src.logs.length === 0, 'it carries zero logs (a revert rolls back the journal)', `logs=${src.logs.length}`);
+    check(parseInt(src.blockNumber, 16) === h.sourceBlock, `mainnet block ${h.sourceBlock}`);
+  }
 
   // 2. the CC3 ruling accepted it anyway
-  const rc = await receipt(CC3, h.acceptanceTx);
+  const rc = await read('cc3', h.acceptanceTx, 'the CC3 ruling');
   console.log(`\n   ruling (Creditcoin CC3)    ${h.acceptanceTx}`);
-  check(rc?.status === '0x1', 'the naive ASC transaction SUCCEEDED', `status=${rc?.status}`);
-  check(getAddress(rc.to) === getAddress(h.contract), `sent to the naive ASC ${h.contract}`);
+  if (!rc) return;
+  check(rc.status === '0x1', 'the naive ASC transaction SUCCEEDED', `status=${rc.status}`);
+  check(!!rc.to && getAddress(rc.to) === getAddress(h.contract), `sent to the naive ASC ${h.contract}`);
 
-  const proved = rc.logs.filter((l: any) => l.address.toLowerCase() === PRECOMPILE && l.topics[0] === TX_VERIFIED);
+  const proved = rc.logs.filter((l) => l.address.toLowerCase() === PRECOMPILE && l.topics[0] === TX_VERIFIED);
   check(proved.length >= 1, 'the block-prover precompile emitted TransactionVerified', `${proved.length} event(s)`);
 
   let accepted: any = null;
@@ -115,7 +90,7 @@ async function halfOne() {
     console.log(`     target    ${accepted.args.target}  ${dim('(1inch v6 AggregationRouter)')}`);
     console.log(`     selector  ${accepted.args.selector}`);
     console.log(`     gasUsed   ${accepted.args.gasUsed}  ${dim('— decoded from the same bytes that carry receiptStatus 0')}`);
-    check(accepted.args.gasUsed.toString() === String(parseInt(src.gasUsed, 16)),
+    if (src) check(accepted.args.gasUsed.toString() === String(parseInt(src.gasUsed, 16)),
       'the recorded gasUsed matches mainnet exactly', `${accepted.args.gasUsed}`);
   }
   console.log(`\n   ${dim('The contract had receiptStatus in hand and never read it.')}`);
@@ -130,25 +105,33 @@ async function halfTwo() {
   console.log(`   ${h.title}\n`);
 
   // 1. the impostor on Sepolia is not a token
-  const code = await SEP.getCode(h.impostor);
   console.log(`   impostor (Sepolia)         ${h.impostor}`);
-  check(code.length > 2, 'the impostor contract exists on Sepolia', `${(code.length - 2) / 2} bytes`);
-  check((code.length - 2) / 2 < 400, 'it is far too small to be a real ERC-20', `${(code.length - 2) / 2} bytes`);
+  try {
+    const c = await code('sepolia', h.impostor);
+    if (c.via !== 'rpc') console.log(dim(`     (${h.impostor.slice(0, 10)}… ${c.note})`));
+    check(c.bytes > 0, 'the impostor contract exists on Sepolia', `${c.bytes} bytes`);
+    check(c.bytes > 0 && c.bytes < 400, 'it is far too small to be a real ERC-20', `${c.bytes} bytes`);
+  } catch (e: any) {
+    check(false, 'the impostor contract could be looked up', e.message);
+  }
 
   // 2. it emitted a real Transfer log
-  const frc = await receipt(SEP, h.forgeTx);
-  const log = frc.logs[0];
+  const frc = await read('sepolia', h.forgeTx, 'the Sepolia forge transaction');
   console.log(`\n   forged event (Sepolia)     ${h.forgeTx}`);
-  check(frc?.status === '0x1', 'the forge transaction succeeded on Sepolia');
-  check(log.topics[0] === id('Transfer(address,address,uint256)'), 'topic[0] is the standard ERC-20 Transfer signature');
-  check(getAddress(log.address) === getAddress(h.impostor), 'but it was emitted by the IMPOSTOR, not a token');
-  console.log(`     claims  ${formatUnits(h.forgedAmount, 6)} USDC from ${h.forgedFrom} ${dim("(Circle's treasury)")}`);
+  if (frc) {
+    const log = frc.logs[0];
+    check(frc.status === '0x1', 'the forge transaction succeeded on Sepolia');
+    check(!!log && log.topics[0] === id('Transfer(address,address,uint256)'), 'topic[0] is the standard ERC-20 Transfer signature');
+    check(!!log && getAddress(log.address) === getAddress(h.impostor), 'but it was emitted by the IMPOSTOR, not a token');
+    console.log(`     claims  ${formatUnits(h.forgedAmount, 6)} USDC from ${h.forgedFrom} ${dim("(Circle's treasury)")}`);
+  }
 
   // 3. CC3 accepted it against the real token
-  const rc = await receipt(CC3, h.acceptanceTx);
+  const rc = await read('cc3', h.acceptanceTx, 'the CC3 ruling');
   console.log(`\n   ruling (Creditcoin CC3)    ${h.acceptanceTx}`);
-  check(rc?.status === '0x1', 'the naive ASC transaction SUCCEEDED');
-  const proved = rc.logs.filter((l: any) => l.address.toLowerCase() === PRECOMPILE && l.topics[0] === TX_VERIFIED);
+  if (!rc) return;
+  check(rc.status === '0x1', 'the naive ASC transaction SUCCEEDED');
+  const proved = rc.logs.filter((l) => l.address.toLowerCase() === PRECOMPILE && l.topics[0] === TX_VERIFIED);
   check(proved.length >= 1, 'the precompile proved the Sepolia transaction', `${proved.length} event(s)`);
 
   let acc: any = null;
@@ -176,6 +159,7 @@ async function main() {
   const which = process.argv[2];
   console.log(b('\nArrears — exploit demo, verified live off chain'));
   console.log(dim('Nothing here is a fixture. Every value is re-read from CC3, Sepolia and Ethereum mainnet.'));
+  if (process.env.FORCE_SECOND_ROUTE) console.log(dim('FORCE_SECOND_ROUTE: every lookup skips the RPC and reads Blockscout.'));
   if (which !== 'two') await halfOne();
   if (which !== 'one') await halfTwo();
   rule();

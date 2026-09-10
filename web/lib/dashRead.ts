@@ -5,7 +5,7 @@ import { REGISTRY_ABI, CC3 } from './wallet';
 
 /** Read-side for the dashboard. eth_call only, no wallet needed — the observer
  *  role and every record view work with nothing installed. */
-const rpc = () => new JsonRpcProvider(CC3.rpc, undefined, { staticNetwork: true });
+const rpc = () => new JsonRpcProvider(CC3.rpc, CC3.chainIdDec, { staticNetwork: true });
 export const registryRead = () => new Contract(M.contracts.arrearsRegistry.address, REGISTRY_ABI, rpc());
 export const lineRead = () => new Contract(M.contracts.arrearsCreditLine.address,
   ['function terms(bytes32) view returns ((uint256 limit, uint16 premiumBps, uint32 strikes, uint64 repricedAt))',

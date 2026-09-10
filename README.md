@@ -221,6 +221,7 @@ obvious upgrade if this ever matters.
 | [`docs/video-shotlist.md`](docs/video-shotlist.md) | the submission video, shot by shot |
 | [`docs/dorahacks-submission.md`](docs/dorahacks-submission.md) | the DoraHacks form text; every hash must come from the manifest and exist on chain (`cd deck && npx tsx verify.mts`) |
 | [`docs/upstream-selector-issue.md`](docs/upstream-selector-issue.md) | a report for ethers/viem/web3, held until after 13 September |
+| [`lib/chain-read.mts`](lib/chain-read.mts) | the one way any script asks whether a transaction or contract exists — one node's null is not absence, and failing to ask is not absence either |
 | [`selftest/`](selftest/) | walks every write path in a real browser with a real wallet, as a first-time user |
 | [`demo/`](demo/) | the demo surface — both exploit halves, the evidence gallery and the slash, verifiable with one command |
 | [`demo/manifest.json`](demo/manifest.json) | single source of truth for the demo and the frontend: hashes and addresses, no fixtures |

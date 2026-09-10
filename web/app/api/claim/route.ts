@@ -57,7 +57,7 @@ export async function POST(req: Request) {
   if (!isAddress(ben)) return bad('beneficiary is not an address');
 
   const chainKey = (M as any).operator.chainKey as number;
-  const rpc = new JsonRpcProvider((M as any).chains.cc3.rpc, undefined, { staticNetwork: true });
+  const rpc = new JsonRpcProvider((M as any).chains.cc3.rpc, (M as any).chains.cc3.chainId, { staticNetwork: true });
   const wallet = new Wallet(key, rpc);
   const court = new Contract((M as any).contracts.arrearsCourt.address, COURT_ABI, wallet);
 

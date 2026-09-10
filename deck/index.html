@@ -380,8 +380,8 @@
         <span class="k">recorded</span><span class="v away">nothing — ruledAt 0</span>
       </div>
       <p class="small" style="margin-top:26px">The reason is read from <code>previewClaim</code> over
-        <code>eth_call</code>. A receipt never carries revert data and the public CC3 RPC offers no
-        trace, so the UI never tries to read a reason from a failed transaction.</p>
+        <code>eth_call</code>. On any EVM chain, a mined revert never hands its reason back through
+        the node — so the preview is the one moment the reason is in hand, and it is read there.</p>
     </div>
   </div>
   <div class="foot"><b>Arrears</b><span>arrears.0xo.in</span><span>7 / 13</span></div>

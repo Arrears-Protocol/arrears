@@ -8,7 +8,7 @@ const U = process.argv[2];
 const PREVIEW_ONLY = process.argv.includes('--preview-only');
 const ok = (s: string) => console.log(`  PASS  ${s}`);
 const note = (sev: string, w: string, x: string) => console.log(`  ${sev}  ${w} — ${x}`);
-const rpc = new JsonRpcProvider(M.chains.cc3.rpc, undefined, { staticNetwork: true });
+const rpc = new JsonRpcProvider(M.chains.cc3.rpc, M.chains.cc3.chainId, { staticNetwork: true });
 
 const h = await harness({ startChain: '0x18e8f' });   // already on CC3 for this leg
 const p = h.page;

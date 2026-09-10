@@ -23,7 +23,7 @@
 import { JsonRpcProvider, Contract, Interface, AbiCoder, keccak256 } from 'ethers';
 import { M } from './manifest';
 
-export const cc3 = () => new JsonRpcProvider(M.chains.cc3.rpc, undefined, { staticNetwork: true });
+export const cc3 = () => new JsonRpcProvider(M.chains.cc3.rpc, M.chains.cc3.chainId, { staticNetwork: true });
 
 export const VERDICT = ['None', 'Succeeded', 'ExplicitRevert', 'OutOfGas'] as const;
 export const MISS = ['None', 'ChainKey', 'Window', 'Target', 'Selector', 'Operator', 'Revoked', 'Expired', 'Exhausted'] as const;

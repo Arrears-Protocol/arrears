@@ -50,22 +50,28 @@ screen. A narrow document beside a wide console is correct, not an inconsistency
 
 ## 4. Never read a failed transaction's revert reason on chain
 
-A receipt never carries revert data — on any EVM chain — and the public CC3 RPC
-does not expose `debug_traceTransaction`, so a client cannot learn why a mined
-transaction reverted without re-running it. Refusal reasons come from
-`previewClaim` over `eth_call`, before anything is sent, always.
+**No mined revert, on any EVM chain, hands its revert data back through the node.** A
+receipt has no field for it. The only ways back to *why* are to re-run the call or to ask a
+tracing node, and the public CC3 RPC offers no `debug_traceTransaction`. A client that submits
+a transaction and waits for its receipt learns *that* it reverted and never *why*.
 
-> *Corrected 10 September 2026.* This rule used to say `pallet-evm` does not
-> propagate precompile revert reasons on a mined transaction. That was a misreading.
-> When the relayer submitted the out-of-scope ruling, the node's response carried no
-> revert data (`phase0/evidence/32-rulings.txt`: "revert data not returned by the node") —
-> which is what a client sees for *any* mined revert, and we attributed it to the
-> chain. Blockscout decodes the named error for both mined refusals, `OutOfScope`
-> on `0xd9f96284…` and `NotSlashableExplicitRevert` on `0xc0bf98c0…`, and replaying
-> the call at its parent block over `eth_call` returns the same bytes. The rule
-> stands; its stated cause did not. It also cited "finding 2", which is about
-> `estimateGas` and says nothing of the kind. The rule 6 pattern: the client's view
-> of a transaction, read as a property of the chain.
+So refusal reasons come from `previewClaim` over `eth_call`, before anything is sent, always.
+The preview is the one moment the reason is in the client's hands for free, and the interface
+never tries to parse one out of a failed transaction — there is nothing there to parse.
+
+**We made this decision for a reason that was slightly wrong, and the right one is stronger.**
+When the relayer submitted the out-of-scope ruling, the node's response carried no revert data
+(`phase0/evidence/32-rulings.txt`: "revert data not returned by the node"), and we blamed
+`pallet-evm` for dropping precompile revert reasons. The observation was real; the inference was
+too narrow. It is not a CC3 quirk, it is how every EVM chain behaves — Blockscout decodes the
+named error for both mined refusals, `OutOfScope` on `0xd9f96284…` and
+`NotSlashableExplicitRevert` on `0xc0bf98c0…`, and replaying the call at its parent block over
+`eth_call` returns the same bytes. The general reason holds on any chain Arrears could ever
+read, not only this one. *(Corrected 10 September 2026. The rule also cited "finding 2", which is
+about `estimateGas`.)*
+
+It was caught by checking a claim against the chain rather than against our own transcript —
+rule 7 applied, not just recorded.
 
 ## 5. Sample arbitrary heights when benchmarking Attestcoin
 
@@ -76,7 +82,7 @@ the guidance was right. Use 12,345,678, never 12,000,000.
 
 ## 6. When a test fails, suspect the instrument before the subject
 
-Four times now the instrument lied in a way that looked exactly like a finding.
+Five times now the instrument lied in a way that looked exactly like a finding.
 
 **An ABI-derived selector is wrong for a Solidity library.** A public library function refers to a
 struct parameter by canonical name — `EvmV1Decoder.LogEntry[]` — instead of expanding it to a
@@ -86,9 +92,10 @@ indistinguishable from a function that was never deployed. We wrote it up as *"s
 but not deployed"*. Both functions were there the whole time. Rewritten as
 [`../PROTOCOL-FINDINGS.md`](../PROTOCOL-FINDINGS.md) finding 3.
 
-This is the only one of them that reached print. The others were caught in the session
-that produced them; this one survived review and went into a document written to be published.
-Why it survived is rule 7.
+This was the first of them to reach print; the others were caught in the session that
+produced them. It survived review and went into a document written to be published — why is
+rule 7. It was not the last: rule 4's stated cause reached a public PDF before a check against
+the chain caught it.
 
 **`tsx` breaks Playwright's `addInitScript`.** It rewrites the function body and
 injects a `__name` helper that does not exist in the browser. The script throws,
@@ -110,18 +117,34 @@ second RPC confirmed the second. The same endpoint served a neighbouring
 transaction, `0xe11a3557…`, without trouble, so the gaps are per-transaction,
 not a node that is plainly down. **Never conclude a transaction is missing from
 one source.** A miss falls through to a second route and the output names which
-route answered — `deck/verify.mts` and `demo/verify.ts` both do this against each
-chain's Blockscout API. The gap is also **intermittent**: on one run publicnode dropped
-the forge transaction `0xb7dbe7c2…` and on the next it served it, so a reproduction
-that reads one node passes or crashes depending on the day. Before the fallback,
+route answered. That now lives in one module, [`lib/chain-read.mts`](../lib/chain-read.mts),
+which every script uses for any lookup whose empty answer could be read as absence — so a new
+script inherits the rule instead of reimplementing it. It also separates the two ways of not
+finding something: every route answered and none had it (absent), or some route could not be
+asked (a failure to look, which throws).
+
+The gap is also **intermittent**: on one run publicnode dropped the forge transaction
+`0xb7dbe7c2…` and on the next it served it, so a reproduction that reads one node passes or
+crashes depending on the day. Before the fallback,
 `demo/verify.ts` — the command the deck and README hand to judges — crashed with a
 `TypeError` on exactly that gap.
+
+**The first fix for that recursed, and the check written to confirm it passed.** The regex
+that routed every receipt read through the new fallback also rewrote the fallback's own call,
+so it called itself. The `catch` around it swallowed the stack overflow and the second route
+answered, so the run passed — while printing "the RPC returned nothing" about an RPC it had
+never called. The script written to confirm the change counted direct RPC reads remaining,
+found zero, and was right for exactly the reason the code was wrong. A forced run that skipped
+the RPC died after five lines and gave it away. Minutes later a throwaway `awk` summary reported
+two failures in a run that had none; it had matched `FAILURE` in a heading. **A test that passes
+for the wrong reason is the failure these rules exist for** — and so is one that fails for the
+wrong reason. Count the thing you mean, not the string that usually accompanies it.
 
 The tell in every one was a result that contradicted something already known to
 be true — a documented gas curve, a wallet that was plainly installed, a function
 named in the library's own header comment, a transaction our own demo had verified
-the day before. When that happens, reproduce the claim by a second route before
-writing it down. A harness bug filed as an app bug wastes a fix; a harness bug
+the day before, a forced run that died after five lines. When that happens, reproduce the
+claim by a second route before writing it down. A harness bug filed as an app bug wastes a fix; a harness bug
 filed as a protocol finding gets published, and then someone has to be told in
 public that they were wrong.
 
@@ -149,6 +172,11 @@ only part that can come back and correct you. In practice, on this project:
 - A superseded transcript is **kept and marked wrong** rather than deleted. `14-selectors.txt`
   still sits next to `42-selectors-library.txt`, so the trail shows what we measured, what we
   concluded, and where the two parted company.
+- **Check a claim against the chain, not against our own transcript.** Slide 7 of the public
+  deck said a mined precompile revert carries no revert data, and transcript 32 agreed with it
+  every time we looked. Checking the DoraHacks draft's claims against Blockscout instead found
+  the named error sitting on the mined transaction. That is this rule applied rather than
+  recorded: our transcript was the conclusion; the chain was the reproduction.
 
 The cost of being wrong in public is small and one-off. The cost of being wrong in private, with a
 transcript that agrees with you, compounds.

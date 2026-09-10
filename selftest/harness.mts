@@ -18,7 +18,7 @@ import { join } from 'node:path';
 const M = JSON.parse(readFileSync('../demo/manifest.json', 'utf8'));
 const kf = JSON.parse(readFileSync(join(homedir(), '.config', 'creditcoin', 'arrears-testnet.json'), 'utf8'));
 const CC3_HEX = '0x' + M.chains.cc3.chainId.toString(16);
-const rpc = new JsonRpcProvider(M.chains.cc3.rpc, undefined, { staticNetwork: true });
+const rpc = new JsonRpcProvider(M.chains.cc3.rpc, M.chains.cc3.chainId, { staticNetwork: true });
 
 export type Acct = 'controller' | 'source';
 const KEYS: Record<Acct, Wallet> = {

@@ -108,6 +108,11 @@ thinks to ask. Arrears is the first design we know of that makes a *failure* loa
 The whole verdict is three lines in `ArrearsVerdict.classify`, declared `internal` so the compiler
 inlines the same bytes into the court and into the probe that classifies the mainnet gallery.
 
+`previewClaim` matters more than it looks. On any EVM chain, a mined revert never hands its
+reason back through the node — a receipt has no field for it — so the preview over `eth_call` is
+the one moment a refusal's named error is in the client's hands. Arrears reads reasons there,
+before any gas is spent, and never from a failed transaction.
+
 ### Constraints we designed around rather than worked around
 
 Each of these is a property of the protocol that shaped a decision, not a bug we patched:
